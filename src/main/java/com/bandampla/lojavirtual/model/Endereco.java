@@ -20,13 +20,13 @@ import com.bandampla.lojavirtual.enums.TipoEndereco;
 
 @Entity
 @Table(name = "endereco")
-@SequenceGenerator(name = "seq_marca_produto", sequenceName = "seq_marca_produto", allocationSize = 1, initialValue = 1)
+@SequenceGenerator(name = "seq_endereco", sequenceName = "seq_endereco", allocationSize = 1, initialValue = 1)
 public class Endereco implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_marca_produto")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_endereco")
 	private Long id;
 
 	private String rua;
