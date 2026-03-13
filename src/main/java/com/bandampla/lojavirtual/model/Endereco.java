@@ -19,8 +19,8 @@ import javax.persistence.Table;
 import com.bandampla.lojavirtual.enums.TipoEndereco;
 
 @Entity
-@Table(name= "endereco")
-@SequenceGenerator(name= "seq_marca_produto", sequenceName="seq_marca_produto", allocationSize	= 1 , initialValue = 1)
+@Table(name = "endereco")
+@SequenceGenerator(name = "seq_marca_produto", sequenceName = "seq_marca_produto", allocationSize = 1, initialValue = 1)
 public class Endereco implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -40,7 +40,7 @@ public class Endereco implements Serializable {
 	@ManyToOne(targetEntity = Pessoa.class)
 	@JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
 	private Pessoa pessoa;
-	
+
 	@Enumerated(EnumType.STRING)
 	private TipoEndereco tipoEndereco;
 
@@ -115,11 +115,11 @@ public class Endereco implements Serializable {
 	public void setPessoa(Pessoa pessoa) {
 		this.pessoa = pessoa;
 	}
-	
+
 	public void setTipoEndereco(TipoEndereco tipoEndereco) {
 		this.tipoEndereco = tipoEndereco;
 	}
-	
+
 	public TipoEndereco getTipoEndereco() {
 		return tipoEndereco;
 	}

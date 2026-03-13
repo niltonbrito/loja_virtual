@@ -25,10 +25,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
-@Table(name= "usuario")
-@SequenceGenerator(name= "seq_usuario", sequenceName="seq_usuario", allocationSize	= 1 , initialValue = 1)
-public class Usuario implements UserDetails{
-	
+@Table(name = "usuario")
+@SequenceGenerator(name = "seq_usuario", sequenceName = "seq_usuario", allocationSize = 1, initialValue = 1)
+public class Usuario implements UserDetails {
+
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -37,22 +37,25 @@ public class Usuario implements UserDetails{
 
 	@Column(unique = true)
 	private String login;
-	
+
 	private String senha;
-	
+
 	@Temporal(TemporalType.DATE)
 	private Date createAt;
-	
+
 	@Temporal(TemporalType.DATE)
 	private Date updateAt;
-	
+
 	@OneToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "usuario_acesso",	uniqueConstraints = @UniqueConstraint(columnNames = {"usuario_id", "acesso_id"}, name = "unique_acesso_user"),
-	joinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "id", table = "usuario", unique = false, foreignKey = @ForeignKey(name ="usuario_fk", value = ConstraintMode.CONSTRAINT)), 
-	inverseJoinColumns = @JoinColumn(name = "acesso_id", unique = false, referencedColumnName = "id", table = "acesso", foreignKey = @ForeignKey(name = "acesso_fk", value = ConstraintMode.CONSTRAINT)))		
+	@JoinTable(name = "usuario_acesso", uniqueConstraints = @UniqueConstraint(columnNames = { "usuario_id",	"acesso_id" }, name = "unique_acesso_user"), 
+	joinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "id", table = "usuario", unique = false, foreignKey = @ForeignKey(name = "usuario_fk", value = ConstraintMode.CONSTRAINT)), 
+	inverseJoinColumns = @JoinColumn(name = "acesso_id", unique = false, referencedColumnName = "id", table = "acesso", foreignKey = @ForeignKey(name = "acesso_fk", value = ConstraintMode.CONSTRAINT)))
 	private List<Acesso> acessos;
-	
-	/*Autoridades = São os acessos, ou seja ROLE_ADMIN, ROLE_SECRETARIO, ROLE_FINANCEIRO*/
+
+	/*
+	 * Autoridades = São os acessos, ou seja ROLE_ADMIN, ROLE_SECRETARIO,
+	 * ROLE_FINANCEIRO
+	 */
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 
