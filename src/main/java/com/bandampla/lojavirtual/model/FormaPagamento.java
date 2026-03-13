@@ -5,11 +5,15 @@ import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import com.bandampla.lojavirtual.enums.StatusFormaPagamento;
 
 @Entity
 @Table(name = "forma_pagamento")
@@ -23,6 +27,9 @@ public class FormaPagamento implements Serializable {
 
 	@Column(nullable = false)
 	private String descricao;
+
+	@Enumerated(EnumType.STRING)
+	private StatusFormaPagamento formaPagamento;
 
 	public Long getId() {
 		return id;
@@ -38,6 +45,14 @@ public class FormaPagamento implements Serializable {
 
 	public void setDescricao(String descricao) {
 		this.descricao = descricao;
+	}
+	
+	public StatusFormaPagamento getStatus() {
+		return formaPagamento;
+	}
+	
+	public void setStatus(StatusFormaPagamento formaPagamento) {
+		this.formaPagamento = formaPagamento;
 	}
 
 	@Override
