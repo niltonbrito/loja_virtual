@@ -26,18 +26,30 @@ public class NotaFiscalVenda implements Serializable {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_nota_fiscal_venda")
 	private Long id;
 
+	@Column(nullable= false)
 	private String numeroNota;
+	
+	@Column(nullable= false)
 	private String serieNota;
+	
+	@Column(nullable= false)
 	private String tipo;
+	
+	@Column(nullable= false)
 	private String descricao;
+	
+	@Column(nullable= false)
 	private Double valorTotal;
+	
 	private Double valorDesconto;
+	
+	@Column(nullable= false)
 	private Double valorIcms;
 
-	@Column(columnDefinition = "text")
+	@Column(columnDefinition = "text", nullable = false)
 	private String xml;
 
-	@Column(columnDefinition = "text")
+	@Column(columnDefinition = "text", nullable = false)
 	private String pdf;
 
 	@OneToOne

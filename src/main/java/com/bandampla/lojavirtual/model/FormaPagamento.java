@@ -28,6 +28,7 @@ public class FormaPagamento implements Serializable {
 	@Column(nullable = false)
 	private String descricao;
 
+	@Column(nullable= false)
 	@Enumerated(EnumType.STRING)
 	private TipoFormaPagamento tipoPagamento;
 
