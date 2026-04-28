@@ -24,4 +24,9 @@ public class AcessoService {
 	public Acesso save(Acesso acesso) {
 		return acessoRepository.save(acesso);
 	}
+	
+	
+	public void delete(Acesso acesso) {
+		acessoRepository.deleteById(acesso.getId());
+	}
 }

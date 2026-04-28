@@ -7,8 +7,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.bandampla.lojavirtual.controller.AcessoController;
 import com.bandampla.lojavirtual.model.Acesso;
 
+import junit.framework.TestCase;
+
 @SpringBootTest(classes = LojaVirtualApplication.class)
-class LojaVirtualApplicationTests {
+class LojaVirtualApplicationTests extends TestCase{
 
 	@Autowired
 	private AcessoController acessoController;
