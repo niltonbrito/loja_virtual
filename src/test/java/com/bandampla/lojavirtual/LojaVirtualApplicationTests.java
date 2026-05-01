@@ -222,13 +222,10 @@ class LojaVirtualApplicationTests extends TestCase {
 		/* Teste de Query */
 		acesso = new Acesso(); // Objeto recebe uma nova instância
 		acesso.setDescricao("ROLE_ALUNO"); // seta o valor no objeto
-		acesso = acessoController.salvarAcesso(acesso).getBody(); // Chama o metodo salvar do controller passando o
-																	// objeto
-		List<Acesso> acessos = acessoRepository.buscarAcessoDesc("ALUNO".trim().toUpperCase()); // cria uma lista de
-																								// Acessos buscando os
-																								// acessos no banco
-		assertEquals(1, acessos.size()); // valida a quantidade de acessos com o valor passado, travando somente em um
-											// unico resultado
+		acesso = acessoController.salvarAcesso(acesso).getBody(); // Chama o metodo salvar do controller passando o objeto
+		
+		List<Acesso> acessos = acessoRepository.buscarAcessoDesc("ALUNO".trim().toUpperCase()); // cria uma lista de Acessos buscando os acessos no banco
+		assertEquals(1, acessos.size()); // valida a quantidade de acessos com o valor passado, travando somente em um unico resultado
 		acessoRepository.deleteById(acesso.getId()); // deletea o valor no banco
 	}
 
