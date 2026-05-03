@@ -23,7 +23,7 @@ import com.bandampla.lojavirtual.model.Usuario;
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
 	@Query(value = "select u from Usuario u where u.login = ?1")
-	Usuario findUserByLogin(String id);
+	//Usuario findUserByLogin(String id);
 
 	Optional<Usuario> findByLogin(String login);
 

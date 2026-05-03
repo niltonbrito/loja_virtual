@@ -26,6 +26,7 @@ import com.bandampla.lojavirtual.service.AcessoService;
  * @Data: 27 de abr. de 2026
  */
 
+//@CrossOrigin(value = "http://bandampla.com") //Somente requisições a partir desta origem http://bandampla.com podem utilizar este controler ou end-point
 @Controller
 @RestController(value = "acesso")
 public class AcessoController {
@@ -47,6 +48,7 @@ public class AcessoController {
 		return new ResponseEntity<>("Acesso Removido", HttpStatus.OK);
 	}
 
+	//@Secured(value = {"ROLE_ADMIN", "ROLE_GERENTE"}) //Somente usuario ou requisições com o Role permitido podem utilizar este controler ou end-point
 	@ResponseBody
 	@DeleteMapping(value = "/deletarAcessoPorId/{id}")
 	public ResponseEntity<?> deletarAcessoPorId(@PathVariable Long id) {

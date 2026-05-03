@@ -7,12 +7,15 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 
 /**
  * @author: Nilton Brito
  * @Email: <nilton.brito@outlook.com>
  * @Data: 1 de mai. de 2026
  */
+
+@Component
 public class ApplicationContextLoad implements ApplicationContextAware {
 
 	@Autowired

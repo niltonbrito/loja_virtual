@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class LojaVirtualApplication {
 
 	public static void main(String[] args) {
+		
+		//System.out.println(new BCryptPasswordEncoder().encode("admin123"));
+		
 		SpringApplication.run(LojaVirtualApplication.class, args);
 	}
 
