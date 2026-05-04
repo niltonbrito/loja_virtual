@@ -52,6 +52,8 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 		objectErrorDTO.setError(msg);
 		objectErrorDTO.setCode(status.value() + " ==>" + status.getReasonPhrase());
 
+		ex.printStackTrace();
+		
 		return new ResponseEntity<Object>(objectErrorDTO, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
@@ -79,6 +81,8 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 		objectErrorDTO.setError(msg);
 		objectErrorDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
 
+		ex.printStackTrace();
+		
 		return new ResponseEntity<Object>(objectErrorDTO, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
