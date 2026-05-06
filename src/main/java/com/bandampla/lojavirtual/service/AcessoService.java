@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Acesso;
 import com.bandampla.lojavirtual.repository.AcessoRepository;
 
@@ -23,7 +24,14 @@ public class AcessoService {
 	@Autowired
 	private AcessoRepository acessoRepository;
 
-	public Acesso save(Acesso acesso) {
+	public Acesso save(Acesso acesso) throws ExceptionCustom {
+
+		if (acesso.getId() == null) {
+			List<Acesso> acessos = acessoRepository.buscarAcessoDesc(acesso.getDescricao().toUpperCase());
+			if (!acessos.isEmpty()) {
+				throw new ExceptionCustom("Já existe Acesso com a descrição: " + acesso.getDescricao());
+			}
+		}
 		return acessoRepository.save(acesso);
 	}
 
@@ -35,8 +43,13 @@ public class AcessoService {
 		acessoRepository.deleteById(id);
 	}
 
-	public Acesso buscarById(Long id) {
-		return acessoRepository.findById(id).get();
+	public Acesso buscarById(Long id) throws ExceptionCustom {
+
+		Acesso acesso = acessoRepository.findById(id).orElse(null);
+		if (acesso == null) {
+			throw new ExceptionCustom("Não encontrou Acesso com o código: " + id);
+		}
+		return acesso;
 	}
 
 	public List<Acesso> buscarPorDescricao(String desc) {

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Acesso;
 import com.bandampla.lojavirtual.service.AcessoService;
 
@@ -36,9 +37,9 @@ public class AcessoController {
 
 	@ResponseBody // Pode dar um retorno da API
 	@PostMapping(value = "/salvarAcesso") // Mapeandoa url para receber um JSON
-	public ResponseEntity<Acesso> salvarAcesso(@RequestBody Acesso acesso) {// Recebe o JSON e converte para objeto
-		Acesso acessoSalvoAcesso = acessoService.save(acesso);
-		return new ResponseEntity<Acesso>(acessoSalvoAcesso, HttpStatus.OK);
+	public ResponseEntity<Acesso> salvarAcesso(@RequestBody Acesso acesso) throws ExceptionCustom {// Recebe o JSON e converte para objeto
+		
+		return new ResponseEntity<Acesso>(acessoService.save(acesso), HttpStatus.OK);
 	}
 
 	@ResponseBody
@@ -58,15 +59,15 @@ public class AcessoController {
 
 	@ResponseBody
 	@GetMapping(value = "/buscarAcessoPorId/{id}")
-	public ResponseEntity<Acesso> buscarAcessoPorId(@PathVariable Long id) {
-		Acesso acesso = acessoService.buscarById(id);
-		return new ResponseEntity<Acesso>(acesso, HttpStatus.OK);
+	public ResponseEntity<Acesso> buscarAcessoPorId(@PathVariable Long id) throws ExceptionCustom {
+		
+		return new ResponseEntity<Acesso>(acessoService.buscarById(id), HttpStatus.OK);
 	}
 
 	@ResponseBody
 	@GetMapping(value = "/buscarPorDescricao/{desc}")
 	public ResponseEntity<List<Acesso>> buscarPorDescricao(@PathVariable String desc) {
-		List<Acesso> acesso = acessoService.buscarPorDescricao(desc);
+		List<Acesso> acesso = acessoService.buscarPorDescricao(desc.toUpperCase());
 		return new ResponseEntity<List<Acesso>>(acesso, HttpStatus.OK);
 	}
 }

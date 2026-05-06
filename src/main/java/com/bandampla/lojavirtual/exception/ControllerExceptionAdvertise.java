@@ -32,6 +32,20 @@ import com.bandampla.lojavirtual.model.dto.ObjectErrorDTO;
 public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler {
 
 	/* Captura Exceções do Projeto */
+
+	@ExceptionHandler(ExceptionCustom.class)
+	protected ResponseEntity<Object> handleExceptionCustom(ExceptionCustom ex) {
+
+		ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
+
+		objectErrorDTO.setError(ex.getMessage());
+		objectErrorDTO.setCode(HttpStatus.OK.toString());
+
+		ex.printStackTrace();
+
+		return new ResponseEntity<Object>(objectErrorDTO, HttpStatus.OK);
+	}
+
 	@ExceptionHandler({ Exception.class, RuntimeException.class, Throwable.class })
 	@Override
 	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
@@ -50,10 +64,10 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 			msg = ex.getMessage();
 		}
 		objectErrorDTO.setError(msg);
-		objectErrorDTO.setCode(status.value() + " ==>" + status.getReasonPhrase());
+		objectErrorDTO.setCode(status.value() + " ==> " + status.getReasonPhrase());
 
 		ex.printStackTrace();
-		
+
 		return new ResponseEntity<Object>(objectErrorDTO, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
@@ -82,7 +96,7 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 		objectErrorDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
 
 		ex.printStackTrace();
-		
+
 		return new ResponseEntity<Object>(objectErrorDTO, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
