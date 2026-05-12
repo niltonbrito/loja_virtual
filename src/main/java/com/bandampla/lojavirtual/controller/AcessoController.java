@@ -59,8 +59,7 @@ public class AcessoController {
 
 	@ResponseBody
 	@GetMapping(value = "/buscarAcessoPorId/{id}")
-	public ResponseEntity<Acesso> buscarAcessoPorId(@PathVariable Long id) throws ExceptionCustom {
-		
+	public ResponseEntity<Acesso> buscarAcessoPorId(@PathVariable Long id) throws ExceptionCustom {		
 		return new ResponseEntity<Acesso>(acessoService.buscarById(id), HttpStatus.OK);
 	}
 
