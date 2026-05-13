@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.bandampla.lojavirtual.controller.AcessoController;
+import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Acesso;
 import com.bandampla.lojavirtual.repository.AcessoRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -191,7 +192,7 @@ class LojaVirtualApplicationTests extends TestCase {
 
 	/* Teste Junit unitario */
 	@Test
-	public void testCadastrarAcesso() {
+	public void testCadastrarAcesso() throws ExceptionCustom {
 		Acesso acesso = new Acesso();
 
 		acesso.setDescricao("ROLE_ADMIN");

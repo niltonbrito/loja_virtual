@@ -25,6 +25,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
  * @Data: 1 de mai. de 2026
  */
 /* Criar a autenticação e retornar também a autenticação JWT */
+
 @Service
 @Component
 public class JWTTokenAutenticacaoService {
@@ -67,8 +68,8 @@ public class JWTTokenAutenticacaoService {
 	}
 
 	/* Retorna o usuario válido com tojen ou caso não seja válido retorna null */
-	public Authentication getAuthentication(HttpServletRequest httpServletRequest,
-			HttpServletResponse response) throws IOException {
+	public Authentication getAuthentication(HttpServletRequest httpServletRequest, HttpServletResponse response)
+			throws IOException {
 
 		String tokenString = httpServletRequest.getHeader(HEADER_STRING);
 
@@ -96,20 +97,19 @@ public class JWTTokenAutenticacaoService {
 					}
 				}
 
-			} catch (io.jsonwebtoken.SignatureException e ) {
+			} catch (io.jsonwebtoken.SignatureException e) {
 				response.getWriter().write("Token está inválido: " + e.getMessage());
 				e.printStackTrace();
-			} catch (io.jsonwebtoken.ExpiredJwtException e ) {
+			} catch (io.jsonwebtoken.ExpiredJwtException e) {
 				response.getWriter().write("Token está Expirado efetue o login novamente: " + e.getMessage());
 				e.printStackTrace();
-			}  finally {
+			} finally {
 				liberacaoCors(response);
 			}
 		}
 		return null;
 	}
 
-	
 	/* Fazendo liberação contra erro de COrs no navegador */
 	private void liberacaoCors(HttpServletResponse httpServletResponse) {
 		if (httpServletResponse.getHeader("Access-Control-Allow-Origin") == null) {
