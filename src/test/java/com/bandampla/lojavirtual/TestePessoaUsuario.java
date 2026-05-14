@@ -1,5 +1,7 @@
 package com.bandampla.lojavirtual;
 
+import java.util.Calendar;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,12 +25,12 @@ class TestePessoaUsuario extends TestCase {
 
 		PessoaJuridica pessoaJuridica = new PessoaJuridica();
 
-		pessoaJuridica.setCnpj("0236117412548");
+		pessoaJuridica.setCnpj("" + Calendar.getInstance().getTimeInMillis());
 		pessoaJuridica.setNome("Nilton Brito");
-		pessoaJuridica.setEmail("nilton.bri8to@outlook.com");
+		pessoaJuridica.setEmail("nilton.brdi8to@outlook.com");
 		pessoaJuridica.setTelefone("719920456500");
-		pessoaJuridica.setIncriscaoMunicipal("12547");
-		pessoaJuridica.setIncriscaoMunicipal("98754658");
+		pessoaJuridica.setInscricaoEstadual("" + Calendar.getInstance().getTimeInMillis());
+		pessoaJuridica.setIncriscaoMunicipal("" + Calendar.getInstance().getTimeInMillis());
 		pessoaJuridica.setNomeFantasia("Bandampla");
 		pessoaJuridica.setRazaoSocial("BAndampla Sistemas");
 		

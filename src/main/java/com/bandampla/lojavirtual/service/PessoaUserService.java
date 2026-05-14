@@ -1,23 +1,18 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.service;
 
+import java.util.Calendar;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
+import com.bandampla.lojavirtual.model.Usuario;
 import com.bandampla.lojavirtual.repository.PessoaRepository;
 import com.bandampla.lojavirtual.repository.UsuarioRepository;
-
-/**
- * @author: Nilton Brito
- * @Email: <nilton.brito@outlook.com>
- * @Data: 27 de abr. de 2026
- */
 
 @Service
 public class PessoaUserService {
@@ -28,22 +23,101 @@ public class PessoaUserService {
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
 	public PessoaJuridica save(PessoaJuridica pessoaJuridica) throws ExceptionCustom {
 
 		if (pessoaJuridica == null) {
-
 			throw new ExceptionCustom("Pessoa Juridica não pode ser NULL");
 		}
-		
+
 		if (pessoaJuridica.getId() == null) {
 			Optional<PessoaJuridica> pessoaJuridicas = pessoaRepository.findByCnpj(pessoaJuridica.getCnpj());
 			if (!pessoaJuridicas.isEmpty()) {
 				throw new ExceptionCustom("Já existe Pessoa Juridica com este CNPJ: " + pessoaJuridica.getCnpj());
 			}
 		}
-		usuarioRepository.finUserByPessoa(pessoaJuridica.getId(), pessoaJuridica.getEmail());
-		return pessoaRepository.save(pessoaJuridica);
+
+		// CORREÇÃO AQUI: Salva a Pessoa Jurídica primeiro para gerar o ID no Banco de Dados
+		pessoaJuridica = pessoaRepository.save(pessoaJuridica);
+
+		// Agora que o ID da pessoa existe, a busca abaixo funcionará corretamente sem passar parâmetros nulos
+		Usuario usuarioPJ = usuarioRepository.finUserByPessoa(pessoaJuridica.getId(), pessoaJuridica.getEmail());
+
+		if (usuarioPJ == null) {
+			String constraint = usuarioRepository.consultaConstraintAcesso();
+			if (constraint != null) {
+				jdbcTemplate.execute("begin; alter table usuario_acesso drop constraint " + constraint + "; commit;");
+			}
+			usuarioPJ = new Usuario();
+			usuarioPJ.setCreateAt(Calendar.getInstance().getTime());
+			
+			// Objetos já persistidos com IDs válidos para as FKs do banco
+			usuarioPJ.setEmpresa(pessoaJuridica);
+			usuarioPJ.setPessoa(pessoaJuridica);
+			usuarioPJ.setLogin(pessoaJuridica.getEmail());
+
+			String senha = "" + Calendar.getInstance().getTimeInMillis();
+			String senhaCriptografada = new BCryptPasswordEncoder().encode(senha);
+			usuarioPJ.setSenha(senhaCriptografada);
+
+			usuarioPJ = usuarioRepository.save(usuarioPJ);
+			usuarioRepository.insereAcessoPj(usuarioPJ.getId());
+		}
 		
+		// Retorna a pessoa jurídica já salva com sucesso no banco
+		return pessoaJuridica;
+	}
+}
+
+/*
+@Service
+public class PessoaUserService {
+
+	@Autowired
+	private PessoaRepository pessoaRepository;
+
+	@Autowired
+	private UsuarioRepository usuarioRepository;
+
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
+
+	public PessoaJuridica save(PessoaJuridica pessoaJuridica) throws ExceptionCustom {
+
+		if (pessoaJuridica == null) {
+			throw new ExceptionCustom("Pessoa Juridica não pode ser NULL");
+		}
+
+		if (pessoaJuridica.getId() == null) {
+			Optional<PessoaJuridica> pessoaJuridicas = pessoaRepository.findByCnpj(pessoaJuridica.getCnpj());
+			if (!pessoaJuridicas.isEmpty()) {
+				throw new ExceptionCustom("Já existe Pessoa Juridica com este CNPJ: " + pessoaJuridica.getCnpj());
+			}
+		}
+		Usuario usuarioPJ = usuarioRepository.finUserByPessoa(pessoaJuridica.getId(), pessoaJuridica.getEmail());
+
+		if (usuarioPJ == null) {
+			String constraint = usuarioRepository.consultaConstraintAcesso();
+			if (constraint != null) {
+				jdbcTemplate.execute("begin; alter table usuario_acesso drop constraint " + constraint + "; commit;");
+			}
+			usuarioPJ = new Usuario();
+			usuarioPJ.setCreateAt(Calendar.getInstance().getTime());
+			usuarioPJ.setEmpresa(pessoaJuridica);
+			usuarioPJ.setPessoa(pessoaJuridica);
+			usuarioPJ.setLogin(pessoaJuridica.getEmail());
+
+			String senha = "" + Calendar.getInstance().getTimeInMillis();
+			String senhaCriptografada = new BCryptPasswordEncoder().encode(senha);
+			usuarioPJ.setSenha(senhaCriptografada);
+
+			usuarioPJ = usuarioRepository.save(usuarioPJ);
+			usuarioRepository.insereAcessoPj(usuarioPJ.getId());
+		}
+		return pessoaRepository.save(pessoaJuridica);
+
 	}
 
 	/*
@@ -62,3 +136,4 @@ public class PessoaUserService {
 	 * acessoRepository.buscarAcessoDesc(desc); }
 	 */
 }
+*/
