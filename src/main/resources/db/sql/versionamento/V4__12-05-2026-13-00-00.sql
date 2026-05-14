@@ -49,6 +49,8 @@ ALTER TABLE produto ADD CONSTRAINT empresa_fk FOREIGN KEY (empresa_id)
 ALTER TABLE usuario ADD CONSTRAINT empresa_fk FOREIGN KEY (empresa_id)
       REFERENCES pessoa_juridica (id);
       
+ALTER TABLE usuario ADD CONSTRAINT login_unique UNIQUE (login);
+      
 ALTER TABLE status_rastreio ADD CONSTRAINT empresa_fk FOREIGN KEY (empresa_id)
       REFERENCES pessoa_juridica (id);
 	  

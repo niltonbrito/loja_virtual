@@ -1,5 +1,6 @@
 package com.bandampla.lojavirtual;
 
+import java.util.Calendar;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class LojaVirtualApplicationTests extends TestCase {
 		MockMvc mockMvc = builder.build();
 
 		Acesso acesso = new Acesso();
-		acesso.setDescricao("ROLE_COMPRADOR");
+		acesso.setDescricao("ROLE_COMPRADOR" + Calendar.getInstance().getTimeInMillis());
 
 		ObjectMapper objectMapperAcesso = new ObjectMapper();
 
@@ -66,7 +67,7 @@ class LojaVirtualApplicationTests extends TestCase {
 		MockMvc mockMvc = builder.build();
 
 		Acesso acesso = new Acesso();
-		acesso.setDescricao("ROLE_COMPRADOR");
+		acesso.setDescricao("ROLE_COMPRADOR" + Calendar.getInstance().getTimeInMillis());
 
 		ObjectMapper objectMapperAcesso = new ObjectMapper();
 
@@ -193,9 +194,11 @@ class LojaVirtualApplicationTests extends TestCase {
 	/* Teste Junit unitario */
 	@Test
 	public void testCadastrarAcesso() throws ExceptionCustom {
+		
+		String desacesso  = "ROLE_ADMIN" + Calendar.getInstance().getTimeInMillis();
 		Acesso acesso = new Acesso();
 
-		acesso.setDescricao("ROLE_ADMIN");
+		acesso.setDescricao(desacesso);
 
 		assertEquals(true, acesso.getId() == null);
 
@@ -205,7 +208,7 @@ class LojaVirtualApplicationTests extends TestCase {
 
 		/* Teste de Validação */
 		// Valida dados da forma correta
-		assertEquals("ROLE_ADMIN", acesso.getDescricao());
+		assertEquals(desacesso, acesso.getDescricao());
 
 		assertEquals(true, acesso.getId() > 0);
 		/* Teste de carregamento */

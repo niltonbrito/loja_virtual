@@ -7,10 +7,14 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.model.Usuario;
+import java.util.List;
+
 
 /**
  * @author: Nilton Brito
@@ -20,19 +24,7 @@ import com.bandampla.lojavirtual.model.Usuario;
 
 @Repository
 @Transactional
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface PessoaRepository extends JpaRepository<PessoaJuridica, Long> {
 
-	@Query(value = "select u from Usuario u where u.login = ?1")
-	//Usuario findUserByLogin(String id);
-
-	Optional<Usuario> findByLogin(String login);
-
-	/**
-	 * @param id
-	 * @param email
-	 */
-
-	@Query(value = "select u from Usuario u where u.pessoa.id = ?1or u.login = ?2")
-	Usuario finUserByPessoa(Long id, String email);
-
+	Optional<PessoaJuridica> findByCnpj(String cnpj);
 }
