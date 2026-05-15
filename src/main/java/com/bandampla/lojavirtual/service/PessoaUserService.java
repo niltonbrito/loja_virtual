@@ -1,7 +1,6 @@
 package com.bandampla.lojavirtual.service;
 
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +26,9 @@ public class PessoaUserService {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
+	@Autowired
+	private SendMailService sendMailService;
+
 	public PessoaJuridica save(PessoaJuridica pessoaJuridica) throws ExceptionCustom {
 
 		if (pessoaJuridica == null) {
@@ -46,7 +48,7 @@ public class PessoaUserService {
 		}
 
 		pessoaJuridica = pessoaRepository.save(pessoaJuridica);
-		
+
 		Usuario usuarioPJ = usuarioRepository.finUserByPessoa(pessoaJuridica.getId(), pessoaJuridica.getEmail());
 
 		if (usuarioPJ == null) {
@@ -55,19 +57,32 @@ public class PessoaUserService {
 				jdbcTemplate.execute("begin; alter table usuario_acesso drop constraint " + constraint + "; commit;");
 			}
 			usuarioPJ = new Usuario();
-			usuarioPJ.setCreateAt(Calendar.getInstance().getTime());
-			usuarioPJ.setEmpresa(pessoaJuridica);
-			usuarioPJ.setPessoa(pessoaJuridica);
 			usuarioPJ.setLogin(pessoaJuridica.getEmail());
 
 			String senha = "" + Calendar.getInstance().getTimeInMillis();
 			String senhaCriptografada = new BCryptPasswordEncoder().encode(senha);
 			usuarioPJ.setSenha(senhaCriptografada);
 
+			usuarioPJ.setCreateAt(Calendar.getInstance().getTime());
+			usuarioPJ.setEmpresa(pessoaJuridica);
+			usuarioPJ.setPessoa(pessoaJuridica);
+
 			usuarioPJ = usuarioRepository.save(usuarioPJ);
 			usuarioRepository.insereAcessoPj(usuarioPJ.getId());
 
-			/* Fazer o envio de e-mail do login e senha */
+			StringBuilder mensagemHtml = new StringBuilder();
+			mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
+			mensagemHtml.append("<b>Login: </b>" + pessoaJuridica.getEmail() + "</b>").append("<br/>");
+			mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
+			mensagemHtml.append("Obrigado");
+			try {
+				/* Fazer o envio de e-mail do login e senha */
+				sendMailService.enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!",
+						mensagemHtml.toString(), pessoaJuridica.getEmail());
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
 		}
 
