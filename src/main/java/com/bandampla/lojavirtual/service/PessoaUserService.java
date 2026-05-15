@@ -1,6 +1,7 @@
 package com.bandampla.lojavirtual.service;
 
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +40,13 @@ public class PessoaUserService {
 			}
 		}
 
-		pessoaJuridica = pessoaRepository.save(pessoaJuridica);
+		for (int i = 0; i < pessoaJuridica.getEnderecos().size(); i++) {
+			pessoaJuridica.getEnderecos().get(i).setPessoa(pessoaJuridica);
+			pessoaJuridica.getEnderecos().get(i).setEmpresa(pessoaJuridica);
+		}
 
+		pessoaJuridica = pessoaRepository.save(pessoaJuridica);
+		
 		Usuario usuarioPJ = usuarioRepository.finUserByPessoa(pessoaJuridica.getId(), pessoaJuridica.getEmail());
 
 		if (usuarioPJ == null) {
@@ -60,9 +66,9 @@ public class PessoaUserService {
 
 			usuarioPJ = usuarioRepository.save(usuarioPJ);
 			usuarioRepository.insereAcessoPj(usuarioPJ.getId());
-			
-			/*Fazer o envio de e-mail do login e senha*/
-			
+
+			/* Fazer o envio de e-mail do login e senha */
+
 		}
 
 		return pessoaJuridica;
