@@ -39,10 +39,8 @@ public class PessoaUserService {
 			}
 		}
 
-		// CORREÇÃO AQUI: Salva a Pessoa Jurídica primeiro para gerar o ID no Banco de Dados
 		pessoaJuridica = pessoaRepository.save(pessoaJuridica);
 
-		// Agora que o ID da pessoa existe, a busca abaixo funcionará corretamente sem passar parâmetros nulos
 		Usuario usuarioPJ = usuarioRepository.finUserByPessoa(pessoaJuridica.getId(), pessoaJuridica.getEmail());
 
 		if (usuarioPJ == null) {
@@ -52,71 +50,22 @@ public class PessoaUserService {
 			}
 			usuarioPJ = new Usuario();
 			usuarioPJ.setCreateAt(Calendar.getInstance().getTime());
+			usuarioPJ.setEmpresa(pessoaJuridica);
+			usuarioPJ.setPessoa(pessoaJuridica);
+			usuarioPJ.setLogin(pessoaJuridica.getEmail());
+
+			String senha = "" + Calendar.getInstance().getTimeInMillis();
+			String senhaCriptografada = new BCryptPasswordEncoder().encode(senha);
+			usuarioPJ.setSenha(senhaCriptografada);
+
+			usuarioPJ = usuarioRepository.save(usuarioPJ);
+			usuarioRepository.insereAcessoPj(usuarioPJ.getId());
 			
-			// Objetos já persistidos com IDs válidos para as FKs do banco
-			usuarioPJ.setEmpresa(pessoaJuridica);
-			usuarioPJ.setPessoa(pessoaJuridica);
-			usuarioPJ.setLogin(pessoaJuridica.getEmail());
-
-			String senha = "" + Calendar.getInstance().getTimeInMillis();
-			String senhaCriptografada = new BCryptPasswordEncoder().encode(senha);
-			usuarioPJ.setSenha(senhaCriptografada);
-
-			usuarioPJ = usuarioRepository.save(usuarioPJ);
-			usuarioRepository.insereAcessoPj(usuarioPJ.getId());
+			/*Fazer o envio de e-mail do login e senha*/
+			
 		}
-		
-		// Retorna a pessoa jurídica já salva com sucesso no banco
+
 		return pessoaJuridica;
-	}
-}
-
-/*
-@Service
-public class PessoaUserService {
-
-	@Autowired
-	private PessoaRepository pessoaRepository;
-
-	@Autowired
-	private UsuarioRepository usuarioRepository;
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
-
-	public PessoaJuridica save(PessoaJuridica pessoaJuridica) throws ExceptionCustom {
-
-		if (pessoaJuridica == null) {
-			throw new ExceptionCustom("Pessoa Juridica não pode ser NULL");
-		}
-
-		if (pessoaJuridica.getId() == null) {
-			Optional<PessoaJuridica> pessoaJuridicas = pessoaRepository.findByCnpj(pessoaJuridica.getCnpj());
-			if (!pessoaJuridicas.isEmpty()) {
-				throw new ExceptionCustom("Já existe Pessoa Juridica com este CNPJ: " + pessoaJuridica.getCnpj());
-			}
-		}
-		Usuario usuarioPJ = usuarioRepository.finUserByPessoa(pessoaJuridica.getId(), pessoaJuridica.getEmail());
-
-		if (usuarioPJ == null) {
-			String constraint = usuarioRepository.consultaConstraintAcesso();
-			if (constraint != null) {
-				jdbcTemplate.execute("begin; alter table usuario_acesso drop constraint " + constraint + "; commit;");
-			}
-			usuarioPJ = new Usuario();
-			usuarioPJ.setCreateAt(Calendar.getInstance().getTime());
-			usuarioPJ.setEmpresa(pessoaJuridica);
-			usuarioPJ.setPessoa(pessoaJuridica);
-			usuarioPJ.setLogin(pessoaJuridica.getEmail());
-
-			String senha = "" + Calendar.getInstance().getTimeInMillis();
-			String senhaCriptografada = new BCryptPasswordEncoder().encode(senha);
-			usuarioPJ.setSenha(senhaCriptografada);
-
-			usuarioPJ = usuarioRepository.save(usuarioPJ);
-			usuarioRepository.insereAcessoPj(usuarioPJ.getId());
-		}
-		return pessoaRepository.save(pessoaJuridica);
 
 	}
 
@@ -135,5 +84,5 @@ public class PessoaUserService {
 	 * public List<Acesso> buscarPorDescricao(String desc) { return
 	 * acessoRepository.buscarAcessoDesc(desc); }
 	 */
+
 }
-*/

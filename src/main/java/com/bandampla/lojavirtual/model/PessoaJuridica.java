@@ -19,7 +19,7 @@ public class PessoaJuridica extends Pessoa {
 	private String inscricaoEstadual;
 
 	@Column(nullable = true)
-	private String incriscaoMunicipal;
+	private String inscricaoMunicipal;
 
 	@Column(nullable = false)
 	private String nomeFantasia;
@@ -45,12 +45,12 @@ public class PessoaJuridica extends Pessoa {
 		this.inscricaoEstadual = inscricaoEstadual;
 	}
 
-	public String getIncriscaoMunicipal() {
-		return incriscaoMunicipal;
+	public String getInscricaoMunicipal() {
+		return inscricaoMunicipal;
 	}
 
-	public void setIncriscaoMunicipal(String incriscaoMunicipal) {
-		this.incriscaoMunicipal = incriscaoMunicipal;
+	public void setInscricaoMunicipal(String inscricaoMunicipal) {
+		this.inscricaoMunicipal = inscricaoMunicipal;
 	}
 
 	public String getNomeFantasia() {

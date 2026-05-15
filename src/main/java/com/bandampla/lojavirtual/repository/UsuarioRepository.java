@@ -29,11 +29,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
 	Optional<Usuario> findByLogin(String login);
 
-	/**
-	 * @param id
-	 * @param email
-	 */
-
 	@Query(nativeQuery = true, value = "select * from usuario u where u.pessoa_id = ?1 or u.login = ?2")
 	Usuario finUserByPessoa(Long id, String email);
 

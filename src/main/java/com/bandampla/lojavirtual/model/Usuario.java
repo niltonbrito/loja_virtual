@@ -45,7 +45,7 @@ public class Usuario implements UserDetails {
 	@Temporal(TemporalType.DATE)
 	private Date createAt;
 
-	@Column(nullable = false)
+	@Column(nullable = true)
 	@Temporal(TemporalType.DATE)
 	private Date updateAt;
 

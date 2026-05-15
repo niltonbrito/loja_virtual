@@ -30,7 +30,7 @@ class TestePessoaUsuario extends TestCase {
 		pessoaJuridica.setEmail("nilton.brdi8to@outlook.com");
 		pessoaJuridica.setTelefone("719920456500");
 		pessoaJuridica.setInscricaoEstadual("" + Calendar.getInstance().getTimeInMillis());
-		pessoaJuridica.setIncriscaoMunicipal("" + Calendar.getInstance().getTimeInMillis());
+		pessoaJuridica.setInscricaoMunicipal("" + Calendar.getInstance().getTimeInMillis());
 		pessoaJuridica.setNomeFantasia("Bandampla");
 		pessoaJuridica.setRazaoSocial("BAndampla Sistemas");
 		
