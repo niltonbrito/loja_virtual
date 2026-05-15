@@ -41,10 +41,12 @@ public class PessoaUserService {
 				throw new ExceptionCustom("Já existe Pessoa Juridica com este CNPJ: " + pessoaJuridica.getCnpj());
 			}
 		}
-
-		for (int i = 0; i < pessoaJuridica.getEnderecos().size(); i++) {
-			pessoaJuridica.getEnderecos().get(i).setPessoa(pessoaJuridica);
-			pessoaJuridica.getEnderecos().get(i).setEmpresa(pessoaJuridica);
+		// Adicione esta validação antes do loop for:
+		if (pessoaJuridica.getEnderecos() != null) {
+			for (int i = 0; i < pessoaJuridica.getEnderecos().size(); i++) {
+				pessoaJuridica.getEnderecos().get(i).setPessoa(pessoaJuridica);
+				pessoaJuridica.getEnderecos().get(i).setEmpresa(pessoaJuridica);
+			}
 		}
 
 		pessoaJuridica = pessoaRepository.save(pessoaJuridica);
@@ -72,7 +74,7 @@ public class PessoaUserService {
 
 			StringBuilder mensagemHtml = new StringBuilder();
 			mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
-			mensagemHtml.append("<b>Login: </b>" + pessoaJuridica.getEmail() + "</b>").append("<br/>");
+			mensagemHtml.append("<b>Login: </b>" + pessoaJuridica.getEmail()).append("<br/>");
 			mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
 			mensagemHtml.append("Obrigado");
 			try {
