@@ -77,7 +77,7 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 	/**
 	 * Captura erro na parte de banco de dados
 	 */
-	@ExceptionHandler({ DataIntegrityViolationException.class, ConstraintViolationException.class, SQLException.class })
+	@ExceptionHandler({ DataIntegrityViolationException.class, ConstraintViolationException.class, SQLException.class})
 	protected ResponseEntity<Object> handleExceptionDataIntegry(Exception ex) {
 		ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
 

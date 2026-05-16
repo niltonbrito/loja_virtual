@@ -34,7 +34,7 @@ public class PessoaController {
 	@PostMapping(value = "/salvarPessoaJuridica") // Mapeandoa url para receber um JSON
 	public ResponseEntity<PessoaJuridica> salvarPessoaJuridica(@RequestBody PessoaJuridica pessoaJuridica) throws ExceptionCustom  {// Recebe o JSON e converte para objeto
 		
-		return new ResponseEntity<PessoaJuridica>(pessoaUserService.save(pessoaJuridica), HttpStatus.OK);
+		return new ResponseEntity<PessoaJuridica>(pessoaUserService.salvarPessoaJuridica(pessoaJuridica), HttpStatus.OK);
 	}
 /*
 	@ResponseBody

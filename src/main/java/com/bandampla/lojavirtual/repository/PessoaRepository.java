@@ -27,4 +27,8 @@ import java.util.List;
 public interface PessoaRepository extends JpaRepository<PessoaJuridica, Long> {
 
 	Optional<PessoaJuridica> findByCnpj(String cnpj);
+	
+
+	Optional<PessoaJuridica> findByInscricaoEstadual(String inscricaoEstadual);
+	
 }

@@ -11,11 +11,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @EnableAsync
+@EnableScheduling
 @EntityScan(basePackages = "com.bandampla.lojavirtual.model") //Deixa explicito para o spring que este e o pacote de Model do projeto
 @ComponentScan(basePackages = {"com.*"})  //Informa ao spring para varrer todo o projeto a procura de anotações e recusos ativado
 @EnableJpaRepositories(basePackages = {"com.bandampla.lojavirtual.repository"}) //Deixa explicito para o spring que este e o pacote de Repository do projeto

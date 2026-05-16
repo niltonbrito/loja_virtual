@@ -35,6 +35,7 @@ class TestePessoaUsuario extends TestCase {
 		pessoaJuridica.setInscricaoMunicipal("" + Calendar.getInstance().getTimeInMillis());
 		pessoaJuridica.setNomeFantasia("Bandampla");
 		pessoaJuridica.setRazaoSocial("BAndampla Sistemas");
+		pessoaJuridica.setTipoPessoa("JURIDICA");
 		
 		Endereco endereco = new Endereco();
 		endereco.setRua("Rua do Ceu");

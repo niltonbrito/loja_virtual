@@ -3,6 +3,7 @@
  */
 package com.bandampla.lojavirtual.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -42,4 +43,11 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	@Query(value = "insert into usuario_acesso(usuario_id, acesso_id) values(?1, (select id from acesso where descricao = 'ROLE_USER'))", nativeQuery = true)
 	void insereAcessoPj(Long idUser);
 
+	@Transactional
+	@Modifying
+	@Query(value = "insert into usuario_acesso(usuario_id, acesso_id) values(?1, (select id from acesso where descricao = ?2))", nativeQuery = true)
+	void insereAcessoPj(Long idUser, String role);
+
+	@Query(value = "SELECT u.* FROM usuario u WHERE u.update_at <= current_date - 90", nativeQuery = true)
+	List<Usuario> usuarioSenhaVencida();
 }

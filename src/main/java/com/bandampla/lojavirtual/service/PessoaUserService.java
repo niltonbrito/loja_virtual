@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.model.Usuario;
@@ -29,18 +30,22 @@ public class PessoaUserService {
 	@Autowired
 	private SendMailService sendMailService;
 
-	public PessoaJuridica save(PessoaJuridica pessoaJuridica) throws ExceptionCustom {
+	public PessoaJuridica salvarPessoaJuridica(PessoaJuridica pessoaJuridica) throws ExceptionCustom {
 
 		if (pessoaJuridica == null) {
 			throw new ExceptionCustom("Pessoa Juridica não pode ser NULL");
 		}
 
-		if (pessoaJuridica.getId() == null) {
-			Optional<PessoaJuridica> pessoaJuridicas = pessoaRepository.findByCnpj(pessoaJuridica.getCnpj());
-			if (!pessoaJuridicas.isEmpty()) {
-				throw new ExceptionCustom("Já existe Pessoa Juridica com este CNPJ: " + pessoaJuridica.getCnpj());
-			}
+		Optional<PessoaJuridica> pjCnpj = pessoaRepository.findByCnpj(pessoaJuridica.getCnpj());
+		if (pjCnpj.isPresent() && !pjCnpj.get().getId().equals(pessoaJuridica.getId())) {
+		    throw new ExceptionCustom("CNPJ já cadastrado no sistema");
 		}
+
+		Optional<PessoaJuridica> pjIe = pessoaRepository.findByInscricaoEstadual(pessoaJuridica.getInscricaoEstadual());
+		if (pjIe.isPresent() && !pjIe.get().getId().equals(pessoaJuridica.getId())) {
+		    throw new ExceptionCustom("Inscrição Estadual já cadastrada");
+		}
+
 		// Adicione esta validação antes do loop for:
 		if (pessoaJuridica.getEnderecos() != null) {
 			for (int i = 0; i < pessoaJuridica.getEnderecos().size(); i++) {
@@ -66,11 +71,12 @@ public class PessoaUserService {
 			usuarioPJ.setSenha(senhaCriptografada);
 
 			usuarioPJ.setCreateAt(Calendar.getInstance().getTime());
+			usuarioPJ.setUpdateAt(Calendar.getInstance().getTime());
 			usuarioPJ.setEmpresa(pessoaJuridica);
 			usuarioPJ.setPessoa(pessoaJuridica);
 
 			usuarioPJ = usuarioRepository.save(usuarioPJ);
-			usuarioRepository.insereAcessoPj(usuarioPJ.getId());
+			usuarioRepository.insereAcessoPj(usuarioPJ.getId(), RoleUser.ROLE_ADMIN.toString());
 
 			StringBuilder mensagemHtml = new StringBuilder();
 			mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
