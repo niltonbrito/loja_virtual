@@ -3,7 +3,9 @@ package com.bandampla.lojavirtual.enums;
 public enum TipoEndereco {
 
 	COBRANCA("Cobrança"),
-	ENTREGA("Entrega");
+	ENTREGA("Entrega"),
+	COMERCIAL("Comercial"),
+	RESIDENCIAL("Residencial");
 	
 	private String descricao;
 	

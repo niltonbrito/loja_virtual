@@ -1,5 +1,6 @@
 package com.bandampla.lojavirtual.model;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -8,6 +9,9 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
 @Table(name = "pessoa_fisica")
@@ -19,8 +23,8 @@ public class PessoaFisica extends Pessoa{
 	@Column(nullable = false, unique = true)
 	private String cpf;
 	
-	@Temporal(TemporalType.DATE)
-	private Date dataNascimento;
+	private LocalDate dataNascimento;
+
 
 	public String getCpf() {
 		return cpf;
@@ -30,11 +34,11 @@ public class PessoaFisica extends Pessoa{
 		this.cpf = cpf;
 	}
 
-	public Date getDataNascimento() {
+	public LocalDate getDataNascimento() {
 		return dataNascimento;
 	}
 
-	public void setDataNascimento(Date dataNascimento) {
+	public void setDataNascimento(LocalDate dataNascimento) {
 		this.dataNascimento = dataNascimento;
 	}
 	

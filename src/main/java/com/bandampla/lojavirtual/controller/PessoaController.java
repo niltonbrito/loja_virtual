@@ -3,6 +3,9 @@
  */
 package com.bandampla.lojavirtual.controller;
 
+import com.bandampla.lojavirtual.mapper.PessoaMapper;
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bandampla.lojavirtual.dto.request.PessoaFisicaRequestDTO;
+import com.bandampla.lojavirtual.dto.request.PessoaJuridicaRequestDTO;
+import com.bandampla.lojavirtual.dto.response.PessoaFisicaResponseDTO;
+import com.bandampla.lojavirtual.dto.response.PessoaJuridicaResponseDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
+import com.bandampla.lojavirtual.model.PessoaFisica;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.service.PessoaUserService;
 
@@ -23,45 +31,34 @@ import com.bandampla.lojavirtual.service.PessoaUserService;
 
 //@CrossOrigin(value = "http://bandampla.com") //Somente requisições a partir desta origem http://bandampla.com podem utilizar este controler ou end-point
 
-
 @RestController
 public class PessoaController {
 
+	private final PessoaMapper pessoaMapper;
+	
 	@Autowired
 	private PessoaUserService pessoaUserService;
 
-	@ResponseBody // Pode dar um retorno da API
-	@PostMapping(value = "/salvarPessoaJuridica") // Mapeandoa url para receber um JSON
-	public ResponseEntity<PessoaJuridica> salvarPessoaJuridica(@RequestBody PessoaJuridica pessoaJuridica) throws ExceptionCustom  {// Recebe o JSON e converte para objeto
-		
-		return new ResponseEntity<PessoaJuridica>(pessoaUserService.salvarPessoaJuridica(pessoaJuridica), HttpStatus.OK);
-	}
-/*
-	@ResponseBody
-	@PostMapping(value = "/deletarAcesso")
-	public ResponseEntity<?> deletarPessoaJuridica(@RequestBody Acesso acesso) {
-		//acessoService.delete(acesso);
-		/ new ResponseEntity<>("Acesso Removido", HttpStatus.OK);
-	}
-
-	//@Secured(value = {"ROLE_ADMIN", "ROLE_GERENTE"}) //Somente usuario ou requisições com o Role permitido podem utilizar este controler ou end-point
-	@ResponseBody
-	@DeleteMapping(value = "/deletarAcessoPorId/{id}")
-	public ResponseEntity<?> deletarPessoaJuridicaPorId(@PathVariable Long id) {
-		//acessoService.deleteById(id);
-		//return new ResponseEntity<>("Acesso Removido", HttpStatus.OK);
+	PessoaController(PessoaMapper pessoaMapper) {
+		this.pessoaMapper = pessoaMapper;
 	}
 
 	@ResponseBody
-	@GetMapping(value = "/buscarAcessoPorId/{id}")
-	public ResponseEntity<PessoaJuridica> buscarPessoaJuridicaPorId(@PathVariable Long id) throws ExceptionCustom {		
-	//	return new ResponseEntity<Acesso>(acessoService.buscarById(id), HttpStatus.OK);
+	@PostMapping("/pessoa/juridica")
+	public ResponseEntity<PessoaJuridicaResponseDTO> salvarPessoaJuridica(@Valid @RequestBody PessoaJuridicaRequestDTO dto)
+			throws ExceptionCustom {
+
+		PessoaJuridica pj = pessoaUserService.salvarPessoaJuridica(dto);
+	    return ResponseEntity.ok(pessoaMapper.toResponse(pj));
 	}
 
-	@ResponseBody
-	@GetMapping(value = "/buscarPorDescricao/{desc}")
-	public ResponseEntity<List<PessoaJuridica>> buscarPessoaJuridicaPorDescricao(@PathVariable String desc) {
-		//List<Acesso> acesso = acessoService.buscarPorDescricao(desc.toUpperCase());
-	//	return new ResponseEntity<List<Acesso>>(acesso, HttpStatus.OK);
-	}*/
+	@PostMapping("/pessoa/fisica")
+	public ResponseEntity<PessoaFisicaResponseDTO> salvarPessoaFisica(
+	        @Valid @RequestBody PessoaFisicaRequestDTO dto) throws ExceptionCustom {
+
+	    PessoaFisica pf = pessoaUserService.salvarPessoaFisica(dto);
+	    return ResponseEntity.ok(pessoaMapper.toResponse(pf));
+	}
+
+
 }

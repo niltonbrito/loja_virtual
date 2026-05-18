@@ -20,6 +20,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import org.springframework.lang.NonNull;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -35,7 +40,8 @@ public abstract class Pessoa implements Serializable {
 	
 	@Column(nullable = false)
 	private String nome;
-	
+		
+
 	@Column(nullable = false, unique = true)
 	private String email;
 	

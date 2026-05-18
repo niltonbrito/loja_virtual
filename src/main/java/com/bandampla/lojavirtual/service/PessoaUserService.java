@@ -8,110 +8,175 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.bandampla.lojavirtual.dto.request.PessoaFisicaRequestDTO;
+import com.bandampla.lojavirtual.dto.request.PessoaJuridicaRequestDTO;
 import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
+import com.bandampla.lojavirtual.mapper.PessoaMapper;
+import com.bandampla.lojavirtual.model.Pessoa;
+import com.bandampla.lojavirtual.model.PessoaFisica;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.model.Usuario;
-import com.bandampla.lojavirtual.repository.PessoaRepository;
+import com.bandampla.lojavirtual.repository.PessoaFisicaRepository;
+import com.bandampla.lojavirtual.repository.PessoaJuridicaRepository;
 import com.bandampla.lojavirtual.repository.UsuarioRepository;
+import com.bandampla.lojavirtual.util.ValidaCNPJ;
+import com.bandampla.lojavirtual.util.ValidaCPF;
 
 @Service
 public class PessoaUserService {
 
-	@Autowired
-	private PessoaRepository pessoaRepository;
+    @Autowired
+    private PessoaJuridicaRepository pessoaJuridicaRepository;
 
-	@Autowired
-	private UsuarioRepository usuarioRepository;
+    @Autowired
+    private PessoaFisicaRepository pessoaFisicaRepository;
 
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-	@Autowired
-	private SendMailService sendMailService;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-	public PessoaJuridica salvarPessoaJuridica(PessoaJuridica pessoaJuridica) throws ExceptionCustom {
+    @Autowired
+    private SendMailService sendMailService;
 
-		if (pessoaJuridica == null) {
-			throw new ExceptionCustom("Pessoa Juridica não pode ser NULL");
+    @Autowired
+    private PessoaMapper mapper;
+
+    // ============================================================
+    // SALVAR PESSOA JURÍDICA
+    // ============================================================
+    public PessoaJuridica salvarPessoaJuridica(PessoaJuridicaRequestDTO dto) throws ExceptionCustom {
+
+        if (dto == null) {
+            throw new ExceptionCustom("Pessoa Jurídica não pode ser NULL");
+        }
+
+        String cnpj = ValidaCNPJ.cnpjSemMascara(dto.getCnpj());
+
+        if (!ValidaCNPJ.isCNPJ(cnpj)) {
+            throw new ExceptionCustom("CNPJ inválido: " + ValidaCNPJ.cnpjComMascara(cnpj));
+        }
+
+		Optional<PessoaJuridica> cnpjOpt = pessoaJuridicaRepository.findByCnpj(dto.getCnpj());
+		if (cnpjOpt.isPresent() && !cnpjOpt.get().getId().equals(dto.getId())) {
+			throw new ExceptionCustom("CNPJ já cadastrado no sistema.");
 		}
 
-		Optional<PessoaJuridica> pjCnpj = pessoaRepository.findByCnpj(pessoaJuridica.getCnpj());
-		if (pjCnpj.isPresent() && !pjCnpj.get().getId().equals(pessoaJuridica.getId())) {
-		    throw new ExceptionCustom("CNPJ já cadastrado no sistema");
+		Optional<PessoaJuridica> inscricaoEstadual = pessoaJuridicaRepository
+				.findByInscricaoEstadual(dto.getInscricaoEstadual());
+		if (inscricaoEstadual.isPresent() && !inscricaoEstadual.get().getId().equals(dto.getId())) {
+			throw new ExceptionCustom("Inscrição Estadual já cadastrada");
 		}
 
-		Optional<PessoaJuridica> pjIe = pessoaRepository.findByInscricaoEstadual(pessoaJuridica.getInscricaoEstadual());
-		if (pjIe.isPresent() && !pjIe.get().getId().equals(pessoaJuridica.getId())) {
-		    throw new ExceptionCustom("Inscrição Estadual já cadastrada");
+        // Converte DTO → Model
+        PessoaJuridica pj = mapper.toModel(dto);
+        pj.setCnpj(ValidaCNPJ.cnpjSemMascara(dto.getCnpj()));
+        // Salva
+        pj = pessoaJuridicaRepository.save(pj);
+
+        // Cria usuário
+        criarUsuarioAcesso(pj.getEmail(), pj, pj, RoleUser.ROLE_ADMIN);
+
+        return pj;
+    }
+
+    // ============================================================
+    // SALVAR PESSOA FÍSICA
+    // ============================================================
+    public PessoaFisica salvarPessoaFisica(PessoaFisicaRequestDTO dto) throws ExceptionCustom {
+
+        if (dto == null) {
+            throw new ExceptionCustom("Pessoa Física não pode ser NULL");
+        }
+
+        dto.setCpf(ValidaCPF.cpfSemMascara(dto.getCpf()));
+
+        if (!ValidaCPF.isCPF(dto.getCpf())) {
+            throw new ExceptionCustom("CPF inválido: " + ValidaCPF.cpfComMascara(dto.getCpf()));
+        }
+
+		Optional<PessoaFisica> cpf = pessoaFisicaRepository.findByCpf(dto.getCpf());
+		if (cpf.isPresent() && !cpf.get().getId().equals(dto.getId())) {
+			throw new ExceptionCustom(
+					"Já existe CPF: " + ValidaCPF.cpfComMascara(dto.getCpf()) + " cadastrado no sistema.");
 		}
 
-		// Adicione esta validação antes do loop for:
-		if (pessoaJuridica.getEnderecos() != null) {
-			for (int i = 0; i < pessoaJuridica.getEnderecos().size(); i++) {
-				pessoaJuridica.getEnderecos().get(i).setPessoa(pessoaJuridica);
-				pessoaJuridica.getEnderecos().get(i).setEmpresa(pessoaJuridica);
-			}
-		}
+        // Buscar empresa pelo CNPJ enviado no JSON
+        String cnpj = ValidaCNPJ.cnpjSemMascara(dto.getEmpresa().getCnpj());
 
-		pessoaJuridica = pessoaRepository.save(pessoaJuridica);
+        PessoaJuridica empresa = pessoaJuridicaRepository.findByCnpj(cnpj)
+                .orElseThrow(() -> new ExceptionCustom(
+                        "Empresa não encontrada para o CNPJ: " + ValidaCNPJ.cnpjComMascara(cnpj)));
 
-		Usuario usuarioPJ = usuarioRepository.finUserByPessoa(pessoaJuridica.getId(), pessoaJuridica.getEmail());
+        // Converte DTO → Model
+        PessoaFisica pf = mapper.toModel(dto, empresa);
 
-		if (usuarioPJ == null) {
-			String constraint = usuarioRepository.consultaConstraintAcesso();
-			if (constraint != null) {
-				jdbcTemplate.execute("begin; alter table usuario_acesso drop constraint " + constraint + "; commit;");
-			}
-			usuarioPJ = new Usuario();
-			usuarioPJ.setLogin(pessoaJuridica.getEmail());
+        // Salva
+        pf = pessoaFisicaRepository.save(pf);
 
-			String senha = "" + Calendar.getInstance().getTimeInMillis();
-			String senhaCriptografada = new BCryptPasswordEncoder().encode(senha);
-			usuarioPJ.setSenha(senhaCriptografada);
+        // Cria usuário
+        criarUsuarioAcesso(pf.getEmail(), pf, empresa, RoleUser.ROLE_USER);
 
-			usuarioPJ.setCreateAt(Calendar.getInstance().getTime());
-			usuarioPJ.setUpdateAt(Calendar.getInstance().getTime());
-			usuarioPJ.setEmpresa(pessoaJuridica);
-			usuarioPJ.setPessoa(pessoaJuridica);
+        return pf;
+    }
 
-			usuarioPJ = usuarioRepository.save(usuarioPJ);
-			usuarioRepository.insereAcessoPj(usuarioPJ.getId(), RoleUser.ROLE_ADMIN.toString());
+    // ============================================================
+    // MÉTODOS PRIVADOS
+    // ============================================================
 
-			StringBuilder mensagemHtml = new StringBuilder();
-			mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
-			mensagemHtml.append("<b>Login: </b>" + pessoaJuridica.getEmail()).append("<br/>");
-			mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
-			mensagemHtml.append("Obrigado");
-			try {
-				/* Fazer o envio de e-mail do login e senha */
-				sendMailService.enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!",
-						mensagemHtml.toString(), pessoaJuridica.getEmail());
+    private void criarUsuarioAcesso(String email, Object pessoa, PessoaJuridica empresa, RoleUser role) {
 
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+        Long idPessoa = pessoa instanceof PessoaFisica
+                ? ((PessoaFisica) pessoa).getId()
+                : ((PessoaJuridica) pessoa).getId();
 
-		}
+        Usuario usuario = usuarioRepository.finUserByPessoa(idPessoa, email);
 
-		return pessoaJuridica;
+        if (usuario != null)
+            return;
 
-	}
+        removerConstraintAcesso();
 
-	/*
-	 * public void delete(Acesso acesso) {
-	 * acessoRepository.deleteById(acesso.getId()); }
-	 * 
-	 * public void deleteById(Long id) { acessoRepository.deleteById(id); }
-	 * 
-	 * public Acesso buscarById(Long id) throws ExceptionCustom {
-	 * 
-	 * Acesso acesso = acessoRepository.findById(id).orElse(null); if (acesso ==
-	 * null) { throw new ExceptionCustom("Não encontrou Acesso com o código: " +
-	 * id); } return acesso; }
-	 * 
-	 * public List<Acesso> buscarPorDescricao(String desc) { return
-	 * acessoRepository.buscarAcessoDesc(desc); }
-	 */
+        usuario = new Usuario();
+        usuario.setLogin(email);
 
+        String senha = "" + Calendar.getInstance().getTimeInMillis();
+        usuario.setSenha(new BCryptPasswordEncoder().encode(senha));
+
+        usuario.setCreateAt(Calendar.getInstance().getTime());
+        usuario.setUpdateAt(Calendar.getInstance().getTime());
+        usuario.setEmpresa(empresa);
+        usuario.setPessoa((Pessoa) pessoa);
+
+        usuario = usuarioRepository.save(usuario);
+        usuarioRepository.insereAcessoUser(usuario.getId(), role.toString());
+
+        enviarEmailAcesso(email, senha);
+    }
+
+    private void removerConstraintAcesso() {
+        String constraint = usuarioRepository.consultaConstraintAcesso();
+        if (constraint != null) {
+            jdbcTemplate.execute("begin; ALTER TABLE usuario_acesso DROP CONSTRAINT " + constraint+ "; commit");
+        }
+    }
+
+    private void enviarEmailAcesso(String email, String senha) {
+        StringBuilder msg = new StringBuilder();
+        msg.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b><br/>")
+                .append("<b>Login: </b>").append(email).append("<br/>")
+                .append("<b>Senha: </b>").append(senha).append("<br/><br/>")
+                .append("Obrigado");
+
+        try {
+            sendMailService.enviarEmailHtml(
+                    "Credencial Criada para acesso à plataforma Loja Virtual Bandampla!",
+                    msg.toString(),
+                    email);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

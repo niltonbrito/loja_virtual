@@ -15,10 +15,10 @@ public class PessoaJuridica extends Pessoa {
 	@Column(nullable = false, unique = true)
 	private String cnpj;
 
-	@Column(nullable = true)
+	@Column(nullable = true, unique = true)
 	private String inscricaoEstadual;
 
-	@Column(nullable = true)
+	@Column(nullable = true, unique = true)
 	private String inscricaoMunicipal;
 
 	@Column(nullable = false)
