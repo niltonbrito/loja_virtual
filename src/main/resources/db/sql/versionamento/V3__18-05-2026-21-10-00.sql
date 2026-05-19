@@ -1,8 +1,12 @@
 -- ============================================
 -- 1. Cria EMPRESA padrão (PessoaJuridica)
 -- ============================================
-INSERT INTO pessoa_juridica (id, nome, email, telefone, tipo_pessoa, cnpj, inscricao_estadual, inscricao_municipal, nome_fantasia, razao_social, categoria,empresa_id)
-values ( '1',
+INSERT INTO pessoa_juridica (
+       id, nome, email, telefone, tipo_pessoa,
+       cnpj, inscricao_estadual, inscricao_municipal,
+       nome_fantasia, razao_social, categoria, empresa_id
+)
+SELECT nextval('seq_pessoa'),
        'Empresa Administrativa',
        'empresa@sistema.com',
        '71999990000',
@@ -12,26 +16,37 @@ values ( '1',
        'ISENTO',
        'Empresa Administrativa',
        'Empresa Administrativa LTDA',
-       'ADMIN','1')
-;
+       'ADMIN',
+       NULL
+WHERE NOT EXISTS (
+    SELECT 1 FROM pessoa_juridica WHERE email = 'empresa@sistema.com'
+);
 
 -- ============================================
 -- 2. Cria PESSOA FÍSICA padrão para o usuário admin
 -- ============================================
-INSERT INTO pessoa_fisica (id, nome, email, telefone, tipo_pessoa, cpf, data_nascimento,empresa_id)
+INSERT INTO pessoa_fisica (
+       id, nome, email, telefone, tipo_pessoa,
+       cpf, data_nascimento, empresa_id
+)
 SELECT nextval('seq_pessoa'),
        'Administrador do Sistema',
        'admin@sistema.com',
        '71999990001',
        'FISICA',
        '00000000000',
-       '1990-01-01','1'
-WHERE NOT EXISTS (SELECT 1 FROM pessoa_fisica WHERE email = 'admin@sistema.com');
+       '1990-01-01',
+       (SELECT id FROM pessoa_juridica WHERE email = 'empresa@sistema.com')
+WHERE NOT EXISTS (
+    SELECT 1 FROM pessoa_fisica WHERE email = 'admin@sistema.com'
+);
 
 -- ============================================
 -- 3. Cria o usuário ADMIN
 -- ============================================
-INSERT INTO usuario (id, login, senha, pessoa_id, empresa_id, create_at, update_at)
+INSERT INTO usuario (
+       id, login, senha, pessoa_id, empresa_id, create_at, update_at
+)
 SELECT nextval('seq_usuario'),
        'admin',
        '$2a$10$g1pAwZ4omnpfWKzr8bsmKOspS76zYX5QnX4mKAally2V2Tb.gktWW',
@@ -39,7 +54,9 @@ SELECT nextval('seq_usuario'),
        (SELECT id FROM pessoa_juridica WHERE email = 'empresa@sistema.com'),
        now(),
        now()
-WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE login = 'admin');
+WHERE NOT EXISTS (
+    SELECT 1 FROM usuario WHERE login = 'admin'
+);
 
 -- ============================================
 -- 4. Associa o usuário ADMIN ao ROLE_SUPER_ADMIN

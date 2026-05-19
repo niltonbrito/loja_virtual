@@ -26,8 +26,8 @@ import com.bandampla.lojavirtual.model.Usuario;
 @Transactional
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-	//@Query(value = "select u from Usuario u where u.login = ?1")
-	//Usuario findUserByLogin(String id);
+	// @Query(value = "select u from Usuario u where u.login = ?1")
+	// Usuario findUserByLogin(String id);
 
 	Optional<Usuario> findByLogin(String login);
 
@@ -40,8 +40,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
 	@Transactional
 	@Modifying
-	@Query(value = "insert into usuario_acesso(usuario_id, acesso_id) values(?1, upper((select id from acesso where role_user = ?2)))", nativeQuery = true)
-	void insereAcessoUser(Long idUser, RoleUser roleUser);
+	@Query(value = "INSERT INTO usuario_acesso(usuario_id, acesso_id)VALUES (?1, (SELECT id FROM acesso WHERE role_user = ?2))", nativeQuery = true)
+	void insereAcessoUser(Long idUser, String roleUser);
 
 	@Query(value = "SELECT u.* FROM usuario u WHERE u.update_at <= current_date - 90", nativeQuery = true)
 	List<Usuario> usuarioSenhaVencida();

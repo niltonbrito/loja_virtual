@@ -1,6 +1,8 @@
 package com.bandampla.lojavirtual.service;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,94 +12,131 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.bandampla.lojavirtual.dto.request.CepDTO;
+import com.bandampla.lojavirtual.dto.request.EnderecoRequestDTO;
 import com.bandampla.lojavirtual.dto.request.PessoaFisicaRequestDTO;
 import com.bandampla.lojavirtual.dto.request.PessoaJuridicaRequestDTO;
 import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
+import com.bandampla.lojavirtual.mapper.EnderecoMapper;
 import com.bandampla.lojavirtual.mapper.PessoaMapper;
+import com.bandampla.lojavirtual.model.Endereco;
 import com.bandampla.lojavirtual.model.Pessoa;
 import com.bandampla.lojavirtual.model.PessoaFisica;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.model.Usuario;
+import com.bandampla.lojavirtual.repository.EnderecoRepository;
 import com.bandampla.lojavirtual.repository.PessoaFisicaRepository;
 import com.bandampla.lojavirtual.repository.PessoaJuridicaRepository;
 import com.bandampla.lojavirtual.repository.UsuarioRepository;
+import com.bandampla.lojavirtual.util.ValidaCEP;
 import com.bandampla.lojavirtual.util.ValidaCNPJ;
 import com.bandampla.lojavirtual.util.ValidaCPF;
 
 @Service
 public class PessoaUserService {
 
-    @Autowired
-    private PessoaJuridicaRepository pessoaJuridicaRepository;
+	@Autowired
+	private PessoaJuridicaRepository pessoaJuridicaRepository;
 
-    @Autowired
-    private PessoaFisicaRepository pessoaFisicaRepository;
+	@Autowired
+	private PessoaFisicaRepository pessoaFisicaRepository;
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+	@Autowired
+	private UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+	@Autowired
+	private EnderecoMapper enderecoMapper;
 
-    @Autowired
-    private SendMailService sendMailService;
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private PessoaMapper mapper;
+	@Autowired
+	private SendMailService sendMailService;
 
-    // ============================================================
-    // SALVAR PESSOA JURÍDICA
-    // ============================================================
-    public PessoaJuridica salvarPessoaJuridica(PessoaJuridicaRequestDTO dto) throws ExceptionCustom {
+	@Autowired
+	private PessoaMapper mapper;
 
-        if (dto == null) {
-            throw new ExceptionCustom("Pessoa Jurídica não pode ser NULL");
-        }
+	@Autowired
+	private EnderecoRepository enderecoRepository;
 
-        String cnpj = ValidaCNPJ.cnpjSemMascara(dto.getCnpj());
+	// ============================================================
+	// SALVAR PESSOA JURÍDICA
+	// ============================================================
+	public PessoaJuridica salvarPessoaJuridica(PessoaJuridicaRequestDTO dto) throws ExceptionCustom {
 
-        if (!ValidaCNPJ.isCNPJ(cnpj)) {
-            throw new ExceptionCustom("CNPJ inválido: " + ValidaCNPJ.cnpjComMascara(cnpj));
-        }
+		if (dto == null) {
+			throw new ExceptionCustom("Pessoa Jurídica não pode ser NULL");
+		}
 
+		String cnpj = ValidaCNPJ.cnpjSemMascara(dto.getCnpj());
+
+		if (!ValidaCNPJ.isCNPJ(cnpj)) {
+			throw new ExceptionCustom("CNPJ inválido: " + ValidaCNPJ.cnpjComMascara(cnpj));
+		}
+
+		// Verifica duplicidade
 		Optional<PessoaJuridica> cnpjOpt = pessoaJuridicaRepository.findByCnpj(dto.getCnpj());
 		if (cnpjOpt.isPresent() && !cnpjOpt.get().getId().equals(dto.getId())) {
 			throw new ExceptionCustom("CNPJ já cadastrado no sistema.");
 		}
-
 		Optional<PessoaJuridica> inscricaoEstadual = pessoaJuridicaRepository
 				.findByInscricaoEstadual(dto.getInscricaoEstadual());
 		if (inscricaoEstadual.isPresent() && !inscricaoEstadual.get().getId().equals(dto.getId())) {
 			throw new ExceptionCustom("Inscrição Estadual já cadastrada");
 		}
+		
+		// Converte DTO → Model
+		PessoaJuridica pj = mapper.toModel(dto);
 
-        // Converte DTO → Model
-        PessoaJuridica pj = mapper.toModel(dto);
-        pj.setCnpj(ValidaCNPJ.cnpjSemMascara(dto.getCnpj()));
-        // Salva
-        pj = pessoaJuridicaRepository.save(pj);
+		
+		// Trata endereços com CEP
+		List<Endereco> enderecos = new ArrayList<>();
 
-        // Cria usuário
-        criarUsuarioAcesso(pj.getEmail(), pj, pj, RoleUser.ROLE_ADMIN);
+		if (dto.getId() == null) {
+		    // CREATE
+		    pj.setCnpj(cnpj);
+			for (EnderecoRequestDTO e : dto.getEnderecos()) {
 
-        return pj;
-    }
+				CepDTO cep = consultaCep(e.getCep());
 
-    // ============================================================
-    // SALVAR PESSOA FÍSICA
-    // ============================================================
-    public PessoaFisica salvarPessoaFisica(PessoaFisicaRequestDTO dto) throws ExceptionCustom {
+				Endereco endereco = enderecoMapper.toEnderecoModel(e, cep);
+				endereco.setPessoa(pj);
+				endereco.setEmpresa(pj);
+				enderecos.add(endereco);
+				pj.setEnderecos(enderecos);
+			}
+			// Salva
+			pj = pessoaJuridicaRepository.save(pj);
+			// Cria usuário
+			criarUsuarioAcesso(pj.getEmail(), pj, pj, RoleUser.ROLE_ADMIN);
+		} else {
+		    // UPDATE
+		    pj = pessoaJuridicaRepository.findByCnpj(dto.getCnpj())
+		            .orElseThrow(() -> new ExceptionCustom("CNPJ já cadastrado no sistema."));
 
-        if (dto == null) {
-            throw new ExceptionCustom("Pessoa Física não pode ser NULL");
-        }
+		    atualizarCampos(pj, dto);
+		    atualizarEnderecos(pj, dto.getEnderecos());
+		    pessoaJuridicaRepository.save(pj);
+		}
 
-        dto.setCpf(ValidaCPF.cpfSemMascara(dto.getCpf()));
 
-        if (!ValidaCPF.isCPF(dto.getCpf())) {
-            throw new ExceptionCustom("CPF inválido: " + ValidaCPF.cpfComMascara(dto.getCpf()));
-        }
+		return pj;
+	}
+
+	// ============================================================
+	// SALVAR PESSOA FÍSICA
+	// ============================================================
+	public PessoaFisica salvarPessoaFisica(PessoaFisicaRequestDTO dto) throws ExceptionCustom {
+
+		if (dto == null) {
+			throw new ExceptionCustom("Pessoa Física não pode ser NULL");
+		}
+
+		dto.setCpf(ValidaCPF.cpfSemMascara(dto.getCpf()));
+
+		if (!ValidaCPF.isCPF(dto.getCpf())) {
+			throw new ExceptionCustom("CPF inválido: " + ValidaCPF.cpfComMascara(dto.getCpf()));
+		}
 
 		Optional<PessoaFisica> cpf = pessoaFisicaRepository.findByCpf(dto.getCpf());
 		if (cpf.isPresent() && !cpf.get().getId().equals(dto.getId())) {
@@ -105,84 +144,112 @@ public class PessoaUserService {
 					"Já existe CPF: " + ValidaCPF.cpfComMascara(dto.getCpf()) + " cadastrado no sistema.");
 		}
 
-        // Buscar empresa pelo CNPJ enviado no JSON
-        String cnpj = ValidaCNPJ.cnpjSemMascara(dto.getEmpresa().getCnpj());
+		// Buscar empresa pelo CNPJ enviado no JSON
+		String cnpj = ValidaCNPJ.cnpjSemMascara(dto.getEmpresa().getCnpj());
 
-        PessoaJuridica empresa = pessoaJuridicaRepository.findByCnpj(cnpj)
-                .orElseThrow(() -> new ExceptionCustom(
-                        "Empresa não encontrada para o CNPJ: " + ValidaCNPJ.cnpjComMascara(cnpj)));
+		PessoaJuridica empresa = pessoaJuridicaRepository.findByCnpj(cnpj).orElseThrow(
+				() -> new ExceptionCustom("Empresa não encontrada para o CNPJ: " + ValidaCNPJ.cnpjComMascara(cnpj)));
 
-        // Converte DTO → Model
-        PessoaFisica pf = mapper.toModel(dto, empresa);
+		// Converte DTO → Model
+		PessoaFisica pf = mapper.toModel(dto, empresa);
 
-        // Salva
-        pf = pessoaFisicaRepository.save(pf);
+		// Trata endereços com CEP
+		List<Endereco> enderecos = new ArrayList<>();
+		for (EnderecoRequestDTO e : dto.getEnderecos()) {
 
-        // Cria usuário
-        criarUsuarioAcesso(pf.getEmail(), pf, empresa, RoleUser.ROLE_USER);
+			CepDTO cep = consultaCep(e.getCep());
 
-        return pf;
-    }
-    
-    public CepDTO consultaCep(String cep) {    	
-    	return new RestTemplate().getForEntity("https://viacep.com.br/ws/"+ cep+ "/json/", CepDTO.class).getBody();
+			Endereco endereco = enderecoMapper.toEnderecoModel(e, cep);
+			endereco.setPessoa(pf);
+			endereco.setEmpresa(pf.getEmpresa());
+
+			enderecos.add(endereco);
+		}
+
+		pf.setEnderecos(enderecos);
+
+		// Salva
+		pf = pessoaFisicaRepository.save(pf);
+
+		// Cria usuário
+		criarUsuarioAcesso(pf.getEmail(), pf, empresa, RoleUser.ROLE_USER);
+
+		return pf;
 	}
 
-    // ============================================================
-    // MÉTODOS PRIVADOS
-    // ============================================================
+	// ============================================================
+	// CONSULTA CEP
+	// ============================================================
+	public CepDTO consultaCep(String cep) throws ExceptionCustom {
 
-    private void criarUsuarioAcesso(String email, Object pessoa, PessoaJuridica empresa, RoleUser role) {
+		// Validação sintática
+		ValidaCEP.validarFormato(cep);
 
-        Long idPessoa = pessoa instanceof PessoaFisica
-                ? ((PessoaFisica) pessoa).getId()
-                : ((PessoaJuridica) pessoa).getId();
+		cep = ValidaCEP.limpar(cep);
 
-        Usuario usuario = usuarioRepository.finUserByPessoa(idPessoa, email);
+		// Chamada ao ViaCEP
+		CepDTO cepDTO = new RestTemplate().getForEntity("https://viacep.com.br/ws/" + cep + "/json/", CepDTO.class)
+				.getBody();
 
-        if (usuario != null)
-            return;
+		// Validação semântica (ViaCEP retorna "erro": true quando não existe)
+		if (cepDTO == null || cepDTO.getCep() == null) {
+			throw new ExceptionCustom("CEP não encontrado: " + cep);
+		}
 
-        removerConstraintAcesso();
+		return cepDTO;
+	}
 
-        usuario = new Usuario();
-        usuario.setLogin(email);
+	// ============================================================
+	// MÉTODOS PRIVADOS
+	// ============================================================
 
-        String senha = "" + Calendar.getInstance().getTimeInMillis();
-        usuario.setSenha(new BCryptPasswordEncoder().encode(senha));
+	private void criarUsuarioAcesso(String email, Object pessoa, PessoaJuridica empresa, RoleUser role) {
 
-        usuario.setCreateAt(Calendar.getInstance().getTime());
-        usuario.setUpdateAt(Calendar.getInstance().getTime());
-        usuario.setEmpresa(empresa);
-        usuario.setPessoa((Pessoa) pessoa);
+		Long idPessoa = pessoa instanceof PessoaFisica ? ((PessoaFisica) pessoa).getId()
+				: ((PessoaJuridica) pessoa).getId();
 
-        usuario = usuarioRepository.save(usuario);
-        usuarioRepository.insereAcessoUser(usuario.getId(), role);
+		Usuario usuario = usuarioRepository.finUserByPessoa(idPessoa, email);
 
-        enviarEmailAcesso(email, senha);
-    }
+		if (usuario != null)
+			return;
 
-    private void removerConstraintAcesso() {
-        String constraint = usuarioRepository.consultaConstraintAcesso();
-        if (constraint != null) {
-            jdbcTemplate.execute("begin; ALTER TABLE usuario_acesso DROP CONSTRAINT " + constraint+ "; commit");
-        }
-    }
+		removerConstraintAcesso();
 
-    private void enviarEmailAcesso(String email, String senha) {
-        StringBuilder msg = new StringBuilder();
-        msg.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b><br/>")
-                .append("<b>Login: </b>").append(email).append("<br/>")
-                .append("<b>Senha: </b>").append(senha).append("<br/><br/>")
-                .append("Obrigado");
+		usuario = new Usuario();
+		usuario.setLogin(email);
 
-        try {
-            sendMailService.enviarEmailHtml(
-                    "Credencial Criada para acesso à plataforma Loja Virtual Bandampla!",
-                    msg.toString(),
-                    email);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+		String senha = "" + Calendar.getInstance().getTimeInMillis();
+		usuario.setSenha(new BCryptPasswordEncoder().encode(senha));
+
+		usuario.setCreateAt(Calendar.getInstance().getTime());
+		usuario.setUpdateAt(Calendar.getInstance().getTime());
+		usuario.setEmpresa(empresa);
+		usuario.setPessoa((Pessoa) pessoa);
+
+		usuario = usuarioRepository.save(usuario);
+		usuarioRepository.insereAcessoUser(usuario.getId(), role.name());
+
+		enviarEmailAcesso(email, senha);
+	}
+
+	private void removerConstraintAcesso() {
+		String constraint = usuarioRepository.consultaConstraintAcesso();
+		if (constraint != null) {
+			jdbcTemplate.execute("begin; ALTER TABLE usuario_acesso DROP CONSTRAINT " + constraint + "; commit");
+		}
+	}
+
+	private void enviarEmailAcesso(String email, String senha) {
+		StringBuilder msg = new StringBuilder();
+		msg.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b><br/>").append("<b>Login: </b>")
+				.append(email).append("<br/>").append("<b>Senha: </b>").append(senha).append("<br/><br/>")
+				.append("Obrigado");
+
+		try {
+			sendMailService.enviarEmailHtml("Credencial Criada para acesso à plataforma Loja Virtual Bandampla!",
+					msg.toString(), email);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

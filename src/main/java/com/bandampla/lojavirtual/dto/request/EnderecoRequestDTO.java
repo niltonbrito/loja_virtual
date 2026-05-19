@@ -12,6 +12,7 @@ import javax.validation.constraints.NotBlank;
  */
 public class EnderecoRequestDTO {
 
+    private Long id;
     @NotBlank
     private String rua;
 
@@ -35,6 +36,13 @@ public class EnderecoRequestDTO {
     @NotBlank
     private String tipoEndereco;
     
+    
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
 	public String getRua() {
 		return rua;
 	}
