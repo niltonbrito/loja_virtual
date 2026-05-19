@@ -18,52 +18,60 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.bandampla.lojavirtual.service.ImplementacaoUserDetailsService;
 
-/**
- * @author: Nilton Brito
- * @Email: <nilton.brito@outlook.com>
- * @Data: 27 de abr. de 2026
- */
-
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class WebConfigSecurity extends WebSecurityConfigurerAdapter implements HttpSessionListener {
 
-	@Autowired
-	private ImplementacaoUserDetailsService implementacaoUserDetailsService;
+    @Autowired
+    private ImplementacaoUserDetailsService implementacaoUserDetailsService;
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).disable().authorizeRequests()
-				.antMatchers("/").permitAll().antMatchers("/index").permitAll().antMatchers(HttpMethod.OPTIONS, "/**")
-				.permitAll()
+    @Autowired
+    private JWTTokenAutenticacaoService jwtTokenAutenticacaoService;
 
-				/* Redireciona ou da um retorno para o index quando deloga do sistema */
-				.anyRequest().authenticated().and().logout().logoutSuccessUrl("/index")
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
 
-				/* Mapeia o logout do sistema */
-				.logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+        http.csrf()
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .disable()
 
-				/* Filtra as requisiçoes para o login de JWT */
-				.and()
-				.addFilterAfter(new JWTLoginFilter("/login", authenticationManager()),
-						UsernamePasswordAuthenticationFilter.class)
-				.addFilterBefore(new JwtApiAuntenticacaoFilter(), UsernamePasswordAuthenticationFilter.class);
-	}
+                .authorizeRequests()
+                .antMatchers("/", "/index").permitAll()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-	/* Ignora algumas URL livres de autenticação */
-	@Override
-	public void configure(WebSecurity web) throws Exception {
+                // endpoint de login deve ser público
+                .antMatchers("/auth/login").permitAll()
 
-		// Ignorando as URL na Validação
-		// web.ignoring()
-		// .antMatchers(HttpMethod.GET, "/salvarAcesso", "/deletarAcesso")
-		// .antMatchers(HttpMethod.POST, "/salvarAcesso", "/deletarAcesso");
-	}
+                .anyRequest().authenticated()
 
-	/* Ira consultar o user no banco Spring Security */
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.userDetailsService(implementacaoUserDetailsService).passwordEncoder(new BCryptPasswordEncoder());
-	}
+                .and()
+                .logout()
+                .logoutSuccessUrl("/index")
+                .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+
+                .and()
+
+                /* Filtro de login usando DTO */
+                .addFilterBefore(
+                        new JWTLoginFilter("/auth/login", authenticationManager(), jwtTokenAutenticacaoService),
+                        UsernamePasswordAuthenticationFilter.class)
+
+                /* Filtro que valida o token em TODAS as requisições */
+                .addFilterBefore(
+                        new JwtApiAuntenticacaoFilter(jwtTokenAutenticacaoService),
+                        UsernamePasswordAuthenticationFilter.class);
+    }
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        // Aqui você pode liberar recursos estáticos se quiser
+        // web.ignoring().antMatchers("/css/**", "/js/**", "/img/**");
+    }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(implementacaoUserDetailsService)
+                .passwordEncoder(new BCryptPasswordEncoder());
+    }
 }

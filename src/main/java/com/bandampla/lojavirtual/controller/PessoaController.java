@@ -9,11 +9,14 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bandampla.lojavirtual.dto.request.CepDTO;
 import com.bandampla.lojavirtual.dto.request.PessoaFisicaRequestDTO;
 import com.bandampla.lojavirtual.dto.request.PessoaJuridicaRequestDTO;
 import com.bandampla.lojavirtual.dto.response.PessoaFisicaResponseDTO;
@@ -35,7 +38,7 @@ import com.bandampla.lojavirtual.service.PessoaUserService;
 public class PessoaController {
 
 	private final PessoaMapper pessoaMapper;
-	
+
 	@Autowired
 	private PessoaUserService pessoaUserService;
 
@@ -44,21 +47,27 @@ public class PessoaController {
 	}
 
 	@ResponseBody
-	@PostMapping("/pessoa/juridica")
-	public ResponseEntity<PessoaJuridicaResponseDTO> salvarPessoaJuridica(@Valid @RequestBody PessoaJuridicaRequestDTO dto)
-			throws ExceptionCustom {
+	@PostMapping(value = "/pessoa/juridica")
+	public ResponseEntity<PessoaJuridicaResponseDTO> salvarPessoaJuridica(
+			@Valid @RequestBody PessoaJuridicaRequestDTO dto) throws ExceptionCustom {
 
 		PessoaJuridica pj = pessoaUserService.salvarPessoaJuridica(dto);
-	    return ResponseEntity.ok(pessoaMapper.toResponse(pj));
+		return ResponseEntity.ok(pessoaMapper.toResponse(pj));
 	}
 
-	@PostMapping("/pessoa/fisica")
-	public ResponseEntity<PessoaFisicaResponseDTO> salvarPessoaFisica(
-	        @Valid @RequestBody PessoaFisicaRequestDTO dto) throws ExceptionCustom {
+	@ResponseBody
+	@PostMapping(value = "/pessoa/fisica")
+	public ResponseEntity<PessoaFisicaResponseDTO> salvarPessoaFisica(@Valid @RequestBody PessoaFisicaRequestDTO dto)
+			throws ExceptionCustom {
 
-	    PessoaFisica pf = pessoaUserService.salvarPessoaFisica(dto);
-	    return ResponseEntity.ok(pessoaMapper.toResponse(pf));
+		PessoaFisica pf = pessoaUserService.salvarPessoaFisica(dto);
+		return ResponseEntity.ok(pessoaMapper.toResponse(pf));
 	}
 
+	@ResponseBody
+	@GetMapping(value = "/consulta/cep/{cep}")
+	public ResponseEntity<CepDTO> consultaCep(@PathVariable("cep") String cep) throws ExceptionCustom {
+		return ResponseEntity.ok(pessoaUserService.consultaCep(cep));
+	}
 
 }

@@ -12,37 +12,23 @@ import org.springframework.stereotype.Service;
 import com.bandampla.lojavirtual.model.Usuario;
 import com.bandampla.lojavirtual.repository.UsuarioRepository;
 
-/**
- * @author: Nilton Brito
- * @Email: <nilton.brito@outlook.com>
- * @Data: 1 de mai. de 2026
- */
-
 @Service
 public class ImplementacaoUserDetailsService implements UserDetailsService {
 
-	@Autowired
-	UsuarioRepository usuarioRepository;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-		//Usuario usuario = usuarioRepository.findUserByLogin(username);
+        Optional<Usuario> optUsuario = usuarioRepository.findByLogin(username);
 
-		Optional<Usuario> optUsuario = usuarioRepository.findByLogin(username);
-		Usuario usuarioOpt = optUsuario.get();
-		if (optUsuario.isEmpty()) {
-			throw new UsernameNotFoundException("Não achei este usuario Usuário" + usuarioOpt.getUsername() + " "
-					+ usuarioOpt.getPassword() + " " + usuarioOpt.getAuthorities());
-		}
-		
-		return new User(usuarioOpt.getUsername(), usuarioOpt.getPassword(), usuarioOpt.getAuthorities());
-/*
-		if (usuario == null) {
-			throw new UsernameNotFoundException("Usuário não encontrado");
-		}
+        if (!optUsuario.isPresent()) {
+            throw new UsernameNotFoundException("Usuário não encontrado");
+        }
 
-		return new User(usuario.getUsername(), usuario.getPassword(), usuario.getAuthorities());*/
-	}
+        Usuario usuario = optUsuario.get();
 
+        return new User(usuario.getUsername(), usuario.getPassword(), usuario.getAuthorities());
+    }
 }

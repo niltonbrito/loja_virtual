@@ -6,6 +6,8 @@ package com.bandampla.lojavirtual.dto.response;
 import java.util.Date;
 import java.util.List;
 
+import com.bandampla.lojavirtual.enums.RoleUser;
+
 /**
  * @author: Nilton Brito 
  * @Email:  <nilton.brito@outlook.com>
@@ -24,7 +26,7 @@ public class UsuarioResponseDTO {
     private Long empresaId;
     private String empresaNomeFantasia;
 
-    private List<String> acessos;
+    private List<RoleUser> acessos;
 
 	public Long getId() {
 		return id;
@@ -90,11 +92,11 @@ public class UsuarioResponseDTO {
 		this.empresaNomeFantasia = empresaNomeFantasia;
 	}
 
-	public List<String> getAcessos() {
+	public List<RoleUser> getAcessos() {
 		return acessos;
 	}
 
-	public void setAcessos(List<String> acessos) {
+	public void setAcessos(List<RoleUser> acessos) {
 		this.acessos = acessos;
 	}
 }

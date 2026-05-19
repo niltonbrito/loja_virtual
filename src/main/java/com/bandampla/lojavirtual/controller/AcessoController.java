@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Acesso;
 import com.bandampla.lojavirtual.service.AcessoService;
@@ -31,7 +32,7 @@ import com.bandampla.lojavirtual.service.AcessoService;
 @Controller
 @RestController(value = "acesso")
 public class AcessoController {
-
+/*
 	@Autowired
 	private AcessoService acessoService;
 
@@ -64,9 +65,9 @@ public class AcessoController {
 	}
 
 	@ResponseBody
-	@GetMapping(value = "/buscarPorDescricao/{desc}")
-	public ResponseEntity<List<Acesso>> buscarPorDescricao(@PathVariable String desc) {
-		List<Acesso> acesso = acessoService.buscarPorDescricao(desc.toUpperCase());
-		return new ResponseEntity<List<Acesso>>(acesso, HttpStatus.OK);
-	}
+	@GetMapping(value = "/buscarPorRole/{role}")
+	public ResponseEntity<List<Acesso>> buscarPorRole(@PathVariable("role") RoleUser role) {
+	    return new ResponseEntity<>(acessoService.buscarPorRole(role), HttpStatus.OK);
+	}*/
+
 }

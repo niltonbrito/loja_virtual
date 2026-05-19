@@ -16,64 +16,61 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.bandampla.lojavirtual.model.Usuario;
+import com.bandampla.lojavirtual.dto.request.UsuarioLoginRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-/**
- * @author: Nilton Brito
- * @Email: <nilton.brito@outlook.com>
- * @Data: 2 de mai. de 2026
- */
 
 public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 
-	/**
-	 * Configurando o gerenciador de autenticação
-	 */
-	public JWTLoginFilter(String url, AuthenticationManager authenticationManager) {
-		/* Obriga a autenticar a URL */
-		super(new AntPathRequestMatcher(url));
+    private final JWTTokenAutenticacaoService jwtTokenAutenticacaoService;
 
-		/* Gerenciador de autenticação */
-		setAuthenticationManager(authenticationManager);
-	}
+    public JWTLoginFilter(String url,
+                          AuthenticationManager authenticationManager,
+                          JWTTokenAutenticacaoService jwtTokenAutenticacaoService) {
 
-	/* Retorna o usuário ao procesar a autenticação */
-	@Override
-	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
-			throws AuthenticationException, IOException, ServletException {
+        super(new AntPathRequestMatcher(url));
+        setAuthenticationManager(authenticationManager);
+        this.jwtTokenAutenticacaoService = jwtTokenAutenticacaoService;
+    }
 
-		/* Obter o usuário */
-		Usuario user = new ObjectMapper().readValue(request.getInputStream(), Usuario.class);
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
+            throws AuthenticationException, IOException, ServletException {
 
-		/* Retorna o user com login e senha */
-		return getAuthenticationManager()
-				.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-	}
+        UsuarioLoginRequestDTO loginDTO = new ObjectMapper()
+                .readValue(request.getInputStream(), UsuarioLoginRequestDTO.class);
 
-	@Override
-	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-			Authentication authResult) throws IOException, ServletException {
+        UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(loginDTO.getLogin(), loginDTO.getSenha());
 
-		try {
-			new JWTTokenAutenticacaoService().addAuthentication(response, authResult.getName());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	@Override
-	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-			AuthenticationException failed) throws IOException, ServletException {
+        return getAuthenticationManager().authenticate(authToken);
+    }
 
-		if (failed instanceof BadCredentialsException) {
-			response.getWriter().write("Usuário e senha não encontrado.");
-		}else if (failed instanceof InternalAuthenticationServiceException) {
-			response.getWriter().write("Usuário ou senha não encontrado.");
-		}else {
-			response.getWriter().write("Falha ao logar: "+failed.getMessage());
-		}
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authResult) throws IOException, ServletException {
 
-		//super.unsuccessfulAuthentication(request, response, failed);
-	}
+        try {
+            jwtTokenAutenticacaoService.addAuthentication(response, authResult.getName());
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.getWriter().write("Erro ao gerar token: " + e.getMessage());
+        }
+    }
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request,
+                                              HttpServletResponse response,
+                                              AuthenticationException failed)
+            throws IOException, ServletException {
+
+        if (failed instanceof BadCredentialsException) {
+            response.getWriter().write("Usuário ou senha inválidos.");
+        } else if (failed instanceof InternalAuthenticationServiceException) {
+            response.getWriter().write("Usuário ou senha não encontrados.");
+        } else {
+            response.getWriter().write("Falha ao logar: " + failed.getMessage());
+        }
+    }
 }

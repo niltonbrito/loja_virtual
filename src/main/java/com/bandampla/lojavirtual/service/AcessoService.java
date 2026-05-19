@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Acesso;
 import com.bandampla.lojavirtual.repository.AcessoRepository;
@@ -20,16 +21,16 @@ import com.bandampla.lojavirtual.repository.AcessoRepository;
 
 @Service
 public class AcessoService {
-
+/*
 	@Autowired
 	private AcessoRepository acessoRepository;
 
-	public Acesso save(Acesso acesso) throws ExceptionCustom {
+	public Acesso save(RoleUser roleUser) throws ExceptionCustom {
 
 		if (acesso.getId() == null) {
-			List<Acesso> acessos = acessoRepository.buscarAcessoDesc(acesso.getDescricao().toUpperCase());
+			List<Acesso> acessos = acessoRepository.findByRoleUser(roleUser);
 			if (!acessos.isEmpty()) {
-				throw new ExceptionCustom("Já existe Acesso com a descrição: " + acesso.getDescricao());
+				throw new ExceptionCustom("Já existe Acesso com a descrição: " + acesso.getRoleUser());
 			}
 		}
 		return acessoRepository.save(acesso);
@@ -52,7 +53,8 @@ public class AcessoService {
 		return acesso;
 	}
 
-	public List<Acesso> buscarPorDescricao(String desc) {
-		return acessoRepository.buscarAcessoDesc(desc);
-	}
+	public List<Acesso> buscarPorRole(RoleUser roleUser) {
+	    return acessoRepository.findByRoleUser(roleUser);
+	}*/
+
 }

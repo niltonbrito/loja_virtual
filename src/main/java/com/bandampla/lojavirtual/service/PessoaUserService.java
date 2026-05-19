@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import com.bandampla.lojavirtual.dto.request.CepDTO;
 import com.bandampla.lojavirtual.dto.request.PessoaFisicaRequestDTO;
 import com.bandampla.lojavirtual.dto.request.PessoaJuridicaRequestDTO;
 import com.bandampla.lojavirtual.enums.RoleUser;
@@ -121,6 +123,10 @@ public class PessoaUserService {
 
         return pf;
     }
+    
+    public CepDTO consultaCep(String cep) {    	
+    	return new RestTemplate().getForEntity("https://viacep.com.br/ws/"+ cep+ "/json/", CepDTO.class).getBody();
+	}
 
     // ============================================================
     // MÉTODOS PRIVADOS
@@ -151,7 +157,7 @@ public class PessoaUserService {
         usuario.setPessoa((Pessoa) pessoa);
 
         usuario = usuarioRepository.save(usuario);
-        usuarioRepository.insereAcessoUser(usuario.getId(), role.toString());
+        usuarioRepository.insereAcessoUser(usuario.getId(), role);
 
         enviarEmailAcesso(email, senha);
     }
