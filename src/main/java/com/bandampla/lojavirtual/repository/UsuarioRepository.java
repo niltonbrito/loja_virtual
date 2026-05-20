@@ -41,7 +41,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 	@Transactional
 	@Modifying
 	@Query(value = "INSERT INTO usuario_acesso(usuario_id, acesso_id)VALUES (?1, (SELECT id FROM acesso WHERE role_user = ?2))", nativeQuery = true)
-	void insereAcessoUser(Long idUser, String roleUser);
+	void insereAcessoUser(Long idUser, RoleUser roleUser);
 
 	@Query(value = "SELECT u.* FROM usuario u WHERE u.update_at <= current_date - 90", nativeQuery = true)
 	List<Usuario> usuarioSenhaVencida();

@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.bandampla.lojavirtual.controller.AcessoController;
+import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Acesso;
 import com.bandampla.lojavirtual.repository.AcessoRepository;
@@ -43,7 +44,7 @@ class LojaVirtualApplicationTests extends TestCase {
 		MockMvc mockMvc = builder.build();
 
 		Acesso acesso = new Acesso();
-		acesso.setDescricao("ROLE_COMPRADOR" + Calendar.getInstance().getTimeInMillis());
+		acesso.getRoleUser(RoleUser.ROLE_ADMIN.toString());
 
 		ObjectMapper objectMapperAcesso = new ObjectMapper();
 

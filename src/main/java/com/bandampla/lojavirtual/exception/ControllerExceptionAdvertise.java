@@ -57,7 +57,7 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
         } else if (ex instanceof HttpMessageNotReadableException) {
             msg = "Não está sendo enviado dados para o BODY corpo da requisição";
         } else if (ex instanceof IllegalArgumentException) {
-            msg = "Não está sendo enviado dados para o BODY corpo da requisição";
+            msg = "?";
         } else {
             msg = ex.getMessage();
         }
