@@ -1,0 +1,1715 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.5.25
+-- Dumped by pg_dump version 9.5.25
+
+-- Started on 2026-05-20 20:31:57
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+ALTER TABLE ONLY public.status_rastreio DROP CONSTRAINT venda_compra_loja_virtual_fk;
+ALTER TABLE ONLY public.nota_fiscal_venda DROP CONSTRAINT venda_compra_loja_virtual_fk;
+ALTER TABLE ONLY public.item_venda_loja DROP CONSTRAINT venda_compra_loja_virtual_fk;
+ALTER TABLE ONLY public.usuario_acesso DROP CONSTRAINT usuario_fk;
+ALTER TABLE ONLY public.nota_item_produto DROP CONSTRAINT produto_fk;
+ALTER TABLE ONLY public.item_venda_loja DROP CONSTRAINT produto_fk;
+ALTER TABLE ONLY public.imagem_produto DROP CONSTRAINT produto_fk;
+ALTER TABLE ONLY public.avaliacao_produto DROP CONSTRAINT produto_fk;
+ALTER TABLE ONLY public.produto DROP CONSTRAINT notaitemproduto_fk;
+ALTER TABLE ONLY public.venda_compra_loja_virtual DROP CONSTRAINT nota_fiscal_venda_fk;
+ALTER TABLE ONLY public.nota_item_produto DROP CONSTRAINT nota_fiscal_compra_fk;
+ALTER TABLE ONLY public.venda_compra_loja_virtual DROP CONSTRAINT forma_pagamento_fk;
+ALTER TABLE ONLY public.venda_compra_loja_virtual DROP CONSTRAINT endereco_entrega_fk;
+ALTER TABLE ONLY public.venda_compra_loja_virtual DROP CONSTRAINT endereco_cobranca_fk;
+ALTER TABLE ONLY public.venda_compra_loja_virtual DROP CONSTRAINT cupom_desconto_fk;
+ALTER TABLE ONLY public.nota_fiscal_compra DROP CONSTRAINT conta_pagar_fk;
+ALTER TABLE ONLY public.usuario_acesso DROP CONSTRAINT acesso_fk;
+DROP INDEX public.flyway_schema_history_s_idx;
+ALTER TABLE ONLY public.venda_compra_loja_virtual DROP CONSTRAINT venda_compra_loja_virtual_pkey;
+ALTER TABLE ONLY public.usuario DROP CONSTRAINT usuario_pkey;
+ALTER TABLE ONLY public.usuario_acesso DROP CONSTRAINT unique_acesso_user;
+ALTER TABLE ONLY public.pessoa_juridica DROP CONSTRAINT uk_t9fugaodr2k9s1btuuk6xes0f;
+ALTER TABLE ONLY public.usuario DROP CONSTRAINT uk_pm3f4m4fqv89oeeeac4tbe2f4;
+ALTER TABLE ONLY public.pessoa_fisica DROP CONSTRAINT uk_p3d8co8s4y5h7y18fpqco1wv6;
+ALTER TABLE ONLY public.pessoa_juridica DROP CONSTRAINT uk_heb6e9tra429iv2tcpfkiq9iy;
+ALTER TABLE ONLY public.pessoa_fisica DROP CONSTRAINT uk_d70aayxv20yf3y8kofcx7fhbg;
+ALTER TABLE ONLY public.pessoa_juridica DROP CONSTRAINT uk_6f8dnvy9aakthuofgyrj66lyf;
+ALTER TABLE ONLY public.pessoa_juridica DROP CONSTRAINT uk_3h78rtw3ei11cb43k77af5nhl;
+ALTER TABLE ONLY public.status_rastreio DROP CONSTRAINT status_rastreio_pkey;
+ALTER TABLE ONLY public.produto DROP CONSTRAINT produto_pkey;
+ALTER TABLE ONLY public.pessoa_juridica DROP CONSTRAINT pessoa_juridica_pkey;
+ALTER TABLE ONLY public.pessoa_fisica DROP CONSTRAINT pessoa_fisica_pkey;
+ALTER TABLE ONLY public.nota_item_produto DROP CONSTRAINT nota_item_produto_pkey;
+ALTER TABLE ONLY public.nota_fiscal_venda DROP CONSTRAINT nota_fiscal_venda_pkey;
+ALTER TABLE ONLY public.nota_fiscal_compra DROP CONSTRAINT nota_fiscal_compra_pkey;
+ALTER TABLE ONLY public.marca_produto DROP CONSTRAINT marca_produto_pkey;
+ALTER TABLE ONLY public.item_venda_loja DROP CONSTRAINT item_venda_loja_pkey;
+ALTER TABLE ONLY public.imagem_produto DROP CONSTRAINT imagem_produto_pkey;
+ALTER TABLE ONLY public.forma_pagamento DROP CONSTRAINT forma_pagamento_pkey;
+ALTER TABLE ONLY public.flyway_schema_history DROP CONSTRAINT flyway_schema_history_pk;
+ALTER TABLE ONLY public.endereco DROP CONSTRAINT endereco_pkey;
+ALTER TABLE ONLY public.cupom_desconto DROP CONSTRAINT cupom_desconto_pkey;
+ALTER TABLE ONLY public.conta_receber DROP CONSTRAINT conta_receber_pkey;
+ALTER TABLE ONLY public.conta_pagar DROP CONSTRAINT conta_pagar_pkey;
+ALTER TABLE ONLY public.categoria_produto DROP CONSTRAINT categoria_produto_pkey;
+ALTER TABLE ONLY public.avaliacao_produto DROP CONSTRAINT avaliacao_produto_pkey;
+ALTER TABLE ONLY public.acesso DROP CONSTRAINT acesso_pkey;
+DROP TABLE public.venda_compra_loja_virtual;
+DROP TABLE public.usuario_acesso;
+DROP TABLE public.usuario;
+DROP TABLE public.status_rastreio;
+DROP SEQUENCE public.seq_venda_compra_loja_virtual;
+DROP SEQUENCE public.seq_usuario;
+DROP SEQUENCE public.seq_status_rastreio;
+DROP SEQUENCE public.seq_produto;
+DROP SEQUENCE public.seq_pessoa;
+DROP SEQUENCE public.seq_nota_item_produto;
+DROP SEQUENCE public.seq_nota_fiscal_venda;
+DROP SEQUENCE public.seq_nota_fiscal_compra;
+DROP SEQUENCE public.seq_marca_produto;
+DROP SEQUENCE public.seq_item_venda_loja;
+DROP SEQUENCE public.seq_imagem_produto;
+DROP SEQUENCE public.seq_forma_pagamento;
+DROP SEQUENCE public.seq_endereco;
+DROP SEQUENCE public.seq_cupom_desconto;
+DROP SEQUENCE public.seq_conta_receber;
+DROP SEQUENCE public.seq_conta_pagar;
+DROP SEQUENCE public.seq_categoria_produto;
+DROP SEQUENCE public.seq_avaliacao_produto;
+DROP SEQUENCE public.seq_acesso;
+DROP TABLE public.produto;
+DROP TABLE public.pessoa_juridica;
+DROP TABLE public.pessoa_fisica;
+DROP TABLE public.nota_item_produto;
+DROP TABLE public.nota_fiscal_venda;
+DROP TABLE public.nota_fiscal_compra;
+DROP TABLE public.marca_produto;
+DROP TABLE public.item_venda_loja;
+DROP TABLE public.imagem_produto;
+DROP TABLE public.forma_pagamento;
+DROP TABLE public.flyway_schema_history;
+DROP TABLE public.endereco;
+DROP TABLE public.cupom_desconto;
+DROP TABLE public.conta_receber;
+DROP TABLE public.conta_pagar;
+DROP TABLE public.categoria_produto;
+DROP TABLE public.avaliacao_produto;
+DROP TABLE public.acesso;
+DROP FUNCTION public.validachavepessoafornecedor();
+DROP FUNCTION public.validachavepessoa();
+DROP EXTENSION plpgsql;
+DROP SCHEMA public;
+--
+-- TOC entry 6 (class 2615 OID 2200)
+-- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
+--
+
+CREATE SCHEMA public;
+
+
+ALTER SCHEMA public OWNER TO postgres;
+
+--
+-- TOC entry 2354 (class 0 OID 0)
+-- Dependencies: 6
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
+--
+
+COMMENT ON SCHEMA public IS 'standard public schema';
+
+
+--
+-- TOC entry 1 (class 3079 OID 12355)
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- TOC entry 2356 (class 0 OID 0)
+-- Dependencies: 1
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
+
+--
+-- TOC entry 234 (class 1255 OID 18153)
+-- Name: validachavepessoa(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.validachavepessoa() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    existe INTEGER;
+BEGIN
+    existe = (SELECT COUNT(1) FROM pessoa_fisica WHERE id = NEW.pessoa_id);
+    IF (existe <= 0) THEN
+        existe = (SELECT COUNT(1) FROM pessoa_juridica WHERE id = NEW.pessoa_id);
+        IF (existe <= 0) THEN
+            RAISE EXCEPTION 'Não foi encontrado o ID e PK da pessoa para realizar a associação do cadastro';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.validachavepessoa() OWNER TO postgres;
+
+--
+-- TOC entry 235 (class 1255 OID 18154)
+-- Name: validachavepessoafornecedor(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.validachavepessoafornecedor() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    existe INTEGER;
+BEGIN
+    existe = (SELECT COUNT(1) FROM pessoa_fisica WHERE id = NEW.pessoa_fornecedor_id);
+    IF (existe <= 0) THEN
+        existe = (SELECT COUNT(1) FROM pessoa_juridica WHERE id = NEW.pessoa_fornecedor_id);
+        IF (existe <= 0) THEN
+            RAISE EXCEPTION 'Não foi encontrado o ID e PK da pessoa para realizar a associação do cadastro';
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+
+ALTER FUNCTION public.validachavepessoafornecedor() OWNER TO postgres;
+
+SET default_tablespace = '';
+
+SET default_with_oids = false;
+
+--
+-- TOC entry 181 (class 1259 OID 17830)
+-- Name: acesso; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.acesso (
+    id bigint NOT NULL,
+    role_user character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public.acesso OWNER TO postgres;
+
+--
+-- TOC entry 182 (class 1259 OID 17835)
+-- Name: avaliacao_produto; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.avaliacao_produto (
+    id bigint NOT NULL,
+    descricao character varying(255) NOT NULL,
+    nota integer NOT NULL,
+    empresa_id bigint NOT NULL,
+    pessoa_id bigint NOT NULL,
+    produto_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.avaliacao_produto OWNER TO postgres;
+
+--
+-- TOC entry 183 (class 1259 OID 17840)
+-- Name: categoria_produto; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.categoria_produto (
+    id bigint NOT NULL,
+    nome_descricao character varying(255) NOT NULL,
+    empresa_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.categoria_produto OWNER TO postgres;
+
+--
+-- TOC entry 184 (class 1259 OID 17845)
+-- Name: conta_pagar; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.conta_pagar (
+    id bigint NOT NULL,
+    data_pagamento date,
+    data_vencimento date NOT NULL,
+    descricao character varying(255) NOT NULL,
+    status character varying(255) NOT NULL,
+    valor_desconto numeric(19,2),
+    valor_total numeric(19,2) NOT NULL,
+    empresa_id bigint NOT NULL,
+    pessoa_id bigint NOT NULL,
+    pessoa_fornecedor_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.conta_pagar OWNER TO postgres;
+
+--
+-- TOC entry 185 (class 1259 OID 17853)
+-- Name: conta_receber; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.conta_receber (
+    id bigint NOT NULL,
+    data_pagamento date,
+    data_vencimento date NOT NULL,
+    descricao character varying(255) NOT NULL,
+    status character varying(255) NOT NULL,
+    valor_desconto numeric(19,2),
+    valor_total numeric(19,2) NOT NULL,
+    empresa_id bigint NOT NULL,
+    pessoa_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.conta_receber OWNER TO postgres;
+
+--
+-- TOC entry 186 (class 1259 OID 17861)
+-- Name: cupom_desconto; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.cupom_desconto (
+    id bigint NOT NULL,
+    codigo_descricao character varying(255) NOT NULL,
+    data_validade date NOT NULL,
+    valor_porcentagem_desconto numeric(19,2),
+    valor_real_desconto numeric(19,2),
+    empresa_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.cupom_desconto OWNER TO postgres;
+
+--
+-- TOC entry 187 (class 1259 OID 17866)
+-- Name: endereco; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.endereco (
+    id bigint NOT NULL,
+    bairro character varying(255) NOT NULL,
+    cep character varying(255) NOT NULL,
+    cidade character varying(255) NOT NULL,
+    complemento character varying(255),
+    numero character varying(255) NOT NULL,
+    rua character varying(255) NOT NULL,
+    tipo_endereco character varying(255) NOT NULL,
+    uf character varying(255) NOT NULL,
+    empresa_id bigint NOT NULL,
+    pessoa_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.endereco OWNER TO postgres;
+
+--
+-- TOC entry 221 (class 1259 OID 18143)
+-- Name: flyway_schema_history; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.flyway_schema_history (
+    installed_rank integer NOT NULL,
+    version character varying(50),
+    description character varying(200) NOT NULL,
+    type character varying(20) NOT NULL,
+    script character varying(1000) NOT NULL,
+    checksum integer,
+    installed_by character varying(100) NOT NULL,
+    installed_on timestamp without time zone DEFAULT now() NOT NULL,
+    execution_time integer NOT NULL,
+    success boolean NOT NULL
+);
+
+
+ALTER TABLE public.flyway_schema_history OWNER TO postgres;
+
+--
+-- TOC entry 188 (class 1259 OID 17874)
+-- Name: forma_pagamento; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.forma_pagamento (
+    id bigint NOT NULL,
+    descricao character varying(255) NOT NULL,
+    tipo_pagamento character varying(255) NOT NULL,
+    empresa_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.forma_pagamento OWNER TO postgres;
+
+--
+-- TOC entry 189 (class 1259 OID 17882)
+-- Name: imagem_produto; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.imagem_produto (
+    id bigint NOT NULL,
+    imagem_miniatura text NOT NULL,
+    imagem_original text NOT NULL,
+    empresa_id bigint NOT NULL,
+    produto_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.imagem_produto OWNER TO postgres;
+
+--
+-- TOC entry 190 (class 1259 OID 17890)
+-- Name: item_venda_loja; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.item_venda_loja (
+    id bigint NOT NULL,
+    quantidade double precision NOT NULL,
+    empresa_id bigint NOT NULL,
+    produto_id bigint NOT NULL,
+    venda_compra_loja_virtual_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.item_venda_loja OWNER TO postgres;
+
+--
+-- TOC entry 191 (class 1259 OID 17895)
+-- Name: marca_produto; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.marca_produto (
+    id bigint NOT NULL,
+    nome_descricao character varying(255) NOT NULL,
+    empresa_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.marca_produto OWNER TO postgres;
+
+--
+-- TOC entry 192 (class 1259 OID 17900)
+-- Name: nota_fiscal_compra; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.nota_fiscal_compra (
+    id bigint NOT NULL,
+    data_compra date NOT NULL,
+    descricao_observacao character varying(255),
+    numero_nota character varying(255) NOT NULL,
+    serie_nota character varying(255) NOT NULL,
+    valor_desconto numeric(19,2),
+    valor_icms numeric(19,2) NOT NULL,
+    valor_total numeric(19,2) NOT NULL,
+    conta_pagar_id bigint NOT NULL,
+    empresa_id bigint NOT NULL,
+    pessoa_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.nota_fiscal_compra OWNER TO postgres;
+
+--
+-- TOC entry 193 (class 1259 OID 17908)
+-- Name: nota_fiscal_venda; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.nota_fiscal_venda (
+    id bigint NOT NULL,
+    descricao character varying(255) NOT NULL,
+    numero_nota character varying(255) NOT NULL,
+    pdf text NOT NULL,
+    serie_nota character varying(255) NOT NULL,
+    tipo character varying(255) NOT NULL,
+    valor_desconto double precision,
+    valor_icms double precision NOT NULL,
+    valor_total double precision NOT NULL,
+    xml text NOT NULL,
+    empresa_id bigint NOT NULL,
+    venda_compra_loja_virtual_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.nota_fiscal_venda OWNER TO postgres;
+
+--
+-- TOC entry 194 (class 1259 OID 17916)
+-- Name: nota_item_produto; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.nota_item_produto (
+    id bigint NOT NULL,
+    quantidade double precision NOT NULL,
+    empresa_id bigint NOT NULL,
+    nota_fiscal_compra_id bigint NOT NULL,
+    produto_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.nota_item_produto OWNER TO postgres;
+
+--
+-- TOC entry 195 (class 1259 OID 17921)
+-- Name: pessoa_fisica; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.pessoa_fisica (
+    id bigint NOT NULL,
+    email character varying(255) NOT NULL,
+    nome character varying(255) NOT NULL,
+    telefone character varying(255) NOT NULL,
+    tipo_pessoa character varying(255),
+    empresa_id bigint,
+    cpf character varying(255) NOT NULL,
+    data_nascimento date
+);
+
+
+ALTER TABLE public.pessoa_fisica OWNER TO postgres;
+
+--
+-- TOC entry 196 (class 1259 OID 17929)
+-- Name: pessoa_juridica; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.pessoa_juridica (
+    id bigint NOT NULL,
+    email character varying(255) NOT NULL,
+    nome character varying(255) NOT NULL,
+    telefone character varying(255) NOT NULL,
+    tipo_pessoa character varying(255),
+    empresa_id bigint,
+    categoria character varying(255),
+    cnpj character varying(255) NOT NULL,
+    inscricao_estadual character varying(255),
+    inscricao_municipal character varying(255),
+    nome_fantasia character varying(255) NOT NULL,
+    razao_social character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public.pessoa_juridica OWNER TO postgres;
+
+--
+-- TOC entry 197 (class 1259 OID 17937)
+-- Name: produto; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.produto (
+    id bigint NOT NULL,
+    alerta_estoque boolean,
+    altura double precision NOT NULL,
+    ativo boolean NOT NULL,
+    descricao text NOT NULL,
+    largura double precision NOT NULL,
+    link_youtube character varying(255),
+    nome character varying(255) NOT NULL,
+    peso double precision NOT NULL,
+    profundidade double precision NOT NULL,
+    qtd_click_produto integer,
+    qtd_estoque integer NOT NULL,
+    qtd_estoque_minimo integer,
+    tipo_unidade character varying(255) NOT NULL,
+    valor_venda numeric(19,2) NOT NULL,
+    empresa_id bigint NOT NULL,
+    nota_item_produto_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.produto OWNER TO postgres;
+
+--
+-- TOC entry 202 (class 1259 OID 17987)
+-- Name: seq_acesso; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_acesso
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_acesso OWNER TO postgres;
+
+--
+-- TOC entry 203 (class 1259 OID 17989)
+-- Name: seq_avaliacao_produto; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_avaliacao_produto
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_avaliacao_produto OWNER TO postgres;
+
+--
+-- TOC entry 204 (class 1259 OID 17991)
+-- Name: seq_categoria_produto; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_categoria_produto
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_categoria_produto OWNER TO postgres;
+
+--
+-- TOC entry 205 (class 1259 OID 17993)
+-- Name: seq_conta_pagar; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_conta_pagar
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_conta_pagar OWNER TO postgres;
+
+--
+-- TOC entry 206 (class 1259 OID 17995)
+-- Name: seq_conta_receber; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_conta_receber
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_conta_receber OWNER TO postgres;
+
+--
+-- TOC entry 207 (class 1259 OID 17997)
+-- Name: seq_cupom_desconto; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_cupom_desconto
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_cupom_desconto OWNER TO postgres;
+
+--
+-- TOC entry 208 (class 1259 OID 17999)
+-- Name: seq_endereco; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_endereco
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_endereco OWNER TO postgres;
+
+--
+-- TOC entry 209 (class 1259 OID 18001)
+-- Name: seq_forma_pagamento; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_forma_pagamento
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_forma_pagamento OWNER TO postgres;
+
+--
+-- TOC entry 210 (class 1259 OID 18003)
+-- Name: seq_imagem_produto; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_imagem_produto
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_imagem_produto OWNER TO postgres;
+
+--
+-- TOC entry 211 (class 1259 OID 18005)
+-- Name: seq_item_venda_loja; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_item_venda_loja
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_item_venda_loja OWNER TO postgres;
+
+--
+-- TOC entry 212 (class 1259 OID 18007)
+-- Name: seq_marca_produto; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_marca_produto
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_marca_produto OWNER TO postgres;
+
+--
+-- TOC entry 213 (class 1259 OID 18009)
+-- Name: seq_nota_fiscal_compra; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_nota_fiscal_compra
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_nota_fiscal_compra OWNER TO postgres;
+
+--
+-- TOC entry 214 (class 1259 OID 18011)
+-- Name: seq_nota_fiscal_venda; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_nota_fiscal_venda
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_nota_fiscal_venda OWNER TO postgres;
+
+--
+-- TOC entry 215 (class 1259 OID 18013)
+-- Name: seq_nota_item_produto; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_nota_item_produto
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_nota_item_produto OWNER TO postgres;
+
+--
+-- TOC entry 216 (class 1259 OID 18015)
+-- Name: seq_pessoa; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_pessoa
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_pessoa OWNER TO postgres;
+
+--
+-- TOC entry 217 (class 1259 OID 18017)
+-- Name: seq_produto; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_produto
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_produto OWNER TO postgres;
+
+--
+-- TOC entry 218 (class 1259 OID 18019)
+-- Name: seq_status_rastreio; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_status_rastreio
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_status_rastreio OWNER TO postgres;
+
+--
+-- TOC entry 219 (class 1259 OID 18021)
+-- Name: seq_usuario; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_usuario
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_usuario OWNER TO postgres;
+
+--
+-- TOC entry 220 (class 1259 OID 18023)
+-- Name: seq_venda_compra_loja_virtual; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.seq_venda_compra_loja_virtual
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.seq_venda_compra_loja_virtual OWNER TO postgres;
+
+--
+-- TOC entry 198 (class 1259 OID 17945)
+-- Name: status_rastreio; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.status_rastreio (
+    id bigint NOT NULL,
+    centro_distribuicao character varying(255),
+    cidade character varying(255),
+    codigo character varying(255),
+    estado character varying(255),
+    status character varying(255),
+    empresa_id bigint NOT NULL,
+    venda_compra_loja_virtual_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.status_rastreio OWNER TO postgres;
+
+--
+-- TOC entry 199 (class 1259 OID 17953)
+-- Name: usuario; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.usuario (
+    id bigint NOT NULL,
+    create_at date,
+    login character varying(255) NOT NULL,
+    senha character varying(255) NOT NULL,
+    update_at date,
+    empresa_id bigint NOT NULL,
+    pessoa_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.usuario OWNER TO postgres;
+
+--
+-- TOC entry 200 (class 1259 OID 17961)
+-- Name: usuario_acesso; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.usuario_acesso (
+    usuario_id bigint NOT NULL,
+    acesso_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.usuario_acesso OWNER TO postgres;
+
+--
+-- TOC entry 201 (class 1259 OID 17964)
+-- Name: venda_compra_loja_virtual; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.venda_compra_loja_virtual (
+    id bigint NOT NULL,
+    data_entrega date NOT NULL,
+    data_venda date NOT NULL,
+    dias_entrega integer NOT NULL,
+    valor_desconto numeric(19,2),
+    valor_frete numeric(19,2) NOT NULL,
+    valor_total numeric(19,2) NOT NULL,
+    cupom_desconto_id bigint,
+    empresa_id bigint NOT NULL,
+    endereco_cobranca_id bigint NOT NULL,
+    endereco_entrega_id bigint NOT NULL,
+    forma_pagamento_id bigint NOT NULL,
+    nota_fiscal_venda_id bigint NOT NULL,
+    pessoa_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.venda_compra_loja_virtual OWNER TO postgres;
+
+--
+-- TOC entry 2307 (class 0 OID 17830)
+-- Dependencies: 181
+-- Data for Name: acesso; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO public.acesso (id, role_user) VALUES (1, 'ROLE_USER');
+INSERT INTO public.acesso (id, role_user) VALUES (2, 'ROLE_FINANCEIRO');
+INSERT INTO public.acesso (id, role_user) VALUES (3, 'ROLE_ESTOQUE');
+INSERT INTO public.acesso (id, role_user) VALUES (4, 'ROLE_ADMIN');
+INSERT INTO public.acesso (id, role_user) VALUES (5, 'ROLE_SUPER_ADMIN');
+
+
+--
+-- TOC entry 2308 (class 0 OID 17835)
+-- Dependencies: 182
+-- Data for Name: avaliacao_produto; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2309 (class 0 OID 17840)
+-- Dependencies: 183
+-- Data for Name: categoria_produto; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2310 (class 0 OID 17845)
+-- Dependencies: 184
+-- Data for Name: conta_pagar; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2311 (class 0 OID 17853)
+-- Dependencies: 185
+-- Data for Name: conta_receber; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2312 (class 0 OID 17861)
+-- Dependencies: 186
+-- Data for Name: cupom_desconto; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2313 (class 0 OID 17866)
+-- Dependencies: 187
+-- Data for Name: endereco; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO public.endereco (id, bairro, cep, cidade, complemento, numero, rua, tipo_endereco, uf, empresa_id, pessoa_id) VALUES (1, 'Centro', '40000-123', 'Salvador', 'Sala 201', '150', 'Rua das Palmeiras', 'ENTREGA', 'BA', 3, 3);
+INSERT INTO public.endereco (id, bairro, cep, cidade, complemento, numero, rua, tipo_endereco, uf, empresa_id, pessoa_id) VALUES (2, 'Barra', '41256-255', 'Salvador', NULL, '850', 'Avenida Oceânica', 'COBRANCA', 'BA', 3, 3);
+INSERT INTO public.endereco (id, bairro, cep, cidade, complemento, numero, rua, tipo_endereco, uf, empresa_id, pessoa_id) VALUES (3, 'Centro', '40000123', 'Salvador', 'Sala 201', '150', 'Rua das Palmeiras', 'ENTREGA', 'BA', 4, 4);
+INSERT INTO public.endereco (id, bairro, cep, cidade, complemento, numero, rua, tipo_endereco, uf, empresa_id, pessoa_id) VALUES (4, 'Barra', '41256255', 'Salvador', NULL, '850', 'Avenida Oceânica', 'COBRANCA', 'BA', 4, 4);
+INSERT INTO public.endereco (id, bairro, cep, cidade, complemento, numero, rua, tipo_endereco, uf, empresa_id, pessoa_id) VALUES (5, 'Centro', '40000123', 'Salvador', 'Sala 201', '150', 'Rua das Palmeiras', 'ENTREGA', 'BA', 5, 5);
+INSERT INTO public.endereco (id, bairro, cep, cidade, complemento, numero, rua, tipo_endereco, uf, empresa_id, pessoa_id) VALUES (6, 'Barra', '41256255', 'Salvador', NULL, '850', 'Avenida Oceânica', 'COBRANCA', 'BA', 5, 5);
+INSERT INTO public.endereco (id, bairro, cep, cidade, complemento, numero, rua, tipo_endereco, uf, empresa_id, pessoa_id) VALUES (17, 'Vale dos Lagos', '41256250', 'Salvador', 'Sala 201', '150', 'Rua Jornalista Luiz Eduardo Lobo', 'ENTREGA', 'BA', 11, 11);
+INSERT INTO public.endereco (id, bairro, cep, cidade, complemento, numero, rua, tipo_endereco, uf, empresa_id, pessoa_id) VALUES (18, 'Vale dos Lagos', '41256255', 'Salvador', NULL, '850', 'Rua Jornalista Maria D''Ajuda Medeiros', 'COBRANCA', 'BA', 11, 11);
+
+
+--
+-- TOC entry 2347 (class 0 OID 18143)
+-- Dependencies: 221
+-- Data for Name: flyway_schema_history; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO public.flyway_schema_history (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) VALUES (1, '1', '<< Flyway Baseline >>', 'BASELINE', '<< Flyway Baseline >>', NULL, 'null', '2026-05-19 09:59:21.171556', 0, true);
+INSERT INTO public.flyway_schema_history (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) VALUES (2, '2', '18-05-2026-21-00-00', 'SQL', 'V2__18-05-2026-21-00-00.sql', -993497330, 'postgres', '2026-05-19 09:59:21.275194', 19, true);
+INSERT INTO public.flyway_schema_history (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) VALUES (3, '3', '18-05-2026-21-10-00', 'SQL', 'V3__18-05-2026-21-10-00.sql', -425573058, 'postgres', '2026-05-19 09:59:21.325291', 49, true);
+INSERT INTO public.flyway_schema_history (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) VALUES (4, '4', '19-05-2026-09-10-1', 'SQL', 'V4__19-05-2026-09-10-1.sql', -2040147258, 'postgres', '2026-05-19 10:07:04.815819', 54, true);
+
+
+--
+-- TOC entry 2314 (class 0 OID 17874)
+-- Dependencies: 188
+-- Data for Name: forma_pagamento; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2315 (class 0 OID 17882)
+-- Dependencies: 189
+-- Data for Name: imagem_produto; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2316 (class 0 OID 17890)
+-- Dependencies: 190
+-- Data for Name: item_venda_loja; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2317 (class 0 OID 17895)
+-- Dependencies: 191
+-- Data for Name: marca_produto; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2318 (class 0 OID 17900)
+-- Dependencies: 192
+-- Data for Name: nota_fiscal_compra; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2319 (class 0 OID 17908)
+-- Dependencies: 193
+-- Data for Name: nota_fiscal_venda; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2320 (class 0 OID 17916)
+-- Dependencies: 194
+-- Data for Name: nota_item_produto; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2321 (class 0 OID 17921)
+-- Dependencies: 195
+-- Data for Name: pessoa_fisica; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO public.pessoa_fisica (id, email, nome, telefone, tipo_pessoa, empresa_id, cpf, data_nascimento) VALUES (2, 'admin@sistema.com', 'Administrador do Sistema', '71999990001', 'FISICA', 1, '00000000000', '1990-01-01');
+
+
+--
+-- TOC entry 2322 (class 0 OID 17929)
+-- Dependencies: 196
+-- Data for Name: pessoa_juridica; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO public.pessoa_juridica (id, email, nome, telefone, tipo_pessoa, empresa_id, categoria, cnpj, inscricao_estadual, inscricao_municipal, nome_fantasia, razao_social) VALUES (1, 'empresa@sistema.com', 'Empresa Administrativa', '71999990000', 'JURIDICA', 1, 'ADMIN', '00000000000000', 'ISENTO', 'ISENTO', 'Empresa Administrativa', 'Empresa Administrativa LTDA');
+INSERT INTO public.pessoa_juridica (id, email, nome, telefone, tipo_pessoa, empresa_id, categoria, cnpj, inscricao_estadual, inscricao_municipal, nome_fantasia, razao_social) VALUES (3, 'conthjato@xfpto.com', 'Empresa XPTO LTDA', '7133334444', 'JURIDICA', 3, 'COMERCIO', '6491630hjhj6000175', '10076hjhjhj', '987654hjhj321', 'XPTO', 'XPTO COMÉRCIO E SERVIÇOS LTDA');
+INSERT INTO public.pessoa_juridica (id, email, nome, telefone, tipo_pessoa, empresa_id, categoria, cnpj, inscricao_estadual, inscricao_municipal, nome_fantasia, razao_social) VALUES (4, 'contato@xfpto.fdgfdgcom', 'Empresa XPTO LTDA', '7133334444', 'JURIDICA', 4, 'COMERCIO', '649163fdgdfg06000175', '10076fdgf', '987654gdfgdf321', 'XPTO', 'XPTO COMÉRCIO E SERVIÇOS LTDA');
+INSERT INTO public.pessoa_juridica (id, email, nome, telefone, tipo_pessoa, empresa_id, categoria, cnpj, inscricao_estadual, inscricao_municipal, nome_fantasia, razao_social) VALUES (5, 'contato@xfpdfdfdfdto.com', 'Empresa XPTO LTDA', '7133334444', 'JURIDICA', 5, 'COMERCIO', '6491630600017dfdfdf5', '100dfdfdf76', '98765dfdf4321', 'XPTO', 'XPTO COMÉRCIO E SERVIÇOS LTDA');
+INSERT INTO public.pessoa_juridica (id, email, nome, telefone, tipo_pessoa, empresa_id, categoria, cnpj, inscricao_estadual, inscricao_municipal, nome_fantasia, razao_social) VALUES (11, 'contato@xfpto.com', 'Empresa XPTO LTDA', '7133334444', 'JURIDICA', 11, 'COMERCIO', '64916306000175', '10076', '987654321', 'XPTO', 'XPTO COMÉRCIO E SERVIÇOS LTDA');
+
+
+--
+-- TOC entry 2323 (class 0 OID 17937)
+-- Dependencies: 197
+-- Data for Name: produto; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2357 (class 0 OID 0)
+-- Dependencies: 202
+-- Name: seq_acesso; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_acesso', 1, false);
+
+
+--
+-- TOC entry 2358 (class 0 OID 0)
+-- Dependencies: 203
+-- Name: seq_avaliacao_produto; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_avaliacao_produto', 1, false);
+
+
+--
+-- TOC entry 2359 (class 0 OID 0)
+-- Dependencies: 204
+-- Name: seq_categoria_produto; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_categoria_produto', 1, false);
+
+
+--
+-- TOC entry 2360 (class 0 OID 0)
+-- Dependencies: 205
+-- Name: seq_conta_pagar; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_conta_pagar', 1, false);
+
+
+--
+-- TOC entry 2361 (class 0 OID 0)
+-- Dependencies: 206
+-- Name: seq_conta_receber; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_conta_receber', 1, false);
+
+
+--
+-- TOC entry 2362 (class 0 OID 0)
+-- Dependencies: 207
+-- Name: seq_cupom_desconto; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_cupom_desconto', 1, false);
+
+
+--
+-- TOC entry 2363 (class 0 OID 0)
+-- Dependencies: 208
+-- Name: seq_endereco; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_endereco', 18, true);
+
+
+--
+-- TOC entry 2364 (class 0 OID 0)
+-- Dependencies: 209
+-- Name: seq_forma_pagamento; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_forma_pagamento', 1, false);
+
+
+--
+-- TOC entry 2365 (class 0 OID 0)
+-- Dependencies: 210
+-- Name: seq_imagem_produto; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_imagem_produto', 1, false);
+
+
+--
+-- TOC entry 2366 (class 0 OID 0)
+-- Dependencies: 211
+-- Name: seq_item_venda_loja; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_item_venda_loja', 1, false);
+
+
+--
+-- TOC entry 2367 (class 0 OID 0)
+-- Dependencies: 212
+-- Name: seq_marca_produto; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_marca_produto', 1, false);
+
+
+--
+-- TOC entry 2368 (class 0 OID 0)
+-- Dependencies: 213
+-- Name: seq_nota_fiscal_compra; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_nota_fiscal_compra', 1, false);
+
+
+--
+-- TOC entry 2369 (class 0 OID 0)
+-- Dependencies: 214
+-- Name: seq_nota_fiscal_venda; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_nota_fiscal_venda', 1, false);
+
+
+--
+-- TOC entry 2370 (class 0 OID 0)
+-- Dependencies: 215
+-- Name: seq_nota_item_produto; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_nota_item_produto', 1, false);
+
+
+--
+-- TOC entry 2371 (class 0 OID 0)
+-- Dependencies: 216
+-- Name: seq_pessoa; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_pessoa', 11, true);
+
+
+--
+-- TOC entry 2372 (class 0 OID 0)
+-- Dependencies: 217
+-- Name: seq_produto; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_produto', 1, false);
+
+
+--
+-- TOC entry 2373 (class 0 OID 0)
+-- Dependencies: 218
+-- Name: seq_status_rastreio; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_status_rastreio', 1, false);
+
+
+--
+-- TOC entry 2374 (class 0 OID 0)
+-- Dependencies: 219
+-- Name: seq_usuario; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_usuario', 5, true);
+
+
+--
+-- TOC entry 2375 (class 0 OID 0)
+-- Dependencies: 220
+-- Name: seq_venda_compra_loja_virtual; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.seq_venda_compra_loja_virtual', 1, false);
+
+
+--
+-- TOC entry 2324 (class 0 OID 17945)
+-- Dependencies: 198
+-- Data for Name: status_rastreio; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2325 (class 0 OID 17953)
+-- Dependencies: 199
+-- Data for Name: usuario; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO public.usuario (id, create_at, login, senha, update_at, empresa_id, pessoa_id) VALUES (1, '2026-05-19', 'admin@sistema.com', '$2a$10$g1pAwZ4omnpfWKzr8bsmKOspS76zYX5QnX4mKAally2V2Tb.gktWW', '2026-05-19', 1, 2);
+INSERT INTO public.usuario (id, create_at, login, senha, update_at, empresa_id, pessoa_id) VALUES (2, '2026-05-19', 'contatohjhjhj@xfpto.com', '$2a$10$TJDKBhr6n5/VDGO0/g/ufe5kyoya2h.HMZabyJSq/j71qr2eVJ5a2', '2026-05-19', 3, 3);
+INSERT INTO public.usuario (id, create_at, login, senha, update_at, empresa_id, pessoa_id) VALUES (3, '2026-05-19', 'contfdgfdgato@xfpto.com', '$2a$10$AwSBIg1wWBmaRx9A6POIQ.1ctMj/ldiHW8AlfHMxNDNiHp4wpt1/G', '2026-05-19', 4, 4);
+INSERT INTO public.usuario (id, create_at, login, senha, update_at, empresa_id, pessoa_id) VALUES (4, '2026-05-19', 'codfdfdfntato@xfpto.com', '$2a$10$W.CpSFLqmJWBIh0EI0tdU.c7rhqdfTBSF2Ia97DhROQmoDL4/pV3q', '2026-05-19', 5, 5);
+INSERT INTO public.usuario (id, create_at, login, senha, update_at, empresa_id, pessoa_id) VALUES (5, '2026-05-19', 'contato@xfpto.com', '$2a$10$sEa9HFt/dLQQNsLw7m44HeJZ8HSKkepnVN9itFkhMoGWTnu4paWsK', '2026-05-19', 11, 11);
+
+
+--
+-- TOC entry 2326 (class 0 OID 17961)
+-- Dependencies: 200
+-- Data for Name: usuario_acesso; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+INSERT INTO public.usuario_acesso (usuario_id, acesso_id) VALUES (1, 5);
+INSERT INTO public.usuario_acesso (usuario_id, acesso_id) VALUES (5, 4);
+
+
+--
+-- TOC entry 2327 (class 0 OID 17964)
+-- Dependencies: 201
+-- Data for Name: venda_compra_loja_virtual; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+
+
+--
+-- TOC entry 2118 (class 2606 OID 17834)
+-- Name: acesso_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.acesso
+    ADD CONSTRAINT acesso_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2120 (class 2606 OID 17839)
+-- Name: avaliacao_produto_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.avaliacao_produto
+    ADD CONSTRAINT avaliacao_produto_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2122 (class 2606 OID 17844)
+-- Name: categoria_produto_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.categoria_produto
+    ADD CONSTRAINT categoria_produto_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2124 (class 2606 OID 17852)
+-- Name: conta_pagar_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.conta_pagar
+    ADD CONSTRAINT conta_pagar_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2126 (class 2606 OID 17860)
+-- Name: conta_receber_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.conta_receber
+    ADD CONSTRAINT conta_receber_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2128 (class 2606 OID 17865)
+-- Name: cupom_desconto_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cupom_desconto
+    ADD CONSTRAINT cupom_desconto_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2130 (class 2606 OID 17873)
+-- Name: endereco_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.endereco
+    ADD CONSTRAINT endereco_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2174 (class 2606 OID 18151)
+-- Name: flyway_schema_history_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.flyway_schema_history
+    ADD CONSTRAINT flyway_schema_history_pk PRIMARY KEY (installed_rank);
+
+
+--
+-- TOC entry 2132 (class 2606 OID 17881)
+-- Name: forma_pagamento_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.forma_pagamento
+    ADD CONSTRAINT forma_pagamento_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2134 (class 2606 OID 17889)
+-- Name: imagem_produto_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.imagem_produto
+    ADD CONSTRAINT imagem_produto_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2136 (class 2606 OID 17894)
+-- Name: item_venda_loja_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.item_venda_loja
+    ADD CONSTRAINT item_venda_loja_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2138 (class 2606 OID 17899)
+-- Name: marca_produto_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.marca_produto
+    ADD CONSTRAINT marca_produto_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2140 (class 2606 OID 17907)
+-- Name: nota_fiscal_compra_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.nota_fiscal_compra
+    ADD CONSTRAINT nota_fiscal_compra_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2142 (class 2606 OID 17915)
+-- Name: nota_fiscal_venda_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.nota_fiscal_venda
+    ADD CONSTRAINT nota_fiscal_venda_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2144 (class 2606 OID 17920)
+-- Name: nota_item_produto_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.nota_item_produto
+    ADD CONSTRAINT nota_item_produto_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2146 (class 2606 OID 17928)
+-- Name: pessoa_fisica_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pessoa_fisica
+    ADD CONSTRAINT pessoa_fisica_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2152 (class 2606 OID 17936)
+-- Name: pessoa_juridica_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pessoa_juridica
+    ADD CONSTRAINT pessoa_juridica_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2162 (class 2606 OID 17944)
+-- Name: produto_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.produto
+    ADD CONSTRAINT produto_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2164 (class 2606 OID 17952)
+-- Name: status_rastreio_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.status_rastreio
+    ADD CONSTRAINT status_rastreio_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2154 (class 2606 OID 17976)
+-- Name: uk_3h78rtw3ei11cb43k77af5nhl; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pessoa_juridica
+    ADD CONSTRAINT uk_3h78rtw3ei11cb43k77af5nhl UNIQUE (cnpj);
+
+
+--
+-- TOC entry 2156 (class 2606 OID 17974)
+-- Name: uk_6f8dnvy9aakthuofgyrj66lyf; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pessoa_juridica
+    ADD CONSTRAINT uk_6f8dnvy9aakthuofgyrj66lyf UNIQUE (email);
+
+
+--
+-- TOC entry 2148 (class 2606 OID 17970)
+-- Name: uk_d70aayxv20yf3y8kofcx7fhbg; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pessoa_fisica
+    ADD CONSTRAINT uk_d70aayxv20yf3y8kofcx7fhbg UNIQUE (email);
+
+
+--
+-- TOC entry 2158 (class 2606 OID 17980)
+-- Name: uk_heb6e9tra429iv2tcpfkiq9iy; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pessoa_juridica
+    ADD CONSTRAINT uk_heb6e9tra429iv2tcpfkiq9iy UNIQUE (inscricao_municipal);
+
+
+--
+-- TOC entry 2150 (class 2606 OID 17972)
+-- Name: uk_p3d8co8s4y5h7y18fpqco1wv6; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pessoa_fisica
+    ADD CONSTRAINT uk_p3d8co8s4y5h7y18fpqco1wv6 UNIQUE (cpf);
+
+
+--
+-- TOC entry 2166 (class 2606 OID 17982)
+-- Name: uk_pm3f4m4fqv89oeeeac4tbe2f4; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuario
+    ADD CONSTRAINT uk_pm3f4m4fqv89oeeeac4tbe2f4 UNIQUE (login);
+
+
+--
+-- TOC entry 2160 (class 2606 OID 17978)
+-- Name: uk_t9fugaodr2k9s1btuuk6xes0f; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.pessoa_juridica
+    ADD CONSTRAINT uk_t9fugaodr2k9s1btuuk6xes0f UNIQUE (inscricao_estadual);
+
+
+--
+-- TOC entry 2170 (class 2606 OID 17986)
+-- Name: unique_acesso_user; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuario_acesso
+    ADD CONSTRAINT unique_acesso_user UNIQUE (usuario_id, acesso_id);
+
+
+--
+-- TOC entry 2168 (class 2606 OID 17960)
+-- Name: usuario_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuario
+    ADD CONSTRAINT usuario_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2172 (class 2606 OID 17968)
+-- Name: venda_compra_loja_virtual_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.venda_compra_loja_virtual
+    ADD CONSTRAINT venda_compra_loja_virtual_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2175 (class 1259 OID 18152)
+-- Name: flyway_schema_history_s_idx; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX flyway_schema_history_s_idx ON public.flyway_schema_history USING btree (success);
+
+
+--
+-- TOC entry 2186 (class 2606 OID 18075)
+-- Name: acesso_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuario_acesso
+    ADD CONSTRAINT acesso_fk FOREIGN KEY (acesso_id) REFERENCES public.acesso(id);
+
+
+--
+-- TOC entry 2180 (class 2606 OID 18045)
+-- Name: conta_pagar_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.nota_fiscal_compra
+    ADD CONSTRAINT conta_pagar_fk FOREIGN KEY (conta_pagar_id) REFERENCES public.conta_pagar(id);
+
+
+--
+-- TOC entry 2188 (class 2606 OID 18085)
+-- Name: cupom_desconto_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.venda_compra_loja_virtual
+    ADD CONSTRAINT cupom_desconto_fk FOREIGN KEY (cupom_desconto_id) REFERENCES public.cupom_desconto(id);
+
+
+--
+-- TOC entry 2189 (class 2606 OID 18090)
+-- Name: endereco_cobranca_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.venda_compra_loja_virtual
+    ADD CONSTRAINT endereco_cobranca_fk FOREIGN KEY (endereco_cobranca_id) REFERENCES public.endereco(id);
+
+
+--
+-- TOC entry 2190 (class 2606 OID 18095)
+-- Name: endereco_entrega_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.venda_compra_loja_virtual
+    ADD CONSTRAINT endereco_entrega_fk FOREIGN KEY (endereco_entrega_id) REFERENCES public.endereco(id);
+
+
+--
+-- TOC entry 2191 (class 2606 OID 18100)
+-- Name: forma_pagamento_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.venda_compra_loja_virtual
+    ADD CONSTRAINT forma_pagamento_fk FOREIGN KEY (forma_pagamento_id) REFERENCES public.forma_pagamento(id);
+
+
+--
+-- TOC entry 2182 (class 2606 OID 18055)
+-- Name: nota_fiscal_compra_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.nota_item_produto
+    ADD CONSTRAINT nota_fiscal_compra_fk FOREIGN KEY (nota_fiscal_compra_id) REFERENCES public.nota_fiscal_compra(id);
+
+
+--
+-- TOC entry 2192 (class 2606 OID 18105)
+-- Name: nota_fiscal_venda_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.venda_compra_loja_virtual
+    ADD CONSTRAINT nota_fiscal_venda_fk FOREIGN KEY (nota_fiscal_venda_id) REFERENCES public.nota_fiscal_venda(id);
+
+
+--
+-- TOC entry 2184 (class 2606 OID 18065)
+-- Name: notaitemproduto_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.produto
+    ADD CONSTRAINT notaitemproduto_fk FOREIGN KEY (nota_item_produto_id) REFERENCES public.nota_item_produto(id);
+
+
+--
+-- TOC entry 2176 (class 2606 OID 18025)
+-- Name: produto_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.avaliacao_produto
+    ADD CONSTRAINT produto_fk FOREIGN KEY (produto_id) REFERENCES public.produto(id);
+
+
+--
+-- TOC entry 2177 (class 2606 OID 18030)
+-- Name: produto_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.imagem_produto
+    ADD CONSTRAINT produto_fk FOREIGN KEY (produto_id) REFERENCES public.produto(id);
+
+
+--
+-- TOC entry 2178 (class 2606 OID 18035)
+-- Name: produto_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.item_venda_loja
+    ADD CONSTRAINT produto_fk FOREIGN KEY (produto_id) REFERENCES public.produto(id);
+
+
+--
+-- TOC entry 2183 (class 2606 OID 18060)
+-- Name: produto_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.nota_item_produto
+    ADD CONSTRAINT produto_fk FOREIGN KEY (produto_id) REFERENCES public.produto(id);
+
+
+--
+-- TOC entry 2187 (class 2606 OID 18080)
+-- Name: usuario_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.usuario_acesso
+    ADD CONSTRAINT usuario_fk FOREIGN KEY (usuario_id) REFERENCES public.usuario(id);
+
+
+--
+-- TOC entry 2179 (class 2606 OID 18040)
+-- Name: venda_compra_loja_virtual_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.item_venda_loja
+    ADD CONSTRAINT venda_compra_loja_virtual_fk FOREIGN KEY (venda_compra_loja_virtual_id) REFERENCES public.venda_compra_loja_virtual(id);
+
+
+--
+-- TOC entry 2181 (class 2606 OID 18050)
+-- Name: venda_compra_loja_virtual_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.nota_fiscal_venda
+    ADD CONSTRAINT venda_compra_loja_virtual_fk FOREIGN KEY (venda_compra_loja_virtual_id) REFERENCES public.venda_compra_loja_virtual(id);
+
+
+--
+-- TOC entry 2185 (class 2606 OID 18070)
+-- Name: venda_compra_loja_virtual_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.status_rastreio
+    ADD CONSTRAINT venda_compra_loja_virtual_fk FOREIGN KEY (venda_compra_loja_virtual_id) REFERENCES public.venda_compra_loja_virtual(id);
+
+
+--
+-- TOC entry 2355 (class 0 OID 0)
+-- Dependencies: 6
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+-- Completed on 2026-05-20 20:31:58
+
+--
+-- PostgreSQL database dump complete
+--
+
