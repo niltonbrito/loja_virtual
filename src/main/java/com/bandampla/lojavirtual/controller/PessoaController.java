@@ -3,14 +3,19 @@
  */
 package com.bandampla.lojavirtual.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bandampla.lojavirtual.dto.request.CepDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.PessoaFisica;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
@@ -33,18 +38,23 @@ public class PessoaController {
 	
 
 	@ResponseBody // Pode dar um retorno da API
-	@PostMapping(value = "/salvarPessoaJuridica") // Mapeandoa url para receber um JSON
-	public ResponseEntity<PessoaJuridica> salvarPessoaJuridica(@RequestBody PessoaJuridica pessoaJuridica) throws ExceptionCustom  {// Recebe o JSON e converte para objeto
+	@PostMapping(value = "/pessoa/juridica") // Mapeandoa url para receber um JSON
+	public ResponseEntity<PessoaJuridica> salvarPessoaJuridica(@Valid @RequestBody PessoaJuridica pessoaJuridica) throws ExceptionCustom  {// Recebe o JSON e converte para objeto
 		
 		return new ResponseEntity<PessoaJuridica>(pessoaUserService.salvarPessoaJuridica(pessoaJuridica), HttpStatus.OK);
 	}
+	
 	@ResponseBody // Pode dar um retorno da API
-	@PostMapping(value = "/salvarPessoaFisica") // Mapeandoa url para receber um JSON
-	public ResponseEntity<PessoaFisica> salvarPessoaFisica(@RequestBody PessoaFisica pessoaFisica) throws ExceptionCustom  {// Recebe o JSON e converte para objeto
+	@PostMapping(value = "/pessoa/fisica") // Mapeandoa url para receber um JSON
+	public ResponseEntity<PessoaFisica> salvarPessoaFisica(@Valid @RequestBody PessoaFisica pessoaFisica) throws ExceptionCustom  {// Recebe o JSON e converte para objeto
 		
 		return new ResponseEntity<PessoaFisica>(pessoaUserService.salvarPessoaFisica(pessoaFisica), HttpStatus.OK);
 	}
 
-
+	@ResponseBody // Pode dar um retorno da API
+	@GetMapping(value = "/consulta/cep/{cep}") // Mapeandoa url para receber um JSON
+	public ResponseEntity<CepDTO> consultaCep(@Valid @PathVariable("cep") String cep) throws ExceptionCustom  {// Recebe o JSON e converte para objeto		
+		return new ResponseEntity<CepDTO>(pessoaUserService.consultaCep(cep), HttpStatus.OK);
+	}
 
 }

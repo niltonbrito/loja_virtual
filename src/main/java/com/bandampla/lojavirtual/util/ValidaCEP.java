@@ -11,7 +11,7 @@ public class ValidaCEP {
 	public static void validarFormato(String cep) throws ExceptionCustom {
 
 		if (cep == null || cep.trim().isEmpty()) {
-			throw new ExceptionCustom("CEP não pode ser vazio.");
+			throw new ExceptionCustom("CEP informado não pode ser vazio.");
 		}
 
 		cep = limpar(cep);

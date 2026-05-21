@@ -1,22 +1,21 @@
 -- Popula a tabela acesso com os valores do Enum RoleUser
 -- Insere apenas se ainda não existir
 
-INSERT INTO acesso (role_user)
-SELECT 'ROLE_USER'
-WHERE NOT EXISTS (SELECT 1 FROM acesso WHERE role_user = 'ROLE_USER');
+INSERT INTO acesso (id, role_user) VALUES (1, 'ROLE_USER')
+    ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO acesso (role_user)
-SELECT 'ROLE_FINANCEIRO'
-WHERE NOT EXISTS (SELECT 1 FROM acesso WHERE role_user = 'ROLE_FINANCEIRO');
+INSERT INTO acesso (id, role_user) VALUES (2,'ROLE_FINANCEIRO')
+    ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO acesso (role_user)
-SELECT 'ROLE_ESTOQUE'
-WHERE NOT EXISTS (SELECT 1 FROM acesso WHERE role_user = 'ROLE_ESTOQUE');
+INSERT INTO acesso (id, role_user) VALUES (3, 'ROLE_GERENTE')
+    ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO acesso (role_user)
-SELECT 'ROLE_ADMIN'
-WHERE NOT EXISTS (SELECT 1 FROM acesso WHERE role_user = 'ROLE_ADMIN');
+INSERT INTO acesso (id, role_user) VALUES (4, 'ROLE_ESTOQUE')
+    ON CONFLICT (id) DO NOTHING;
+    
+INSERT INTO acesso (id, role_user) VALUES (5, 'ROLE_ADMIN')
+    ON CONFLICT (id) DO NOTHING;
+    
+INSERT INTO acesso (id, role_user) VALUES (6, 'ROLE_SUPER_ADMIN')
+    ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO acesso (role_user)
-SELECT 'ROLE_SUPER_ADMIN'
-WHERE NOT EXISTS (SELECT 1 FROM acesso WHERE role_user = 'ROLE_SUPER_ADMIN');
