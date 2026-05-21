@@ -23,6 +23,7 @@ import com.bandampla.lojavirtual.repository.PessoaJuridicaRepository;
 import com.bandampla.lojavirtual.repository.UsuarioRepository;
 import com.bandampla.lojavirtual.util.ValidaCEP;
 import com.bandampla.lojavirtual.util.ValidaCNPJ;
+import com.bandampla.lojavirtual.util.ValidaCPF;
 
 @Service
 public class PessoaUserService {
@@ -152,9 +153,103 @@ public class PessoaUserService {
 
 	}
 
-	public PessoaFisica salvarPessoaFisica(PessoaFisica pessoaFisica) {
-		// TODO Auto-generated method stub
-		return null;
+	public PessoaFisica salvarPessoaFisica(PessoaFisica pessoaFisica) throws ExceptionCustom {
+
+		if (pessoaFisica == null) {
+			throw new ExceptionCustom("Pessoa Fisica não pode ser NULL");
+		}
+
+		Optional<PessoaFisica> pessoaOpt = pessoaFisicaRepository.findByCpf(pessoaFisica.getCpf().trim());
+		if (pessoaOpt.isPresent() && !pessoaOpt.get().getId().equals(pessoaFisica.getId())) {
+			throw new ExceptionCustom("CNPJ já cadastrado no sistema");
+		}
+
+		if (pessoaFisica.getId() == null || pessoaFisica.getId() <= 0) {
+			for (int p = 0; p < pessoaFisica.getEnderecos().size(); p++) {
+				CepDTO cepDTO = consultaCep(ValidaCEP.limpar(pessoaFisica.getEnderecos().get(p).getCep()));
+				if (cepDTO.getCep() == null || cepDTO.getCep().trim().isEmpty()) {
+					throw new ExceptionCustom("CEP informado não pode ser vazio ou nullo.");
+				}
+				pessoaFisica.getEnderecos().get(p).setBairro(cepDTO.getBairro());
+				pessoaFisica.getEnderecos().get(p).setCep(ValidaCEP.limpar(cepDTO.getCep()));
+				pessoaFisica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
+				pessoaFisica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
+				pessoaFisica.getEnderecos().get(p).setEmpresa(pessoaFisica);
+				pessoaFisica.getEnderecos().get(p).setPessoa(pessoaFisica);
+				pessoaFisica.getEnderecos().get(p).setRua(cepDTO.getLogradouro());
+				pessoaFisica.getEnderecos().get(p).setUf(cepDTO.getUf());
+			}
+
+		} else {
+
+			for (int p = 0; p < pessoaFisica.getEnderecos().size(); p++) {
+				Endereco enderecoTemp = enderecoRepository.findById(pessoaFisica.getEnderecos().get(p).getId()).get();
+				if (!enderecoTemp.getCep().equals(pessoaFisica.getEnderecos().get(p).getCep())) {
+
+					CepDTO cepDTO = consultaCep(ValidaCEP.limpar(pessoaFisica.getEnderecos().get(p).getCep()));
+					if (cepDTO.getCep() == null || cepDTO.getCep().trim().isEmpty()) {
+						throw new ExceptionCustom("CEP informado não pode ser vazio ou nullo.");
+					}
+					pessoaFisica.getEnderecos().get(p).setBairro(cepDTO.getBairro());
+					pessoaFisica.getEnderecos().get(p).setCep(ValidaCEP.limpar(cepDTO.getCep()));
+					pessoaFisica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
+					pessoaFisica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
+					pessoaFisica.getEnderecos().get(p).setEmpresa(pessoaFisica);
+					pessoaFisica.getEnderecos().get(p).setPessoa(pessoaFisica);
+					pessoaFisica.getEnderecos().get(p).setRua(cepDTO.getLogradouro());
+					pessoaFisica.getEnderecos().get(p).setUf(cepDTO.getUf());
+				}
+			}
+		}
+
+		// Adicione esta validação antes do loop for:
+		/*
+		 * if (pessoaJuridica.getEnderecos() != null) { for (int i = 0; i <
+		 * pessoaJuridica.getEnderecos().size(); i++) {
+		 * pessoaJuridica.getEnderecos().get(i).setPessoa(pessoaJuridica);
+		 * pessoaJuridica.getEnderecos().get(i).setEmpresa(pessoaJuridica); } }
+		 */
+
+		pessoaFisica.setCpf(ValidaCPF.cpfSemMascara(pessoaFisica.getCpf().trim()));
+		pessoaFisica.setEmpresa(pessoaFisica);
+		pessoaFisica = pessoaFisicaRepository.save(pessoaFisica);
+
+		Usuario usuarioPF = usuarioRepository.finUserByPessoa(pessoaFisica.getId(), pessoaFisica.getEmail());
+
+		if (usuarioPF == null) {
+			String constraint = usuarioRepository.consultaConstraintAcesso();
+			if (constraint != null) {
+				jdbcTemplate.execute("begin; alter table usuario_acesso drop constraint " + constraint + "; commit;");
+			}
+			usuarioPF = new Usuario();
+			usuarioPF.setLogin(pessoaFisica.getEmail());
+
+			String senha = "" + Calendar.getInstance().getTimeInMillis();
+			String senhaCriptografada = new BCryptPasswordEncoder().encode(senha);
+			usuarioPF.setSenha(senhaCriptografada);
+
+			usuarioPF.setCreateAt(Calendar.getInstance().getTime());
+			usuarioPF.setUpdateAt(Calendar.getInstance().getTime());
+			usuarioPF.setEmpresa(pessoaFisica);
+			usuarioPF.setPessoa(pessoaFisica);
+
+			usuarioPF = usuarioRepository.save(usuarioPF);
+			usuarioRepository.insereAcessoUser(usuarioPF.getId(), RoleUser.ROLE_USER.name());
+
+			StringBuilder mensagemHtml = new StringBuilder();
+			mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
+			mensagemHtml.append("<b>Login: </b>" + pessoaFisica.getEmail()).append("<br/>");
+			mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
+			mensagemHtml.append("Obrigado");
+			try {
+				/* Fazer o envio de e-mail do login e senha */
+				sendMailService.enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!",
+						mensagemHtml.toString(), pessoaFisica.getEmail());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return pessoaFisica;
 	}
 
 	public CepDTO consultaCep(String cep) {
