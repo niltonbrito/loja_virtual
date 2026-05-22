@@ -136,13 +136,13 @@ public class PessoaUserService {
 			mensagemHtml.append("<b>Login: </b>" + pessoaJuridica.getEmail()).append("<br/>");
 			mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
 			mensagemHtml.append("Obrigado");
-			try {
-				/* Fazer o envio de e-mail do login e senha */
-				sendMailService.enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!",
-						mensagemHtml.toString(), pessoaJuridica.getEmail());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+//			try {
+//				/* Fazer o envio de e-mail do login e senha */
+//				sendMailService.enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!",
+//						mensagemHtml.toString(), pessoaJuridica.getEmail());
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 		}
 
 		return pessoaJuridica;
@@ -159,8 +159,7 @@ public class PessoaUserService {
 		if (pessoaOpt.isPresent() && !pessoaOpt.get().getId().equals(pessoaFisica.getId())) {
 			throw new ExceptionCustom("CPF já cadastrado no sistema");
 		}
-		
-		
+
 		if (pessoaFisica.getId() == null || pessoaFisica.getId() <= 0) {
 			for (int p = 0; p < pessoaFisica.getEnderecos().size(); p++) {
 				CepDTO cepDTO = consultaCep(ValidaCEP.limpar(pessoaFisica.getEnderecos().get(p).getCep()));
@@ -204,10 +203,10 @@ public class PessoaUserService {
 		 * pessoaJuridica.getEnderecos().get(i).setPessoa(pessoaJuridica);
 		 * pessoaJuridica.getEnderecos().get(i).setEmpresa(pessoaJuridica); } }
 		 */
-		String cnpj =  pessoaFisica.getEmpresa().getCnpj();
+		String cnpj = pessoaFisica.getEmpresa().getCnpj();
 
 		PessoaJuridica empresa = pessoaJuridicaRepository.findByCnpj(ValidaCNPJ.cnpjSemMascara(cnpj))
-		        .orElseThrow(() -> new ExceptionCustom("Empresa com CNPJ " + cnpj + " não encontrada."));
+				.orElseThrow(() -> new ExceptionCustom("Empresa com CNPJ " + cnpj + " não encontrada."));
 
 		pessoaFisica.setEmpresa(empresa);
 
@@ -242,13 +241,12 @@ public class PessoaUserService {
 			mensagemHtml.append("<b>Login: </b>" + pessoaFisica.getEmail()).append("<br/>");
 			mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
 			mensagemHtml.append("Obrigado");
-			try {
-				/* Fazer o envio de e-mail do login e senha */
-				sendMailService.enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!",
-						mensagemHtml.toString(), pessoaFisica.getEmail());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			/*
+			 * try { Fazer o envio de e-mail do login e senha sendMailService.
+			 * enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!"
+			 * , mensagemHtml.toString(), pessoaFisica.getEmail()); } catch (Exception e) {
+			 * e.printStackTrace(); }
+			 */
 		}
 		return pessoaFisica;
 	}
