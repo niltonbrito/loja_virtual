@@ -4,7 +4,7 @@
 INSERT INTO pessoa_juridica (
        id, nome, email, telefone, tipo_pessoa,
        cnpj, inscricao_estadual, inscricao_municipal,
-       nome_fantasia, razao_social, categoria, empresa_id
+       nome_fantasia, razao_social, categoria
 )
 SELECT nextval('seq_pessoa'),
        'Empresa Administrativa',
@@ -16,8 +16,7 @@ SELECT nextval('seq_pessoa'),
        'ISENTO',
        'Empresa Administrativa',
        'Empresa Administrativa LTDA',
-       'ADMIN',
-       NULL
+       'ADMIN'       
 WHERE NOT EXISTS (
     SELECT 1 FROM pessoa_juridica WHERE email = 'empresa@sistema.com'
 );
@@ -48,7 +47,7 @@ INSERT INTO usuario (
        id, login, senha, pessoa_id, empresa_id, create_at, update_at
 )
 SELECT nextval('seq_usuario'),
-       'admin',
+       'admin@sistema.com',
        '$2a$10$g1pAwZ4omnpfWKzr8bsmKOspS76zYX5QnX4mKAally2V2Tb.gktWW',
        (SELECT id FROM pessoa_fisica WHERE email = 'admin@sistema.com'),
        (SELECT id FROM pessoa_juridica WHERE email = 'empresa@sistema.com'),

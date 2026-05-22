@@ -43,7 +43,6 @@ class TestePessoaUsuario extends TestCase {
 		pessoaJuridica.setTelefone("719920456500");
 		pessoaJuridica.setInscricaoEstadual("" + Calendar.getInstance().getTimeInMillis());
 		pessoaJuridica.setInscricaoMunicipal("" + Calendar.getInstance().getTimeInMillis());
-		pessoaJuridica.setEmpresa(pessoaJuridica);
 		pessoaJuridica.setNomeFantasia("Bandampla");
 		pessoaJuridica.setRazaoSocial("BAndampla Sistemas");
 		pessoaJuridica.setTipoPessoa("JURIDICA");
@@ -57,7 +56,6 @@ class TestePessoaUsuario extends TestCase {
 		endereco.setCep("41256255");
 		endereco.setUf("BA");
 		endereco.setTipoEndereco(TipoEndereco.ENTREGA);
-		endereco.setEmpresa(pessoaJuridica);
 		endereco.setPessoa(pessoaJuridica);
 
 		Endereco endereco1 = new Endereco();
@@ -69,7 +67,6 @@ class TestePessoaUsuario extends TestCase {
 		endereco1.setCep("41256275");
 		endereco1.setUf("BA");
 		endereco1.setTipoEndereco(TipoEndereco.COBRANCA);
-		endereco1.setEmpresa(pessoaJuridica);
 		endereco1.setPessoa(pessoaJuridica);
 
 		pessoaJuridica.getEnderecos().add(endereco);

@@ -1,7 +1,6 @@
 package com.bandampla.lojavirtual.service;
 
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +72,6 @@ public class PessoaUserService {
 				pessoaJuridica.getEnderecos().get(p).setCep(ValidaCEP.limpar(cepDTO.getCep()));
 				pessoaJuridica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
 				pessoaJuridica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
-				pessoaJuridica.getEnderecos().get(p).setEmpresa(pessoaJuridica);
 				pessoaJuridica.getEnderecos().get(p).setPessoa(pessoaJuridica);
 				pessoaJuridica.getEnderecos().get(p).setRua(cepDTO.getLogradouro());
 				pessoaJuridica.getEnderecos().get(p).setUf(cepDTO.getUf());
@@ -93,7 +91,6 @@ public class PessoaUserService {
 					pessoaJuridica.getEnderecos().get(p).setCep(ValidaCEP.limpar(cepDTO.getCep()));
 					pessoaJuridica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
 					pessoaJuridica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
-					pessoaJuridica.getEnderecos().get(p).setEmpresa(pessoaJuridica);
 					pessoaJuridica.getEnderecos().get(p).setPessoa(pessoaJuridica);
 					pessoaJuridica.getEnderecos().get(p).setRua(cepDTO.getLogradouro());
 					pessoaJuridica.getEnderecos().get(p).setUf(cepDTO.getUf());
@@ -110,7 +107,6 @@ public class PessoaUserService {
 		 */
 
 		pessoaJuridica.setCnpj(ValidaCNPJ.cnpjSemMascara(pessoaJuridica.getCnpj().trim()));
-		pessoaJuridica.setEmpresa(pessoaJuridica);
 		pessoaJuridica = pessoaJuridicaRepository.save(pessoaJuridica);
 
 		Usuario usuarioPJ = usuarioRepository.finUserByPessoa(pessoaJuridica.getId(), pessoaJuridica.getEmail());
@@ -175,7 +171,6 @@ public class PessoaUserService {
 				pessoaFisica.getEnderecos().get(p).setCep(ValidaCEP.limpar(cepDTO.getCep()));
 				pessoaFisica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
 				pessoaFisica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
-				pessoaFisica.getEnderecos().get(p).setEmpresa(pessoaFisica.getEmpresa());
 				pessoaFisica.getEnderecos().get(p).setPessoa(pessoaFisica);
 				pessoaFisica.getEnderecos().get(p).setRua(cepDTO.getLogradouro());
 				pessoaFisica.getEnderecos().get(p).setUf(cepDTO.getUf());
@@ -195,7 +190,6 @@ public class PessoaUserService {
 					pessoaFisica.getEnderecos().get(p).setCep(ValidaCEP.limpar(cepDTO.getCep()));
 					pessoaFisica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
 					pessoaFisica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
-					pessoaFisica.getEnderecos().get(p).setEmpresa(pessoaFisica.getEmpresa());
 					pessoaFisica.getEnderecos().get(p).setPessoa(pessoaFisica);
 					pessoaFisica.getEnderecos().get(p).setRua(cepDTO.getLogradouro());
 					pessoaFisica.getEnderecos().get(p).setUf(cepDTO.getUf());
@@ -210,9 +204,15 @@ public class PessoaUserService {
 		 * pessoaJuridica.getEnderecos().get(i).setPessoa(pessoaJuridica);
 		 * pessoaJuridica.getEnderecos().get(i).setEmpresa(pessoaJuridica); } }
 		 */
+		String cnpj =  pessoaFisica.getEmpresa().getCnpj();
+
+		PessoaJuridica empresa = pessoaJuridicaRepository.findByCnpj(ValidaCNPJ.cnpjSemMascara(cnpj))
+		        .orElseThrow(() -> new ExceptionCustom("Empresa com CNPJ " + cnpj + " não encontrada."));
+
+		pessoaFisica.setEmpresa(empresa);
 
 		pessoaFisica.setCpf(ValidaCPF.cpfSemMascara(pessoaFisica.getCpf().trim()));
-		pessoaFisica.setEmpresa(pessoaFisica.getEmpresa());
+		pessoaFisica.setEmpresa(empresa);
 		pessoaFisica = pessoaFisicaRepository.save(pessoaFisica);
 
 		Usuario usuarioPF = usuarioRepository.finUserByPessoa(pessoaFisica.getId(), pessoaFisica.getEmail());
@@ -231,7 +231,7 @@ public class PessoaUserService {
 
 			usuarioPF.setCreateAt(Calendar.getInstance().getTime());
 			usuarioPF.setUpdateAt(Calendar.getInstance().getTime());
-			usuarioPF.setEmpresa(pessoaFisica.getEmpresa());
+			usuarioPF.setEmpresa(empresa);
 			usuarioPF.setPessoa(pessoaFisica);
 
 			usuarioPF = usuarioRepository.save(usuarioPF);

@@ -32,28 +32,27 @@ import com.bandampla.lojavirtual.service.PessoaUserService;
 @RestController
 public class PessoaController {
 
-
 	@Autowired
 	private PessoaUserService pessoaUserService;
-	
 
 	@ResponseBody // Pode dar um retorno da API
 	@PostMapping(value = "/pessoa/juridica") // Mapeandoa url para receber um JSON
-	public ResponseEntity<PessoaJuridica> salvarPessoaJuridica(@Valid @RequestBody PessoaJuridica pessoaJuridica) throws ExceptionCustom  {// Recebe o JSON e converte para objeto
-		
-		return new ResponseEntity<PessoaJuridica>(pessoaUserService.salvarPessoaJuridica(pessoaJuridica), HttpStatus.OK);
+	public ResponseEntity<PessoaJuridica> salvarPessoaJuridica(@Valid @RequestBody PessoaJuridica pessoaJuridica)
+			throws ExceptionCustom {// Recebe o JSON e converte para objeto
+		return new ResponseEntity<PessoaJuridica>(pessoaUserService.salvarPessoaJuridica(pessoaJuridica),
+				HttpStatus.OK);
 	}
-	
+
 	@ResponseBody // Pode dar um retorno da API
 	@PostMapping(value = "/pessoa/fisica") // Mapeandoa url para receber um JSON
-	public ResponseEntity<PessoaFisica> salvarPessoaFisica(@Valid @RequestBody PessoaFisica pessoaFisica) throws ExceptionCustom  {// Recebe o JSON e converte para objeto
-		
+	public ResponseEntity<PessoaFisica> salvarPessoaFisica(@Valid @RequestBody PessoaFisica pessoaFisica)
+			throws ExceptionCustom {// Recebe o JSON e converte para objeto
 		return new ResponseEntity<PessoaFisica>(pessoaUserService.salvarPessoaFisica(pessoaFisica), HttpStatus.OK);
 	}
 
 	@ResponseBody // Pode dar um retorno da API
 	@GetMapping(value = "/consulta/cep/{cep}") // Mapeandoa url para receber um JSON
-	public ResponseEntity<CepDTO> consultaCep(@Valid @PathVariable("cep") String cep) throws ExceptionCustom  {// Recebe o JSON e converte para objeto		
+	public ResponseEntity<CepDTO> consultaCep(@Valid @PathVariable String cep) throws ExceptionCustom {
 		return new ResponseEntity<CepDTO>(pessoaUserService.consultaCep(cep), HttpStatus.OK);
 	}
 
