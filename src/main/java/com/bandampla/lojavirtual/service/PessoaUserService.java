@@ -161,9 +161,10 @@ public class PessoaUserService {
 
 		Optional<PessoaFisica> pessoaOpt = pessoaFisicaRepository.findByCpf(pessoaFisica.getCpf().trim());
 		if (pessoaOpt.isPresent() && !pessoaOpt.get().getId().equals(pessoaFisica.getId())) {
-			throw new ExceptionCustom("CNPJ já cadastrado no sistema");
+			throw new ExceptionCustom("CPF já cadastrado no sistema");
 		}
-
+		
+		
 		if (pessoaFisica.getId() == null || pessoaFisica.getId() <= 0) {
 			for (int p = 0; p < pessoaFisica.getEnderecos().size(); p++) {
 				CepDTO cepDTO = consultaCep(ValidaCEP.limpar(pessoaFisica.getEnderecos().get(p).getCep()));
@@ -174,7 +175,7 @@ public class PessoaUserService {
 				pessoaFisica.getEnderecos().get(p).setCep(ValidaCEP.limpar(cepDTO.getCep()));
 				pessoaFisica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
 				pessoaFisica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
-				pessoaFisica.getEnderecos().get(p).setEmpresa(pessoaFisica);
+				pessoaFisica.getEnderecos().get(p).setEmpresa(pessoaFisica.getEmpresa());
 				pessoaFisica.getEnderecos().get(p).setPessoa(pessoaFisica);
 				pessoaFisica.getEnderecos().get(p).setRua(cepDTO.getLogradouro());
 				pessoaFisica.getEnderecos().get(p).setUf(cepDTO.getUf());
@@ -194,7 +195,7 @@ public class PessoaUserService {
 					pessoaFisica.getEnderecos().get(p).setCep(ValidaCEP.limpar(cepDTO.getCep()));
 					pessoaFisica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
 					pessoaFisica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
-					pessoaFisica.getEnderecos().get(p).setEmpresa(pessoaFisica);
+					pessoaFisica.getEnderecos().get(p).setEmpresa(pessoaFisica.getEmpresa());
 					pessoaFisica.getEnderecos().get(p).setPessoa(pessoaFisica);
 					pessoaFisica.getEnderecos().get(p).setRua(cepDTO.getLogradouro());
 					pessoaFisica.getEnderecos().get(p).setUf(cepDTO.getUf());
@@ -211,7 +212,7 @@ public class PessoaUserService {
 		 */
 
 		pessoaFisica.setCpf(ValidaCPF.cpfSemMascara(pessoaFisica.getCpf().trim()));
-		pessoaFisica.setEmpresa(pessoaFisica);
+		pessoaFisica.setEmpresa(pessoaFisica.getEmpresa());
 		pessoaFisica = pessoaFisicaRepository.save(pessoaFisica);
 
 		Usuario usuarioPF = usuarioRepository.finUserByPessoa(pessoaFisica.getId(), pessoaFisica.getEmail());
@@ -230,7 +231,7 @@ public class PessoaUserService {
 
 			usuarioPF.setCreateAt(Calendar.getInstance().getTime());
 			usuarioPF.setUpdateAt(Calendar.getInstance().getTime());
-			usuarioPF.setEmpresa(pessoaFisica);
+			usuarioPF.setEmpresa(pessoaFisica.getEmpresa());
 			usuarioPF.setPessoa(pessoaFisica);
 
 			usuarioPF = usuarioRepository.save(usuarioPF);
