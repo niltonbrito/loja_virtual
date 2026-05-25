@@ -27,6 +27,9 @@ import java.util.List;
 @Transactional
 public interface PessoaJuridicaRepository extends JpaRepository<PessoaJuridica, Long> {
 
+
+	List<PessoaJuridica> findByNome(String nome);
+	
 	Optional<PessoaJuridica> findByCnpj(String cnpj);
 	
 	Optional<PessoaJuridica> findByInscricaoEstadual(String inscricaoEstadual);

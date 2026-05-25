@@ -29,4 +29,5 @@ public interface PessoaFisicaRepository extends JpaRepository<PessoaFisica, Long
 
 	Optional<PessoaFisica> findByCpf(String cpf);
 
+	List<PessoaFisica> findByNome(String nome);
 }
