@@ -64,7 +64,7 @@ INSERT INTO usuario_acesso (usuario_id, acesso_id)
 SELECT u.id, a.id
 FROM usuario u
 JOIN acesso a ON a.role_user = 'ROLE_SUPER_ADMIN'
-WHERE u.login = 'admin'
+WHERE u.login = 'admin@sistema.com'
   AND NOT EXISTS (
         SELECT 1 FROM usuario_acesso 
         WHERE usuario_id = u.id 

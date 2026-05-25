@@ -1,7 +1,11 @@
 package com.bandampla.lojavirtual.model;
 
 import javax.persistence.Column;
+import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
+import javax.persistence.ForeignKey;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
@@ -28,7 +32,12 @@ public class PessoaJuridica extends Pessoa {
 	private String razaoSocial;
 
 	private String categoria;
-
+	
+    // MATRIZ / FILIAL
+    @ManyToOne
+    @JoinColumn(name = "matriz_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "matriz_fk"))
+    private PessoaJuridica matriz;
+    
 	public String getCnpj() {
 		return cnpj;
 	}
@@ -75,5 +84,13 @@ public class PessoaJuridica extends Pessoa {
 
 	public void setCategoria(String categoria) {
 		this.categoria = categoria;
+	}
+
+	public PessoaJuridica getMatriz() {
+		return matriz;
+	}
+
+	public void setMatriz(PessoaJuridica matriz) {
+		this.matriz = matriz;
 	}
 }

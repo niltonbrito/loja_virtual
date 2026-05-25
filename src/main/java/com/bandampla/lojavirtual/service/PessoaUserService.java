@@ -13,6 +13,7 @@ import com.bandampla.lojavirtual.dto.request.CepDTO;
 import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Endereco;
+import com.bandampla.lojavirtual.model.Pessoa;
 import com.bandampla.lojavirtual.model.PessoaFisica;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.model.Usuario;
@@ -45,106 +46,49 @@ public class PessoaUserService {
 	@Autowired
 	private SendMailService sendMailService;
 
+	/*
+	 * ============================================================ SALVAR PESSOA
+	 * JURÍDICA (EMPRESA / MATRIZ / FILIAL)
+	 * ============================================================
+	 */
 	public PessoaJuridica salvarPessoaJuridica(PessoaJuridica pessoaJuridica) throws ExceptionCustom {
 
 		if (pessoaJuridica == null) {
 			throw new ExceptionCustom("Pessoa Juridica não pode ser NULL");
 		}
 
-		Optional<PessoaJuridica> pjCnpj = pessoaJuridicaRepository.findByCnpj(pessoaJuridica.getCnpj().trim());
+		/* Validação de CNPJ */
+		Optional<PessoaJuridica> pjCnpj = pessoaJuridicaRepository
+				.findByCnpj(ValidaCNPJ.cnpjSemMascara(pessoaJuridica.getCnpj().trim()));
 		if (pjCnpj.isPresent() && !pjCnpj.get().getId().equals(pessoaJuridica.getId())) {
 			throw new ExceptionCustom("CNPJ já cadastrado no sistema");
 		}
 
-		Optional<PessoaJuridica> pjIe = pessoaJuridicaRepository
-				.findByInscricaoEstadual(pessoaJuridica.getInscricaoEstadual());
-		if (pjIe.isPresent() && !pjIe.get().getId().equals(pessoaJuridica.getId())) {
-			throw new ExceptionCustom("Inscrição Estadual já cadastrada");
+		/* Validação de IE */
+		if (pessoaJuridica.getInscricaoEstadual() != null) {
+			Optional<PessoaJuridica> pjIe = pessoaJuridicaRepository
+					.findByInscricaoEstadual(pessoaJuridica.getInscricaoEstadual().trim());
+			if (pjIe.isPresent() && !pjIe.get().getId().equals(pessoaJuridica.getId())) {
+				throw new ExceptionCustom("Inscrição Estadual já cadastrada");
+			}
 		}
 
-		if (pessoaJuridica.getId() == null || pessoaJuridica.getId() <= 0) {
-			for (int p = 0; p < pessoaJuridica.getEnderecos().size(); p++) {
-				CepDTO cepDTO = consultaCep(ValidaCEP.limpar(pessoaJuridica.getEnderecos().get(p).getCep()));
-				if (cepDTO.getCep() == null || cepDTO.getCep().trim().isEmpty()) {
-					throw new ExceptionCustom("CEP informado não pode ser vazio ou nullo.");
-				}
-				pessoaJuridica.getEnderecos().get(p).setBairro(cepDTO.getBairro());
-				pessoaJuridica.getEnderecos().get(p).setCep(ValidaCEP.limpar(cepDTO.getCep()));
-				pessoaJuridica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
-				pessoaJuridica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
-				pessoaJuridica.getEnderecos().get(p).setPessoa(pessoaJuridica);
-				pessoaJuridica.getEnderecos().get(p).setRua(cepDTO.getLogradouro());
-				pessoaJuridica.getEnderecos().get(p).setUf(cepDTO.getUf());
-			}
-
+		/* MATRIZ / FILIAL */
+		if (pessoaJuridica.getMatriz() != null && pessoaJuridica.getMatriz().getCnpj() != null) {
+			String cnpjMatriz = ValidaCNPJ.cnpjSemMascara(pessoaJuridica.getMatriz().getCnpj().trim());
+			PessoaJuridica matriz = pessoaJuridicaRepository.findByCnpj(cnpjMatriz)
+					.orElseThrow(() -> new ExceptionCustom("Matriz com CNPJ " + cnpjMatriz + " não encontrada."));
+			pessoaJuridica.setMatriz(matriz);
 		} else {
-
-			for (int p = 0; p < pessoaJuridica.getEnderecos().size(); p++) {
-				Endereco enderecoTemp = enderecoRepository.findById(pessoaJuridica.getEnderecos().get(p).getId()).get();
-				if (!enderecoTemp.getCep().equals(pessoaJuridica.getEnderecos().get(p).getCep())) {
-
-					CepDTO cepDTO = consultaCep(ValidaCEP.limpar(pessoaJuridica.getEnderecos().get(p).getCep()));
-					if (cepDTO.getCep() == null || cepDTO.getCep().trim().isEmpty()) {
-						throw new ExceptionCustom("CEP informado não pode ser vazio ou nullo.");
-					}
-					pessoaJuridica.getEnderecos().get(p).setBairro(cepDTO.getBairro());
-					pessoaJuridica.getEnderecos().get(p).setCep(ValidaCEP.limpar(cepDTO.getCep()));
-					pessoaJuridica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
-					pessoaJuridica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
-					pessoaJuridica.getEnderecos().get(p).setPessoa(pessoaJuridica);
-					pessoaJuridica.getEnderecos().get(p).setRua(cepDTO.getLogradouro());
-					pessoaJuridica.getEnderecos().get(p).setUf(cepDTO.getUf());
-				}
-			}
+			pessoaJuridica.setMatriz(null);
 		}
 
-		// Adicione esta validação antes do loop for:
-		/*
-		 * if (pessoaJuridica.getEnderecos() != null) { for (int i = 0; i <
-		 * pessoaJuridica.getEnderecos().size(); i++) {
-		 * pessoaJuridica.getEnderecos().get(i).setPessoa(pessoaJuridica);
-		 * pessoaJuridica.getEnderecos().get(i).setEmpresa(pessoaJuridica); } }
-		 */
+		tratarEnderecos(pessoaJuridica);
 
 		pessoaJuridica.setCnpj(ValidaCNPJ.cnpjSemMascara(pessoaJuridica.getCnpj().trim()));
 		pessoaJuridica = pessoaJuridicaRepository.save(pessoaJuridica);
 
-		Usuario usuarioPJ = usuarioRepository.finUserByPessoa(pessoaJuridica.getId(), pessoaJuridica.getEmail());
-
-		if (usuarioPJ == null) {
-			String constraint = usuarioRepository.consultaConstraintAcesso();
-			if (constraint != null) {
-				jdbcTemplate.execute("begin; alter table usuario_acesso drop constraint " + constraint + "; commit;");
-			}
-			usuarioPJ = new Usuario();
-			usuarioPJ.setLogin(pessoaJuridica.getEmail());
-
-			String senha = "" + Calendar.getInstance().getTimeInMillis();
-			String senhaCriptografada = new BCryptPasswordEncoder().encode(senha);
-			usuarioPJ.setSenha(senhaCriptografada);
-
-			usuarioPJ.setCreateAt(Calendar.getInstance().getTime());
-			usuarioPJ.setUpdateAt(Calendar.getInstance().getTime());
-			usuarioPJ.setEmpresa(pessoaJuridica);
-			usuarioPJ.setPessoa(pessoaJuridica);
-
-			usuarioPJ = usuarioRepository.save(usuarioPJ);
-			usuarioRepository.insereAcessoUser(usuarioPJ.getId(), RoleUser.ROLE_ADMIN.name());
-
-			StringBuilder mensagemHtml = new StringBuilder();
-			mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
-			mensagemHtml.append("<b>Login: </b>" + pessoaJuridica.getEmail()).append("<br/>");
-			mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
-			mensagemHtml.append("Obrigado");
-//			try {
-//				/* Fazer o envio de e-mail do login e senha */
-//				sendMailService.enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!",
-//						mensagemHtml.toString(), pessoaJuridica.getEmail());
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-		}
-
+		criarUsuarioSeNaoExistir(pessoaJuridica, pessoaJuridica);
 		return pessoaJuridica;
 
 	}
@@ -155,102 +99,170 @@ public class PessoaUserService {
 			throw new ExceptionCustom("Pessoa Fisica não pode ser NULL");
 		}
 
-		Optional<PessoaFisica> pessoaOpt = pessoaFisicaRepository.findByCpf(pessoaFisica.getCpf().trim());
-		if (pessoaOpt.isPresent() && !pessoaOpt.get().getId().equals(pessoaFisica.getId())) {
+		/* Validação de CPF */
+		Optional<PessoaFisica> pessoaFisicaOpt = pessoaFisicaRepository
+				.findByCpf(ValidaCPF.cpfSemMascara(pessoaFisica.getCpf()));
+		if (pessoaFisicaOpt.isPresent() && !pessoaFisicaOpt.get().getId().equals(pessoaFisica.getId())) {
 			throw new ExceptionCustom("CPF já cadastrado no sistema");
 		}
 
-		if (pessoaFisica.getId() == null || pessoaFisica.getId() <= 0) {
-			for (int p = 0; p < pessoaFisica.getEnderecos().size(); p++) {
-				CepDTO cepDTO = consultaCep(ValidaCEP.limpar(pessoaFisica.getEnderecos().get(p).getCep()));
-				if (cepDTO.getCep() == null || cepDTO.getCep().trim().isEmpty()) {
-					throw new ExceptionCustom("CEP informado não pode ser vazio ou nullo.");
-				}
-				pessoaFisica.getEnderecos().get(p).setBairro(cepDTO.getBairro());
-				pessoaFisica.getEnderecos().get(p).setCep(ValidaCEP.limpar(cepDTO.getCep()));
-				pessoaFisica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
-				pessoaFisica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
-				pessoaFisica.getEnderecos().get(p).setPessoa(pessoaFisica);
-				pessoaFisica.getEnderecos().get(p).setRua(cepDTO.getLogradouro());
-				pessoaFisica.getEnderecos().get(p).setUf(cepDTO.getUf());
-			}
-
-		} else {
-
-			for (int p = 0; p < pessoaFisica.getEnderecos().size(); p++) {
-				Endereco enderecoTemp = enderecoRepository.findById(pessoaFisica.getEnderecos().get(p).getId()).get();
-				if (!enderecoTemp.getCep().equals(pessoaFisica.getEnderecos().get(p).getCep())) {
-
-					CepDTO cepDTO = consultaCep(ValidaCEP.limpar(pessoaFisica.getEnderecos().get(p).getCep()));
-					if (cepDTO.getCep() == null || cepDTO.getCep().trim().isEmpty()) {
-						throw new ExceptionCustom("CEP informado não pode ser vazio ou nullo.");
-					}
-					pessoaFisica.getEnderecos().get(p).setBairro(cepDTO.getBairro());
-					pessoaFisica.getEnderecos().get(p).setCep(ValidaCEP.limpar(cepDTO.getCep()));
-					pessoaFisica.getEnderecos().get(p).setCidade(cepDTO.getLocalidade());
-					pessoaFisica.getEnderecos().get(p).setComplemento(cepDTO.getComplemento());
-					pessoaFisica.getEnderecos().get(p).setPessoa(pessoaFisica);
-					pessoaFisica.getEnderecos().get(p).setRua(cepDTO.getLogradouro());
-					pessoaFisica.getEnderecos().get(p).setUf(cepDTO.getUf());
-				}
-			}
+		/* Empresa obrigatória */
+		if (pessoaFisica.getEmpresa() == null || pessoaFisica.getEmpresa().getCnpj() == null) {
+			throw new ExceptionCustom("Pessoa Física deve estar vinculada a uma empresa (CNPJ).");
 		}
 
-		// Adicione esta validação antes do loop for:
-		/*
-		 * if (pessoaJuridica.getEnderecos() != null) { for (int i = 0; i <
-		 * pessoaJuridica.getEnderecos().size(); i++) {
-		 * pessoaJuridica.getEnderecos().get(i).setPessoa(pessoaJuridica);
-		 * pessoaJuridica.getEnderecos().get(i).setEmpresa(pessoaJuridica); } }
-		 */
-		String cnpj = pessoaFisica.getEmpresa().getCnpj();
+		tratarEnderecos(pessoaFisica);
 
-		PessoaJuridica empresa = pessoaJuridicaRepository.findByCnpj(ValidaCNPJ.cnpjSemMascara(cnpj))
-				.orElseThrow(() -> new ExceptionCustom("Empresa com CNPJ " + cnpj + " não encontrada."));
+		String cnpjEmpresa = ValidaCNPJ.cnpjSemMascara(pessoaFisica.getEmpresa().getCnpj());
+		PessoaJuridica empresa = pessoaJuridicaRepository.findByCnpj(cnpjEmpresa)
+				.orElseThrow(() -> new ExceptionCustom("Empresa com CNPJ " + cnpjEmpresa + " não encontrada."));
 
 		pessoaFisica.setEmpresa(empresa);
 
 		pessoaFisica.setCpf(ValidaCPF.cpfSemMascara(pessoaFisica.getCpf().trim()));
-		pessoaFisica.setEmpresa(empresa);
 		pessoaFisica = pessoaFisicaRepository.save(pessoaFisica);
 
-		Usuario usuarioPF = usuarioRepository.finUserByPessoa(pessoaFisica.getId(), pessoaFisica.getEmail());
+		criarUsuarioSeNaoExistir(pessoaFisica, empresa);
 
-		if (usuarioPF == null) {
-			String constraint = usuarioRepository.consultaConstraintAcesso();
-			if (constraint != null) {
-				jdbcTemplate.execute("begin; alter table usuario_acesso drop constraint " + constraint + "; commit;");
-			}
-			usuarioPF = new Usuario();
-			usuarioPF.setLogin(pessoaFisica.getEmail());
-
-			String senha = "" + Calendar.getInstance().getTimeInMillis();
-			String senhaCriptografada = new BCryptPasswordEncoder().encode(senha);
-			usuarioPF.setSenha(senhaCriptografada);
-
-			usuarioPF.setCreateAt(Calendar.getInstance().getTime());
-			usuarioPF.setUpdateAt(Calendar.getInstance().getTime());
-			usuarioPF.setEmpresa(empresa);
-			usuarioPF.setPessoa(pessoaFisica);
-
-			usuarioPF = usuarioRepository.save(usuarioPF);
-			usuarioRepository.insereAcessoUser(usuarioPF.getId(), RoleUser.ROLE_USER.name());
-
-			StringBuilder mensagemHtml = new StringBuilder();
-			mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
-			mensagemHtml.append("<b>Login: </b>" + pessoaFisica.getEmail()).append("<br/>");
-			mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
-			mensagemHtml.append("Obrigado");
-			/*
-			 * try { Fazer o envio de e-mail do login e senha sendMailService.
-			 * enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!"
-			 * , mensagemHtml.toString(), pessoaFisica.getEmail()); } catch (Exception e) {
-			 * e.printStackTrace(); }
-			 */
-		}
 		return pessoaFisica;
 	}
 
+	private void tratarEnderecos(Pessoa pessoa) throws ExceptionCustom {
+
+		for (Endereco end : pessoa.getEnderecos()) {
+
+			/*
+			 * ============================================================ 1) NOVA PESSOA →
+			 * cadastra todos os endereços
+			 * ============================================================
+			 */
+			if (pessoa.getId() == null) {
+
+				CepDTO cepDTO = consultaCep(ValidaCEP.limpar(end.getCep()));
+				if (cepDTO.getCep() == null) {
+					throw new ExceptionCustom("CEP inválido.");
+				}
+
+				end.setBairro(cepDTO.getBairro());
+				end.setCep(ValidaCEP.limpar(cepDTO.getCep()));
+				end.setCidade(cepDTO.getLocalidade());
+				end.setComplemento(cepDTO.getComplemento());
+				end.setRua(cepDTO.getLogradouro());
+				end.setUf(cepDTO.getUf());
+				end.setPessoa(pessoa);
+
+				continue;
+			}
+
+			/*
+			 * ============================================================ 2) PESSOA
+			 * EXISTENTE + ENDEREÇO SEM ID → cadastrar novo
+			 * ============================================================
+			 */
+			if (end.getId() == null) {
+
+				CepDTO cepDTO = consultaCep(ValidaCEP.limpar(end.getCep()));
+				if (cepDTO.getCep() == null) {
+					throw new ExceptionCustom("CEP inválido.");
+				}
+
+				end.setBairro(cepDTO.getBairro());
+				end.setCep(ValidaCEP.limpar(cepDTO.getCep()));
+				end.setCidade(cepDTO.getLocalidade());
+				end.setComplemento(cepDTO.getComplemento());
+				end.setRua(cepDTO.getLogradouro());
+				end.setUf(cepDTO.getUf());
+				end.setPessoa(pessoa);
+
+				continue;
+			}
+
+			/*
+			 * ============================================================ 3) PESSOA
+			 * EXISTENTE + ENDEREÇO EXISTENTE → atualizar se CEP mudou
+			 * ============================================================
+			 */
+			Endereco endBanco = enderecoRepository.findById(end.getId())
+					.orElseThrow(() -> new ExceptionCustom("Endereço não encontrado."));
+
+			String cepNovo = ValidaCEP.limpar(end.getCep());
+			String cepAntigo = endBanco.getCep();
+
+			if (!cepNovo.equals(cepAntigo)) {
+
+				CepDTO cepDTO = consultaCep(cepNovo);
+				if (cepDTO.getCep() == null) {
+					throw new ExceptionCustom("CEP inválido.");
+				}
+
+				end.setBairro(cepDTO.getBairro());
+				end.setCep(ValidaCEP.limpar(cepDTO.getCep()));
+				end.setCidade(cepDTO.getLocalidade());
+				end.setComplemento(cepDTO.getComplemento());
+				end.setRua(cepDTO.getLogradouro());
+				end.setUf(cepDTO.getUf());
+				end.setPessoa(pessoa);
+
+			} else {
+				/* Se o CEP não mudou → mantém dados do banco */
+				end.setPessoa(pessoa);
+			}
+		}
+	}
+
+	/*
+	 * ============================================================ 
+	 * CRIA USUÁRIO AUTOMATICAMENTE SE NÃO EXISTIR
+	 * ============================================================
+	 */
+	private void criarUsuarioSeNaoExistir(Pessoa pessoa, PessoaJuridica empresa) {
+
+		Usuario usuario = usuarioRepository.finUserByPessoa(pessoa.getId(), pessoa.getEmail());
+
+		if (usuario != null) {
+			return;
+		}
+
+		String constraint = usuarioRepository.consultaConstraintAcesso();
+		if (constraint != null) {
+			jdbcTemplate.execute("begin; alter table usuario_acesso drop constraint " + constraint + "; commit;");
+		}
+
+		usuario = new Usuario();
+		usuario.setLogin(pessoa.getEmail());
+
+		String senha = "" + Calendar.getInstance().getTimeInMillis();
+		usuario.setSenha(new BCryptPasswordEncoder().encode(senha));
+
+		usuario.setCreateAt(Calendar.getInstance().getTime());
+		usuario.setUpdateAt(Calendar.getInstance().getTime());
+		usuario.setPessoa(pessoa);
+		usuario.setEmpresa(empresa);
+
+		usuario = usuarioRepository.save(usuario);
+
+		String role = (pessoa instanceof PessoaJuridica) ? RoleUser.ROLE_ADMIN.name() : RoleUser.ROLE_USER.name();
+		usuarioRepository.insereAcessoUser(usuario.getId(), role);
+
+		// Envio de email opcional
+
+		StringBuilder mensagemHtml = new StringBuilder();
+		mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
+		mensagemHtml.append("<b>Login: </b>" + pessoa.getEmail()).append("<br/>");
+		mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
+		mensagemHtml.append("Obrigado");
+		/*
+		 * try { Fazer o envio de e-mail do login e senha sendMailService.
+		 * enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!"
+		 * , mensagemHtml.toString(), pessoaFisica.getEmail()); } catch (Exception e) {
+		 * e.printStackTrace(); }
+		 */
+	}
+
+	/*
+	 * ============================================================ CONSULTA CEP
+	 * ============================================================
+	 */
 	public CepDTO consultaCep(String cep) {
 		return new RestTemplate()
 				.getForEntity("https://viacep.com.br/ws/" + ValidaCEP.limpar(cep) + "/json/", CepDTO.class).getBody();

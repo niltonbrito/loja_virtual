@@ -27,16 +27,9 @@ public class PessoaFisica extends Pessoa{
 	private Date dataNascimento;
 
 	@ManyToOne
-	@JoinColumn(name = "empresa_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
 
-	public PessoaJuridica getEmpresa() {
-		return empresa;
-	}
-
-	public void setEmpresa(PessoaJuridica empresa) {
-		this.empresa = empresa;
-	}
 	public String getCpf() {
 		return cpf;
 	}
@@ -53,4 +46,11 @@ public class PessoaFisica extends Pessoa{
 		this.dataNascimento = dataNascimento;
 	}
 	
+	public PessoaJuridica getEmpresa() {
+		return empresa;
+	}
+
+	public void setEmpresa(PessoaJuridica empresa) {
+		this.empresa = empresa;
+	}
 }

@@ -35,6 +35,9 @@ public class PessoaController {
 	@Autowired
 	private PessoaUserService pessoaUserService;
 
+    /* ============================
+       SALVAR PESSOA JURÍDICA
+       ============================ */
 	@ResponseBody // Pode dar um retorno da API
 	@PostMapping(value = "/pessoa/juridica") // Mapeandoa url para receber um JSON
 	public ResponseEntity<PessoaJuridica> salvarPessoaJuridica(@Valid @RequestBody PessoaJuridica pessoaJuridica)
@@ -43,6 +46,9 @@ public class PessoaController {
 				HttpStatus.OK);
 	}
 
+    /* ============================
+       SALVAR PESSOA FÍSICA
+       ============================ */
 	@ResponseBody // Pode dar um retorno da API
 	@PostMapping(value = "/pessoa/fisica") // Mapeandoa url para receber um JSON
 	public ResponseEntity<PessoaFisica> salvarPessoaFisica(@Valid @RequestBody PessoaFisica pessoaFisica)
@@ -50,6 +56,9 @@ public class PessoaController {
 		return new ResponseEntity<PessoaFisica>(pessoaUserService.salvarPessoaFisica(pessoaFisica), HttpStatus.OK);
 	}
 
+    /* ============================
+       CONSULTAR CEP
+       ============================ */
 	@ResponseBody // Pode dar um retorno da API
 	@GetMapping(value = "/consulta/cep/{cep}") // Mapeandoa url para receber um JSON
 	public ResponseEntity<CepDTO> consultaCep(@Valid @PathVariable String cep) throws ExceptionCustom {

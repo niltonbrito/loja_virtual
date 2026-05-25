@@ -3,9 +3,14 @@
  */
 package com.bandampla.lojavirtual.exception;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
+import javax.mail.MessagingException;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,6 +23,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.bandampla.lojavirtual.model.dto.ObjectErrorDTO;
+import com.bandampla.lojavirtual.service.SendMailService;
 
 /**
  * @author: Nilton Brito
@@ -28,6 +34,9 @@ import com.bandampla.lojavirtual.model.dto.ObjectErrorDTO;
 @RestControllerAdvice
 public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler {
 
+	@Autowired
+	private SendMailService sendMailService;
+	
     @ExceptionHandler(ExceptionCustom.class)
     protected ResponseEntity<Object> handleExceptionCustom(ExceptionCustom ex) {
         ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
@@ -67,6 +76,17 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 
         ex.printStackTrace();
 
+		StringBuilder mensagemHtml = new StringBuilder();
+		mensagemHtml.append("<b>Olá Desenvolvedor!</b>").append("<br/>");
+		mensagemHtml.append("<b>Alerta: </b>"+"Foi detectado um erro na loja virtual que precisa ser analisado e reparado.").append("<br/>");
+		mensagemHtml.append("<b>Erro: </b>"+ ExceptionUtils.getStackTrace(ex)).append("<br/>");
+		
+		try {
+			sendMailService.enviarEmailHtml("Erro detectado na plataforma Loja Virtual Bandampla!" , mensagemHtml.toString(), "nilton.brito@outlook.com");
+		} catch (UnsupportedEncodingException | MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         return new ResponseEntity<>(objectErrorDTO, status);
     }
 
@@ -92,6 +112,17 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 
         ex.printStackTrace();
 
+		StringBuilder mensagemHtml = new StringBuilder();
+		mensagemHtml.append("<b>Olá Desenvolvedor!</b>").append("<br/>");
+		mensagemHtml.append("<b>Alerta: </b>"+"Foi detectado um erro na loja virtual que precisa ser analisado e reparado.").append("<br/>");
+		mensagemHtml.append("<b>Erro: </b>"+ ExceptionUtils.getStackTrace(ex)).append("<br/>");
+		
+		try {
+			sendMailService.enviarEmailHtml("Erro detectado na plataforma Loja Virtual Bandampla!" , mensagemHtml.toString(), "nilton.brito@outlook.com");
+		} catch (UnsupportedEncodingException | MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         return new ResponseEntity<>(objectErrorDTO, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

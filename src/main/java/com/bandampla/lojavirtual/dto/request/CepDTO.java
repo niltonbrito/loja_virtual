@@ -31,6 +31,9 @@ public class CepDTO implements Serializable{
 	public void setCep(String cep) {
 		this.cep = cep;
 	}
+	public String pessoaFisica() {
+		return logradouro;
+	}
 	public String getLogradouro() {
 		return logradouro;
 	}
