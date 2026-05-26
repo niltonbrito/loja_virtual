@@ -1,9 +1,13 @@
 package com.bandampla.lojavirtual.service;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -83,12 +87,12 @@ public class PessoaUserService {
 			pessoaJuridica.setMatriz(null);
 		}
 
-		tratarEnderecos(pessoaJuridica);
+		cadastrarEnderecos(pessoaJuridica);
 
 		pessoaJuridica.setCnpj(ValidaCNPJ.cnpjSemMascara(pessoaJuridica.getCnpj().trim()));
 		pessoaJuridica = pessoaJuridicaRepository.save(pessoaJuridica);
 
-		criarUsuarioSeNaoExistir(pessoaJuridica, pessoaJuridica);
+		criarUsuario(pessoaJuridica, pessoaJuridica);
 		return pessoaJuridica;
 
 	}
@@ -111,7 +115,7 @@ public class PessoaUserService {
 			throw new ExceptionCustom("Pessoa Física deve estar vinculada a uma empresa (CNPJ).");
 		}
 
-		tratarEnderecos(pessoaFisica);
+		cadastrarEnderecos(pessoaFisica);
 
 		String cnpjEmpresa = ValidaCNPJ.cnpjSemMascara(pessoaFisica.getEmpresa().getCnpj());
 		PessoaJuridica empresa = pessoaJuridicaRepository.findByCnpj(cnpjEmpresa)
@@ -122,12 +126,12 @@ public class PessoaUserService {
 		pessoaFisica.setCpf(ValidaCPF.cpfSemMascara(pessoaFisica.getCpf().trim()));
 		pessoaFisica = pessoaFisicaRepository.save(pessoaFisica);
 
-		criarUsuarioSeNaoExistir(pessoaFisica, empresa);
+		criarUsuario(pessoaFisica, empresa);
 
 		return pessoaFisica;
 	}
 
-	private void tratarEnderecos(Pessoa pessoa) throws ExceptionCustom {
+	private void cadastrarEnderecos(Pessoa pessoa) throws ExceptionCustom {
 
 		for (Endereco end : pessoa.getEnderecos()) {
 
@@ -215,7 +219,7 @@ public class PessoaUserService {
 	 * CRIA USUÁRIO AUTOMATICAMENTE SE NÃO EXISTIR
 	 * ============================================================
 	 */
-	private void criarUsuarioSeNaoExistir(Pessoa pessoa, PessoaJuridica empresa) {
+	private void criarUsuario(Pessoa pessoa, PessoaJuridica empresa) {
 
 		Usuario usuario = usuarioRepository.finUserByPessoa(pessoa.getId(), pessoa.getEmail());
 
@@ -267,4 +271,32 @@ public class PessoaUserService {
 		return new RestTemplate()
 				.getForEntity("https://viacep.com.br/ws/" + ValidaCEP.limpar(cep) + "/json/", CepDTO.class).getBody();
 	}
+	
+	public List<PessoaJuridica> consultaPessoaJuridicaPorNome(String nome) throws ExceptionCustom {
+
+	    if (nome == null || nome.trim().isEmpty()) {
+	        throw new ExceptionCustom("Nome não pode estar vazio");
+	    }
+	    List<PessoaJuridica> lista = pessoaJuridicaRepository.findAllByNome(nome.trim());
+
+	    if (lista.isEmpty()) {
+	        throw new ExceptionCustom("Nenhuma pessoa jurídica encontrada com o nome informado.");
+	    }
+	    return lista; // ou retorne a lista inteira se quiser
+	}
+	
+	
+	public List<PessoaJuridica> consultaPessoaJuridicaPorCnpj(String cnpj) throws ExceptionCustom {
+
+	    if (cnpj == null || cnpj.trim().isEmpty()) {
+	        throw new ExceptionCustom("CNPJ não pode estar vazio");
+	    }
+	    List<PessoaJuridica> lista = pessoaJuridicaRepository.findAllByCnpj(cnpj.trim());
+
+	    if (lista.isEmpty()) {
+	        throw new ExceptionCustom("Nenhuma pessoa jurídica encontrada com o CNPJ informado.");
+	    }
+	    return lista; // ou retorne a lista inteira se quiser
+	}
+
 }

@@ -31,7 +31,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
 	Optional<Usuario> findByLogin(String login);
 
-	@Query(nativeQuery = true, value = "select * from usuario u where u.pessoa_id = ?1 or u.login = ?2")
+	@Query(value = "select * from usuario u where u.pessoa_id = ?1 or u.login = ?2",nativeQuery = true)
 	Usuario finUserByPessoa(Long id, String email);
 
 	@Query(value = "select constraint_name from information_schema.constraint_column_usage where table_name ='usuario_acesso'\r\n"

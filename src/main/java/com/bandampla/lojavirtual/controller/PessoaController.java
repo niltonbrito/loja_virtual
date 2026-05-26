@@ -3,6 +3,8 @@
  */
 package com.bandampla.lojavirtual.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +37,10 @@ public class PessoaController {
 	@Autowired
 	private PessoaUserService pessoaUserService;
 
-    /* ============================
-       SALVAR PESSOA JURÍDICA
-       ============================ */
+	/*
+	 * ============================ SALVAR PESSOA JURÍDICA
+	 * ============================
+	 */
 	@ResponseBody // Pode dar um retorno da API
 	@PostMapping(value = "/pessoa/juridica") // Mapeandoa url para receber um JSON
 	public ResponseEntity<PessoaJuridica> salvarPessoaJuridica(@Valid @RequestBody PessoaJuridica pessoaJuridica)
@@ -46,9 +49,26 @@ public class PessoaController {
 				HttpStatus.OK);
 	}
 
-    /* ============================
-       SALVAR PESSOA FÍSICA
-       ============================ */
+	@ResponseBody // Pode dar um retorno da API
+	@GetMapping(value = "/consulta/pessoa/juridica/{nome}") // Mapeandoa url para receber um JSON
+	public ResponseEntity<List<PessoaJuridica>> consultaPessoaJuridicaPorNome(@Valid @PathVariable String nome)
+			throws ExceptionCustom {
+		return new ResponseEntity<List<PessoaJuridica>>(
+				pessoaUserService.consultaPessoaJuridicaPorNome(nome.trim().toUpperCase()), HttpStatus.OK);
+	}
+
+	@ResponseBody // Pode dar um retorno da API
+	@GetMapping(value = "/consulta/pessoa/juridica/{cnpj}") // Mapeandoa url para receber um JSON
+	public ResponseEntity<List<PessoaJuridica>> consultaPessoaJuridicaPorCnpj(@Valid @PathVariable String cnpj)
+			throws ExceptionCustom {
+		return new ResponseEntity<List<PessoaJuridica>>(pessoaUserService.consultaPessoaJuridicaPorCnpj(cnpj.trim()),
+				HttpStatus.OK);
+	}
+
+	/*
+	 * ============================ SALVAR PESSOA FÍSICA
+	 * ============================
+	 */
 	@ResponseBody // Pode dar um retorno da API
 	@PostMapping(value = "/pessoa/fisica") // Mapeandoa url para receber um JSON
 	public ResponseEntity<PessoaFisica> salvarPessoaFisica(@Valid @RequestBody PessoaFisica pessoaFisica)
@@ -56,9 +76,9 @@ public class PessoaController {
 		return new ResponseEntity<PessoaFisica>(pessoaUserService.salvarPessoaFisica(pessoaFisica), HttpStatus.OK);
 	}
 
-    /* ============================
-       CONSULTAR CEP
-       ============================ */
+	/*
+	 * ============================ CONSULTAR CEP ============================
+	 */
 	@ResponseBody // Pode dar um retorno da API
 	@GetMapping(value = "/consulta/cep/{cep}") // Mapeandoa url para receber um JSON
 	public ResponseEntity<CepDTO> consultaCep(@Valid @PathVariable String cep) throws ExceptionCustom {

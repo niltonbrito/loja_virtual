@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,5 +30,6 @@ public interface PessoaFisicaRepository extends JpaRepository<PessoaFisica, Long
 
 	Optional<PessoaFisica> findByCpf(String cpf);
 
-	List<PessoaFisica> findByNome(String nome);
+	@Query("select pf from PessoaFisica pf where upper(pf.nome) like upper(concat('%', :nome, '%'))")
+	List<PessoaFisica> findByNome(@Param("nome") String nome);
 }
