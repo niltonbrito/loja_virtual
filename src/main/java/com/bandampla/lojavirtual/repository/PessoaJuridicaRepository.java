@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.repository;
 
 import java.util.List;
@@ -13,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.bandampla.lojavirtual.model.PessoaJuridica;
-
 
 /**
  * @author: Nilton Brito
@@ -30,8 +26,8 @@ public interface PessoaJuridicaRepository extends JpaRepository<PessoaJuridica, 
 
 	@Query("select pj from PessoaJuridica pj where pj.cnpj like %?1%")
 	List<PessoaJuridica> findAllByCnpj(String cnpj);
-	
+
 	Optional<PessoaJuridica> findByCnpj(String cnpj);
-	
+
 	Optional<PessoaJuridica> findByInscricaoEstadual(String inscricaoEstadual);
 }

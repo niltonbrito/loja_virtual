@@ -4,17 +4,16 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.bandampla.lojavirtual.dto.request.CepDTO;
+import com.bandampla.lojavirtual.dto.request.CnpjDTO;
 import com.bandampla.lojavirtual.enums.RoleUser;
+import com.bandampla.lojavirtual.enums.TipoPessoa;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Endereco;
 import com.bandampla.lojavirtual.model.Pessoa;
@@ -51,14 +50,17 @@ public class PessoaUserService {
 	private SendMailService sendMailService;
 
 	/*
-	 * ============================================================ SALVAR PESSOA
-	 * JURÍDICA (EMPRESA / MATRIZ / FILIAL)
-	 * ============================================================
+	 * ===================== SALVAR PESSOA JURÍDICA (EMPRESA / MATRIZ / FILIAL)
+	 * =====================
 	 */
 	public PessoaJuridica salvarPessoaJuridica(PessoaJuridica pessoaJuridica) throws ExceptionCustom {
 
 		if (pessoaJuridica == null) {
 			throw new ExceptionCustom("Pessoa Juridica não pode ser NULL");
+		}
+
+		if (pessoaJuridica.getTipoPessoa() == null) {
+			throw new ExceptionCustom("Informe o tipo de Pessoa Juridica.");
 		}
 
 		/* Validação de CNPJ */
@@ -88,7 +90,7 @@ public class PessoaUserService {
 		}
 
 		cadastrarEnderecos(pessoaJuridica);
-
+		pessoaJuridica.setTipoPessoa(TipoPessoa.JURIDICA);
 		pessoaJuridica.setCnpj(ValidaCNPJ.cnpjSemMascara(pessoaJuridica.getCnpj().trim()));
 		pessoaJuridica = pessoaJuridicaRepository.save(pessoaJuridica);
 
@@ -101,6 +103,10 @@ public class PessoaUserService {
 
 		if (pessoaFisica == null) {
 			throw new ExceptionCustom("Pessoa Fisica não pode ser NULL");
+		}
+
+		if (pessoaFisica.getTipoPessoa() == null) {
+			throw new ExceptionCustom("Informe o tipo de Pessoa.");
 		}
 
 		/* Validação de CPF */
@@ -122,7 +128,7 @@ public class PessoaUserService {
 				.orElseThrow(() -> new ExceptionCustom("Empresa com CNPJ " + cnpjEmpresa + " não encontrada."));
 
 		pessoaFisica.setEmpresa(empresa);
-
+		pessoaFisica.setTipoPessoa(TipoPessoa.FISICA);
 		pessoaFisica.setCpf(ValidaCPF.cpfSemMascara(pessoaFisica.getCpf().trim()));
 		pessoaFisica = pessoaFisicaRepository.save(pessoaFisica);
 
@@ -136,9 +142,8 @@ public class PessoaUserService {
 		for (Endereco end : pessoa.getEnderecos()) {
 
 			/*
-			 * ============================================================ 1) NOVA PESSOA →
-			 * cadastra todos os endereços
-			 * ============================================================
+			 * ===================== 1) NOVA PESSOA cadastra todos os endereços
+			 * =====================
 			 */
 			if (pessoa.getId() == null) {
 
@@ -159,9 +164,8 @@ public class PessoaUserService {
 			}
 
 			/*
-			 * ============================================================ 2) PESSOA
-			 * EXISTENTE + ENDEREÇO SEM ID → cadastrar novo
-			 * ============================================================
+			 * ===================== 2) PESSOA EXISTENTE + ENDEREÇO SEM ID → cadastrar novo
+			 * =====================
 			 */
 			if (end.getId() == null) {
 
@@ -182,9 +186,8 @@ public class PessoaUserService {
 			}
 
 			/*
-			 * ============================================================ 3) PESSOA
-			 * EXISTENTE + ENDEREÇO EXISTENTE → atualizar se CEP mudou
-			 * ============================================================
+			 * ===================== 3) PESSOA EXISTENTE + ENDEREÇO EXISTENTE → atualizar se
+			 * CEP mudou =====================
 			 */
 			Endereco endBanco = enderecoRepository.findById(end.getId())
 					.orElseThrow(() -> new ExceptionCustom("Endereço não encontrado."));
@@ -215,9 +218,8 @@ public class PessoaUserService {
 	}
 
 	/*
-	 * ============================================================ 
-	 * CRIA USUÁRIO AUTOMATICAMENTE SE NÃO EXISTIR
-	 * ============================================================
+	 * ===================== CRIA USUÁRIO AUTOMATICAMENTE SE NÃO EXISTIR
+	 * =====================
 	 */
 	private void criarUsuario(Pessoa pessoa, PessoaJuridica empresa) {
 
@@ -251,52 +253,61 @@ public class PessoaUserService {
 		// Envio de email opcional
 
 		StringBuilder mensagemHtml = new StringBuilder();
+
+		mensagemHtml.append("<b>Olá!: " + pessoa.getNome() + " </b>").append("<br/>");
 		mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
 		mensagemHtml.append("<b>Login: </b>" + pessoa.getEmail()).append("<br/>");
 		mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
 		mensagemHtml.append("Obrigado");
-		/*
-		 * try { Fazer o envio de e-mail do login e senha sendMailService.
-		 * enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!"
-		 * , mensagemHtml.toString(), pessoaFisica.getEmail()); } catch (Exception e) {
-		 * e.printStackTrace(); }
-		 */
+
+		try { // Fazer o envio de e-mail do login e senha
+			sendMailService.enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!",
+					mensagemHtml.toString(), pessoa.getEmail());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	/*
-	 * ============================================================ CONSULTA CEP
-	 * ============================================================
+	 * ===================== CONSULTA CEP =====================
 	 */
 	public CepDTO consultaCep(String cep) {
 		return new RestTemplate()
 				.getForEntity("https://viacep.com.br/ws/" + ValidaCEP.limpar(cep) + "/json/", CepDTO.class).getBody();
 	}
-	
+
+	/*
+	 * ===================== CONSULTA CNPJ =====================
+	 */
+	public CnpjDTO consultaCnpj(String cnpj) throws ExceptionCustom {
+		if (cnpj.length() != 14) {
+			throw new ExceptionCustom("CNPJ informado deve possuir 14 caracteres.");
+		}
+		
+		if (ValidaCNPJ.isCNPJ(cnpj) == false) {
+			throw new ExceptionCustom("CNPJ informado é inválido.");
+		}
+		return new RestTemplate()
+				.getForEntity("https://receitaws.com.br/v1/cnpj/" + ValidaCNPJ.cnpjSemMascara(cnpj), CnpjDTO.class)
+				.getBody();
+	}
+
 	public List<PessoaJuridica> consultaPessoaJuridicaPorNome(String nome) throws ExceptionCustom {
-
-	    if (nome == null || nome.trim().isEmpty()) {
-	        throw new ExceptionCustom("Nome não pode estar vazio");
-	    }
-	    List<PessoaJuridica> lista = pessoaJuridicaRepository.findAllByNome(nome.trim());
-
-	    if (lista.isEmpty()) {
-	        throw new ExceptionCustom("Nenhuma pessoa jurídica encontrada com o nome informado.");
-	    }
-	    return lista; // ou retorne a lista inteira se quiser
+		if (nome == null || nome.trim().isEmpty())
+			throw new ExceptionCustom("Nome não pode estar vazio");
+		List<PessoaJuridica> lista = pessoaJuridicaRepository.findAllByNome(nome.trim());
+		if (lista.isEmpty())
+			throw new ExceptionCustom("Nenhuma pessoa jurídica encontrada com o nome informado.");
+		return lista; // ou retorne a lista inteira se quiser
 	}
-	
-	
+
 	public List<PessoaJuridica> consultaPessoaJuridicaPorCnpj(String cnpj) throws ExceptionCustom {
-
-	    if (cnpj == null || cnpj.trim().isEmpty()) {
-	        throw new ExceptionCustom("CNPJ não pode estar vazio");
-	    }
-	    List<PessoaJuridica> lista = pessoaJuridicaRepository.findAllByCnpj(cnpj.trim());
-
-	    if (lista.isEmpty()) {
-	        throw new ExceptionCustom("Nenhuma pessoa jurídica encontrada com o CNPJ informado.");
-	    }
-	    return lista; // ou retorne a lista inteira se quiser
+		if (cnpj == null || cnpj.trim().isEmpty())
+			throw new ExceptionCustom("CNPJ não pode estar vazio");
+		List<PessoaJuridica> lista = pessoaJuridicaRepository.findAllByCnpj(cnpj.trim());
+		if (lista.isEmpty())
+			throw new ExceptionCustom("Nenhuma pessoa jurídica encontrada com o CNPJ informado.");
+		return lista; // ou retorne a lista inteira se quiser
 	}
-
 }

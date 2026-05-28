@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bandampla.lojavirtual.dto.request.CepDTO;
+import com.bandampla.lojavirtual.dto.request.CnpjDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.PessoaFisica;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
@@ -38,8 +39,7 @@ public class PessoaController {
 	private PessoaUserService pessoaUserService;
 
 	/*
-	 * ============================ SALVAR PESSOA JURÍDICA
-	 * ============================
+	 * ============================ PESSOA JURÍDICA ============================
 	 */
 	@ResponseBody // Pode dar um retorno da API
 	@PostMapping(value = "/pessoa/juridica") // Mapeandoa url para receber um JSON
@@ -50,7 +50,7 @@ public class PessoaController {
 	}
 
 	@ResponseBody // Pode dar um retorno da API
-	@GetMapping(value = "/consulta/pessoa/juridica/{nome}") // Mapeandoa url para receber um JSON
+	@GetMapping(value = "/consulta/pessoa/juridicas/{nome}") // Mapeandoa url para receber um JSON
 	public ResponseEntity<List<PessoaJuridica>> consultaPessoaJuridicaPorNome(@Valid @PathVariable String nome)
 			throws ExceptionCustom {
 		return new ResponseEntity<List<PessoaJuridica>>(
@@ -66,8 +66,7 @@ public class PessoaController {
 	}
 
 	/*
-	 * ============================ SALVAR PESSOA FÍSICA
-	 * ============================
+	 * ============================ PESSOA FÍSICA ============================
 	 */
 	@ResponseBody // Pode dar um retorno da API
 	@PostMapping(value = "/pessoa/fisica") // Mapeandoa url para receber um JSON
@@ -77,12 +76,21 @@ public class PessoaController {
 	}
 
 	/*
-	 * ============================ CONSULTAR CEP ============================
+	 * ============================ CEP ============================
 	 */
 	@ResponseBody // Pode dar um retorno da API
 	@GetMapping(value = "/consulta/cep/{cep}") // Mapeandoa url para receber um JSON
 	public ResponseEntity<CepDTO> consultaCep(@Valid @PathVariable String cep) throws ExceptionCustom {
 		return new ResponseEntity<CepDTO>(pessoaUserService.consultaCep(cep), HttpStatus.OK);
+	}
+
+	/*
+	 * ============================ CNPJ ============================
+	 */
+	@ResponseBody // Pode dar um retorno da API
+	@GetMapping(value = "/consulta/cnpj/{cnpj}") // Mapeandoa url para receber um JSON
+	public ResponseEntity<CnpjDTO> consultaCnpj(@Valid @PathVariable String cnpj) throws ExceptionCustom {
+		return new ResponseEntity<CnpjDTO>(pessoaUserService.consultaCnpj(cnpj), HttpStatus.OK);
 	}
 
 }
