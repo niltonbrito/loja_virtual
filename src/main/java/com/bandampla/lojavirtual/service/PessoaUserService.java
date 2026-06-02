@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.bandampla.lojavirtual.dto.request.CepDTO;
@@ -147,13 +148,13 @@ public class PessoaUserService {
 			 */
 			if (pessoa.getId() == null) {
 
-				CepDTO cepDTO = consultaCep(ValidaCEP.limpar(end.getCep()));
+				CepDTO cepDTO = consultaCep(ValidaCEP.cepSemMascara(end.getCep()));
 				if (cepDTO.getCep() == null) {
 					throw new ExceptionCustom("CEP inválido.");
 				}
 
 				end.setBairro(cepDTO.getBairro());
-				end.setCep(ValidaCEP.limpar(cepDTO.getCep()));
+				end.setCep(ValidaCEP.cepSemMascara(cepDTO.getCep()));
 				end.setCidade(cepDTO.getLocalidade());
 				end.setComplemento(cepDTO.getComplemento());
 				end.setRua(cepDTO.getLogradouro());
@@ -169,13 +170,13 @@ public class PessoaUserService {
 			 */
 			if (end.getId() == null) {
 
-				CepDTO cepDTO = consultaCep(ValidaCEP.limpar(end.getCep()));
+				CepDTO cepDTO = consultaCep(ValidaCEP.cepSemMascara(end.getCep()));
 				if (cepDTO.getCep() == null) {
 					throw new ExceptionCustom("CEP inválido.");
 				}
 
 				end.setBairro(cepDTO.getBairro());
-				end.setCep(ValidaCEP.limpar(cepDTO.getCep()));
+				end.setCep(ValidaCEP.cepSemMascara(cepDTO.getCep()));
 				end.setCidade(cepDTO.getLocalidade());
 				end.setComplemento(cepDTO.getComplemento());
 				end.setRua(cepDTO.getLogradouro());
@@ -192,7 +193,7 @@ public class PessoaUserService {
 			Endereco endBanco = enderecoRepository.findById(end.getId())
 					.orElseThrow(() -> new ExceptionCustom("Endereço não encontrado."));
 
-			String cepNovo = ValidaCEP.limpar(end.getCep());
+			String cepNovo = ValidaCEP.cepSemMascara(end.getCep());
 			String cepAntigo = endBanco.getCep();
 
 			if (!cepNovo.equals(cepAntigo)) {
@@ -203,7 +204,7 @@ public class PessoaUserService {
 				}
 
 				end.setBairro(cepDTO.getBairro());
-				end.setCep(ValidaCEP.limpar(cepDTO.getCep()));
+				end.setCep(ValidaCEP.cepSemMascara(cepDTO.getCep()));
 				end.setCidade(cepDTO.getLocalidade());
 				end.setComplemento(cepDTO.getComplemento());
 				end.setRua(cepDTO.getLogradouro());
@@ -272,9 +273,10 @@ public class PessoaUserService {
 	/*
 	 * ===================== CONSULTA CEP =====================
 	 */
-	public CepDTO consultaCep(String cep) {
+	public CepDTO consultaCep(String cep) throws RestClientException, ExceptionCustom {
 		return new RestTemplate()
-				.getForEntity("https://viacep.com.br/ws/" + ValidaCEP.limpar(cep) + "/json/", CepDTO.class).getBody();
+				.getForEntity("https://viacep.com.br/ws/" + ValidaCEP.cepSemMascara(cep) + "/json/", CepDTO.class)
+				.getBody();
 	}
 
 	/*
@@ -284,7 +286,7 @@ public class PessoaUserService {
 		if (cnpj.length() != 14) {
 			throw new ExceptionCustom("CNPJ informado deve possuir 14 caracteres.");
 		}
-		
+
 		if (ValidaCNPJ.isCNPJ(cnpj) == false) {
 			throw new ExceptionCustom("CNPJ informado é inválido.");
 		}

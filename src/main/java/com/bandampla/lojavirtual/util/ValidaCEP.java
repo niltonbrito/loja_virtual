@@ -4,24 +4,34 @@ import com.bandampla.lojavirtual.exception.ExceptionCustom;
 
 public class ValidaCEP {
 
-	public static String limpar(String cep) {
-		return cep == null ? null : cep.replaceAll("[^0-9]", "");
-	}
+	public static boolean isCepValido(String cep) {
 
-	public static void validarFormato(String cep) throws ExceptionCustom {
-
-		if (cep == null || cep.trim().isEmpty()) {
-			throw new ExceptionCustom("CEP informado não pode ser vazio.");
+		if (cep == null) {
+			return false;
 		}
 
-		cep = limpar(cep);
+		cep = cep.replaceAll("[^0-9]", "");
 
+		return cep.matches("^[0-9]{8}$");
+	}
+
+	public static String cepSemMascara(String cep) throws ExceptionCustom {
+
+
+		cep = cep.replaceAll("[^0-9]", "");
+
+		if (cep.isEmpty()) {
+			throw new ExceptionCustom("CEP informado não pode ser vazio.");
+		}
+		
 		if (cep.length() != 8) {
 			throw new ExceptionCustom("CEP deve conter exatamente 8 dígitos numéricos.");
 		}
+		return cep;
+	}
 
-		if (!cep.matches("\\d{8}")) {
-			throw new ExceptionCustom("CEP deve conter apenas números.");
-		}
+	public static String cepComMascara(String cep) throws ExceptionCustom {
+		cep = cepSemMascara(cep);
+		return cep.substring(0, 5) + "-" + cep.substring(5);
 	}
 }

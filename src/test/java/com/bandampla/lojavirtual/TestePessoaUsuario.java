@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Profile;
 
 import com.bandampla.lojavirtual.controller.PessoaController;
 import com.bandampla.lojavirtual.enums.TipoEndereco;
+import com.bandampla.lojavirtual.enums.TipoPessoa;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Endereco;
 import com.bandampla.lojavirtual.model.PessoaFisica;
@@ -45,7 +46,7 @@ class TestePessoaUsuario extends TestCase {
 		pessoaJuridica.setInscricaoMunicipal("" + Calendar.getInstance().getTimeInMillis());
 		pessoaJuridica.setNomeFantasia("Bandampla");
 		pessoaJuridica.setRazaoSocial("BAndampla Sistemas");
-		pessoaJuridica.setTipoPessoa("JURIDICA");
+		pessoaJuridica.setTipoPessoa(TipoPessoa.JURIDICA);
 		
 		Endereco endereco = new Endereco();
 		endereco.setRua("Rua do Ceu");
@@ -97,8 +98,8 @@ class TestePessoaUsuario extends TestCase {
 		  pessoaFisica.setDataNascimento(sdf.parse("07/10/1985"));
 
 		  pessoaFisica.setTelefone("719920456500");
-		  pessoaFisica.setEmpresa(pessoaJuridica.get().getEmpresa());
-		  pessoaFisica.setTipoPessoa("FISICA");
+		  pessoaFisica.setEmpresa(pessoaJuridica.get().getMatriz());
+		  pessoaFisica.setTipoPessoa(TipoPessoa.FISICA);
 		 
 		
 		Endereco endereco = new Endereco();
@@ -110,7 +111,6 @@ class TestePessoaUsuario extends TestCase {
 		endereco.setCep("41256255");
 		endereco.setUf("BA");
 		endereco.setTipoEndereco(TipoEndereco.ENTREGA);
-		endereco.setEmpresa(pessoaJuridica.get().getEmpresa());
 		endereco.setPessoa(pessoaFisica);
 
 		Endereco endereco1 = new Endereco();
@@ -122,7 +122,6 @@ class TestePessoaUsuario extends TestCase {
 		endereco1.setCep("41256275");
 		endereco1.setUf("BA");
 		endereco1.setTipoEndereco(TipoEndereco.COBRANCA);
-		endereco1.setEmpresa(pessoaJuridica.get().getEmpresa());
 		endereco1.setPessoa(pessoaFisica);
 
 		pessoaFisica.getEnderecos().add(endereco);

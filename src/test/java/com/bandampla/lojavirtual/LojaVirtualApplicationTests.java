@@ -18,6 +18,7 @@ import com.bandampla.lojavirtual.controller.AcessoController;
 import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Acesso;
+import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.repository.AcessoRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -44,7 +45,7 @@ class LojaVirtualApplicationTests extends TestCase {
 		MockMvc mockMvc = builder.build();
 
 		Acesso acesso = new Acesso();
-		acesso.getRoleUser(RoleUser.ROLE_ADMIN.toString());
+		acesso.setRoleUser(RoleUser.ROLE_ADMIN);
 
 		ObjectMapper objectMapperAcesso = new ObjectMapper();
 
@@ -58,7 +59,7 @@ class LojaVirtualApplicationTests extends TestCase {
 		Acesso objetResultApiAcesso = objectMapperAcesso
 				.readValue(resultApiAcesso.andReturn().getResponse().getContentAsString(), Acesso.class);
 		/* Validação */
-		assertEquals(acesso.getDescricao(), objetResultApiAcesso.getDescricao());
+		assertEquals(acesso.getRoleUser(), objetResultApiAcesso.getRoleUser());
 	}
 
 	/* Teste Mokito para o endPoint de cadastrar */
@@ -68,7 +69,8 @@ class LojaVirtualApplicationTests extends TestCase {
 		MockMvc mockMvc = builder.build();
 
 		Acesso acesso = new Acesso();
-		acesso.setDescricao("ROLE_COMPRADOR" + Calendar.getInstance().getTimeInMillis());
+
+		acesso.setRoleUser(RoleUser.ROLE_ESTOQUE);
 
 		ObjectMapper objectMapperAcesso = new ObjectMapper();
 
@@ -82,7 +84,7 @@ class LojaVirtualApplicationTests extends TestCase {
 		Acesso objetResultApiAcesso = objectMapperAcesso
 				.readValue(resultApiAcesso.andReturn().getResponse().getContentAsString(), Acesso.class);
 		/* Validação */
-		assertEquals(acesso.getDescricao(), objetResultApiAcesso.getDescricao());
+		assertEquals(acesso.getRoleUser(), objetResultApiAcesso.getRoleUser());
 	}
 	/* Teste Mokito para o endPoint de cadastrar */
 	@Test
@@ -91,7 +93,8 @@ class LojaVirtualApplicationTests extends TestCase {
 		MockMvc mockMvc = builder.build();
 
 		Acesso acesso = new Acesso();
-		acesso.setDescricao("ROLE_TESTE_DELETE");
+
+		acesso.setRoleUser(RoleUser.ROLE_ADMIN);
 		acesso = acessoRepository.save(acesso);
 
 		ObjectMapper objectMapperAcesso = new ObjectMapper();
@@ -115,7 +118,7 @@ class LojaVirtualApplicationTests extends TestCase {
 		MockMvc mockMvc = builder.build();
 
 		Acesso acesso = new Acesso();
-		acesso.setDescricao("ROLE_TESTE_DELETE_ID");
+		acesso.setRoleUser(RoleUser.ROLE_GERENTE);
 		acesso = acessoRepository.save(acesso);
 
 		ObjectMapper objectMapperAcesso = new ObjectMapper();
@@ -139,7 +142,7 @@ class LojaVirtualApplicationTests extends TestCase {
 		MockMvc mockMvc = builder.build();
 
 		Acesso acesso = new Acesso();
-		acesso.setDescricao("ROLE_TESTE_BUSCAR_ID");
+		acesso.setRoleUser(RoleUser.ROLE_GERENTE);
 		acesso = acessoRepository.save(acesso);
 
 		ObjectMapper objectMapperAcesso = new ObjectMapper();
@@ -154,7 +157,7 @@ class LojaVirtualApplicationTests extends TestCase {
 		Acesso objetResultApiAcesso = objectMapperAcesso
 				.readValue(resultApiAcesso.andReturn().getResponse().getContentAsString(), Acesso.class);
 		/* Validação */
-		assertEquals(acesso.getDescricao(), objetResultApiAcesso.getDescricao());
+		assertEquals(acesso.getRoleUser(), objetResultApiAcesso.getRoleUser());
 		assertEquals(acesso.getId(), objetResultApiAcesso.getId());
 		assertEquals(200, resultApiAcesso.andReturn().getResponse().getStatus());
 	}
@@ -166,7 +169,7 @@ class LojaVirtualApplicationTests extends TestCase {
 		MockMvc mockMvc = builder.build();
 
 		Acesso acesso = new Acesso();
-		acesso.setDescricao("ROLE_TESTE_BUSCAR_DESCRICAO");
+		acesso.setRoleUser(RoleUser.ROLE_GERENTE);
 		acesso = acessoRepository.save(acesso);
 
 		ObjectMapper objectMapperAcesso = new ObjectMapper();
@@ -186,7 +189,7 @@ class LojaVirtualApplicationTests extends TestCase {
 
 		/* Validação */
 		assertEquals(1, objetResultApiAcessoList.size());
-		assertEquals(acesso.getDescricao(), objetResultApiAcessoList.get(0).getDescricao());
+		assertEquals(acesso.getRoleUser(), objetResultApiAcessoList.get(0).getRoleUser());
 		assertEquals(200, resultApiAcesso.andReturn().getResponse().getStatus());
 
 		acessoRepository.deleteById(acesso.getId());
@@ -199,7 +202,8 @@ class LojaVirtualApplicationTests extends TestCase {
 		String desacesso  = "ROLE_ADMIN" + Calendar.getInstance().getTimeInMillis();
 		Acesso acesso = new Acesso();
 
-		acesso.setDescricao(desacesso);
+
+		acesso.setRoleUser(RoleUser.ROLE_GERENTE);
 
 		assertEquals(true, acesso.getId() == null);
 
@@ -209,7 +213,7 @@ class LojaVirtualApplicationTests extends TestCase {
 
 		/* Teste de Validação */
 		// Valida dados da forma correta
-		assertEquals(desacesso, acesso.getDescricao());
+		assertEquals(desacesso, acesso.getRoleUser());
 
 		assertEquals(true, acesso.getId() > 0);
 		/* Teste de carregamento */
@@ -226,7 +230,7 @@ class LojaVirtualApplicationTests extends TestCase {
 
 		/* Teste de Query */
 		acesso = new Acesso(); // Objeto recebe uma nova instância
-		acesso.setDescricao("ROLE_ALUNO"); // seta o valor no objeto
+		acesso.setRoleUser(RoleUser.ROLE_GERENTE); // seta o valor no objeto
 		acesso = acessoController.salvarAcesso(acesso).getBody(); // Chama o metodo salvar do controller passando o objeto
 		
 		List<Acesso> acessos = acessoRepository.buscarAcessoDesc("ALUNO".trim().toUpperCase()); // cria uma lista de Acessos buscando os acessos no banco
