@@ -1,0 +1,49 @@
+/**
+ * 
+ */
+package com.bandampla.lojavirtual.dto;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+
+/**
+ * @author: Nilton Brito
+ * @Email: <nilton.brito@outlook.com>
+ * @Data: 18 de mai. de 2026
+ */
+public class CategoriaProdutoDTO {
+
+	private Long id;
+
+	@NotBlank(message = "A Categoria do produto deve ser informado.")
+	private String nomeDescricao;
+
+	@NotNull(message = "O ID da Empresa deve ser informado.")
+	@Positive(message = "O ID da Empresa deve ser maior que zero.")
+	private Long empresaId;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getNomeDescricao() {
+		return nomeDescricao;
+	}
+
+	public void setNomeDescricao(String nomeDescricao) {
+		this.nomeDescricao = nomeDescricao;
+	}
+
+	public Long getEmpresaId() {
+		return empresaId;
+	}
+
+	public void setEmpresaId(Long empresaId) {
+		this.empresaId = empresaId;
+	}
+}

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.bandampla.lojavirtual.model.dto.ObjectErrorDTO;
+import com.bandampla.lojavirtual.dto.ObjectErrorDTO;
 import com.bandampla.lojavirtual.service.SendMailService;
 
 /**

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.exception;
 
 import java.io.Serializable;

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.bandampla.lojavirtual.model.dto;
+package com.bandampla.lojavirtual.dto;
 
 import java.io.Serializable;
 
