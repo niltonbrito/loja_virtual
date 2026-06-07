@@ -7,11 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
 
-import com.bandampla.lojavirtual.controller.CategoriaProdutoController;
+import com.bandampla.lojavirtual.dto.CategoriaProdutoDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
-import com.bandampla.lojavirtual.model.CategoriaProduto;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.repository.PessoaJuridicaRepository;
+import com.bandampla.lojavirtual.service.CategoriaProdutoService;
 import com.bandampla.lojavirtual.util.ValidaCNPJ;
 
 import junit.framework.TestCase;
@@ -21,30 +21,26 @@ import junit.framework.TestCase;
 class TesteCategoriaProduto extends TestCase {
 
 	@Autowired
-	private CategoriaProdutoController categoriaProdutoController;
+	private CategoriaProdutoService categoriaProdutoService;
 
 	@Autowired
 	private PessoaJuridicaRepository pessoaJuridicaRepository;
+
 	@Test
 	public void testCadastroCategoriaProduto() throws ExceptionCustom {
 
-		CategoriaProduto categoriaProduto = new CategoriaProduto();
-		
-		//Optional<PessoaJuridica> pessoaJuridicaOpt = pessoaJuridicaRepository.findByCnpj(ValidaCNPJ.cnpjSemMascara("64.916.306/0001-75"));
+		CategoriaProdutoDTO dto = new CategoriaProdutoDTO();
 
+		Optional<PessoaJuridica> pessoaJuridicaOpt = pessoaJuridicaRepository
+				.findByCnpj(ValidaCNPJ.cnpjSemMascara("64.916.306/0001-75"));
 
-        // Buscar empresa
-        PessoaJuridica empresaId = pessoaJuridicaRepository.findByCnpj(ValidaCNPJ.cnpjSemMascara("64.916.306/0001-75"))
-                .orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
-        
-		categoriaProduto.setNomeDescricao("Casa");
-		//categoriaProduto.setEmpresa(pessoaJuridicaOpt.get());
-		categoriaProduto.setEmpresa(empresaId);
-		
-		categoriaProduto = categoriaProdutoController.salvarCategoriaProduto(categoriaProduto).getBody();
+		dto.setNomeDescricao("Casa");
+		dto.setEmpresaId(pessoaJuridicaOpt.get().getId());
 
-		assertEquals(true, categoriaProduto.getId() > 0);
-					
+		dto = categoriaProdutoService.salvar(dto);
+
+		assertEquals(true, dto.getId() > 0);
+
 	}
-	
+
 }

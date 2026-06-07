@@ -61,51 +61,59 @@ public class CategoriaProdutoService {
 
 	public CategoriaProdutoDTO atualizar(Long id, CategoriaProdutoDTO dto) throws ExceptionCustom {
 
-		CategoriaProduto existente = categoriaProdutoRepository.findById(id)
-				.orElseThrow(() -> new ExceptionCustom("Categoria não encontrada"));
+	    // 1. Verificar se a categoria existe
+	    CategoriaProduto existente = categoriaProdutoRepository.findById(id)
+	            .orElseThrow(() -> new ExceptionCustom("Categoria não encontrada"));
 
-		// Buscar empresa
-		PessoaJuridica empresa = pessoaJuridicaRepository.findById(dto.getEmpresaId())
-				.orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
+	    // 2. Buscar empresa
+	    PessoaJuridica empresa = pessoaJuridicaRepository.findById(dto.getEmpresaId())
+	            .orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
 
-		// 🔥 Validação de duplicidade no UPDATE
-		List<CategoriaProduto> duplicados = categoriaProdutoRepository
-				.findByNomeDescricaoIgnoreCaseAndEmpresaId(dto.getNomeDescricao(), dto.getEmpresaId());
+	    // 3. Verificar se houve alteração real
+	    boolean nomeIgual = existente.getNomeDescricao().equalsIgnoreCase(dto.getNomeDescricao());
+	    boolean empresaIgual = existente.getEmpresa().getId().equals(dto.getEmpresaId());
 
-		// Se existir outro registro com o mesmo nome e empresa, e não for o mesmo ID →
-		// erro
-		if (!duplicados.isEmpty() && !duplicados.get(0).getId().equals(id)) {
-			throw new ExceptionCustom("Já existe uma categoria '" + dto.getNomeDescricao()
-					+ "' cadastrada para esta empresa de código:" + dto.getEmpresaId());
-		}
+	    if (nomeIgual && empresaIgual) {
+	        throw new ExceptionCustom("Nenhuma alteração detectada para atualizar");
+	    }
 
-		// Atualizar dados
-		existente.setNomeDescricao(dto.getNomeDescricao());
-		existente.setEmpresa(empresa);
+	    // 4. Validação de duplicidade no UPDATE
+	    List<CategoriaProduto> duplicados = categoriaProdutoRepository
+	            .findByNomeDescricaoIgnoreCaseAndEmpresaId(dto.getNomeDescricao(), dto.getEmpresaId());
 
-		existente = categoriaProdutoRepository.save(existente);
+	    if (!duplicados.isEmpty() && !duplicados.get(0).getId().equals(id)) {
+	        throw new ExceptionCustom("Já existe Categoria com nome '" + dto.getNomeDescricao()
+	                + "' cadastrada para esta empresa de código: " + dto.getEmpresaId());
+	    }
 
-		return toDTO(existente);
+	    // 5. Atualizar dados
+	    existente.setNomeDescricao(dto.getNomeDescricao());
+	    existente.setEmpresa(empresa);
+
+	    existente = categoriaProdutoRepository.save(existente);
+
+	    return toDTO(existente);
 	}
 
+
 	public void deletar(Long id) throws ExceptionCustom {
+		if (id <= 0) {
+			throw new ExceptionCustom("ID inválido");
+		}
 		CategoriaProduto categoria = categoriaProdutoRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Categoria não encontrada"));
-
 		categoriaProdutoRepository.delete(categoria);
 	}
 
 	public List<CategoriaProdutoDTO> buscarPorDescricao(String descricao) {
 		List<CategoriaProduto> categorias = categoriaProdutoRepository
 				.findByNomeDescricaoContainingIgnoreCase(descricao.toLowerCase());
-
 		return categorias.stream().map(this::toDTO).collect(Collectors.toList());
 	}
 
 	public CategoriaProdutoDTO buscarPorId(Long id) throws ExceptionCustom {
 		CategoriaProduto categoria = categoriaProdutoRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Categoria não encontrada"));
-
 		return toDTO(categoria);
 	}
 
@@ -119,26 +127,20 @@ public class CategoriaProdutoService {
 	}
 
 	public Page<CategoriaProdutoDTO> listarPaginado(int page, int size, String sort, String direction) {
-
 		Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sort);
-
 		return categoriaProdutoRepository.findAll(pageable).map(this::toDTO);
 	}
 
 	public Page<CategoriaProdutoDTO> buscarAvancado(String descricao, Long empresaId, int page, int size) {
-
 		Pageable pageable = PageRequest.of(page, size);
-
 		Specification<CategoriaProduto> spec = Specification.where(CategoriaProdutoSpec.descricaoContem(descricao))
 				.and(CategoriaProdutoSpec.empresaIgual(empresaId));
-
 		return categoriaProdutoRepository.findAll(spec, pageable).map(this::toDTO);
 	}
 
 	public CategoriaProdutoDTO findById(Long id) throws ExceptionCustom {
 		CategoriaProduto categoria = categoriaProdutoRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Categoria não encontrada com o código: " + id));
-
 		return toDTO(categoria);
 	}
 
@@ -146,9 +148,8 @@ public class CategoriaProdutoService {
 		// Converter DTO → Entidade
 		CategoriaProduto model = new CategoriaProduto();
 		model.setId(dto.getId());
-		model.setNomeDescricao(dto.getNomeDescricao().toUpperCase().trim());
+		model.setNomeDescricao(dto.getNomeDescricao().trim());
 		model.setEmpresa(empresa);
-
 		return model;
 	}
 
