@@ -5,7 +5,10 @@ package com.bandampla.lojavirtual.dto;
 
 import java.math.BigDecimal;
 
-import com.bandampla.lojavirtual.model.NotaItemProduto;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 /**
  * @author: Nilton Brito
@@ -15,21 +18,49 @@ import com.bandampla.lojavirtual.model.NotaItemProduto;
 public class ProdutoDTO {
 
 	private Long id;
+	
+	@NotBlank(message = "O tipo da unidade deve ser informado.")
 	private String tipoUnidade;
+	
+	@NotBlank(message = "O Nome do produto deve ser informado.")
 	private String nome;
 	private Boolean ativo;
+	
+	@NotBlank(message = "Informe uma descrição para o produto.")
 	private String descricao;
-	private NotaItemProduto notaItemProduto;
+	
+	//private NotaItemProduto notaItemProduto;
+	
+	@NotNull(message = "Informe o peso do produto")
+	@Positive(message = "O peso deve ser maior que zero.")
 	private Double peso;
+
+	@NotNull(message = "Informe a largura do produto")
+	@Positive(message = "O largura deve ser maior que zero.")
 	private Double largura;
+
+	@NotNull(message = "Informe a altura do produto")
+	@Positive(message = "O altura deve ser maior que zero.")
 	private Double altura;
+
+	@NotNull(message = "Informe a profundidade do produto")
+	@Positive(message = "O profundidade deve ser maior que zero.")
 	private Double profundidade;
+
+	@NotNull(message = "Informe o valor de venda do produto")
+	@Positive(message = "O valor de venda deve ser maior que zero.")
 	private BigDecimal valorVenda;
+	
 	private Integer qtdEstoque;
 	private Integer qtdEstoqueMinimo;
 	private Boolean alertaEstoque;
 	private String linkYoutube;
+	
+	@PositiveOrZero(message = "A quantidade de cliques deve ser maior que zero.")
 	private Integer qtdClickProduto;
+	
+	@NotNull(message = "A empresa deve ser informada")
+	@Positive(message = "O ID da empresa deve ser maior que zero.")
 	private Long empresaId;
 
 	public Long getId() {
@@ -72,13 +103,7 @@ public class ProdutoDTO {
 		this.descricao = descricao;
 	}
 
-	public NotaItemProduto getNotaItemProduto() {
-		return notaItemProduto;
-	}
 
-	public void setNotaItemProduto(NotaItemProduto notaItemProduto) {
-		this.notaItemProduto = notaItemProduto;
-	}
 
 	public Double getPeso() {
 		return peso;

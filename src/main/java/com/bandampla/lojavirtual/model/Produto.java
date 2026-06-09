@@ -39,9 +39,10 @@ public class Produto implements Serializable {
 	@Column(columnDefinition = "text", length = 2000, nullable = false)
 	private String descricao;
 
-	@ManyToOne
-	@JoinColumn(name = "notaItemProduto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "notaItemProduto_fk"))
-	private NotaItemProduto notaItemProduto;
+	// @ManyToOne
+	// @JoinColumn(name = "notaItemProduto_id", nullable = false, foreignKey =
+	// @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "notaItemProduto_fk"))
+	// private NotaItemProduto notaItemProduto;
 
 	@Column(nullable = false)
 	private Double peso;
@@ -72,7 +73,7 @@ public class Produto implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
-	
+
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}

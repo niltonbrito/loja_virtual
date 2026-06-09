@@ -21,9 +21,9 @@ import com.bandampla.lojavirtual.model.Produto;
 public interface ProdutoRepository
 		extends JpaRepository<Produto, Long>, JpaSpecificationExecutor<Produto> {
 		
-	List<Produto> findByNomeIgnoreCase(String nomeDescricao, Long empresaId);
+	List<Produto> findByNomeIgnoreCaseAndEmpresaId(String nome, Long empresaId);
 
-	List<Produto> findByDescricao(String nomeDescricao);
+	List<Produto> findByDescricaoContainingIgnoreCase(String descricao);
 	
 	List<Produto> findByNomeContainingIgnoreCase(String nome);
 	

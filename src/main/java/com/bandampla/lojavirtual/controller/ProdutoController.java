@@ -37,7 +37,7 @@ public class ProdutoController {
 	public ResponseEntity<ResponseDefaultDTO<ProdutoDTO>> salvar(@Valid @RequestBody ProdutoDTO dto)
 			throws ExceptionCustom {
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(new ResponseDefaultDTO<>("Categoria criada com sucesso", produtoService.salvar(dto)));
+				.body(new ResponseDefaultDTO<>("Produto criada com sucesso", produtoService.salvar(dto)));
 	}
 
 	// ============================
