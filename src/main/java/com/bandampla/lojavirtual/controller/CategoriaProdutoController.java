@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bandampla.lojavirtual.dto.CategoriaProdutoDTO;
-import com.bandampla.lojavirtual.dto.ResponseDefaultDTO;
+import com.bandampla.lojavirtual.dto.response.ResponseDefaultDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
 import com.bandampla.lojavirtual.service.CategoriaProdutoService;

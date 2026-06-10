@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bandampla.lojavirtual.dto.ResponseDefaultDTO;
 import com.bandampla.lojavirtual.dto.request.UsuarioRequestDTO;
+import com.bandampla.lojavirtual.dto.response.ResponseDefaultDTO;
 import com.bandampla.lojavirtual.dto.response.UsuarioResponseDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 

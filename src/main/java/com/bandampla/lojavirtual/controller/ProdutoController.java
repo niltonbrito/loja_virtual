@@ -11,7 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.bandampla.lojavirtual.dto.ProdutoDTO;
-import com.bandampla.lojavirtual.dto.ResponseDefaultDTO;
+import com.bandampla.lojavirtual.dto.response.ResponseDefaultDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
 import com.bandampla.lojavirtual.service.ProdutoService;

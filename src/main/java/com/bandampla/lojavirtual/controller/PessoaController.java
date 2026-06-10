@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bandampla.lojavirtual.dto.request.CepDTO;
-import com.bandampla.lojavirtual.dto.request.CnpjDTO;
+import com.bandampla.lojavirtual.dto.CepDTO;
+import com.bandampla.lojavirtual.dto.CnpjDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.PessoaFisica;
 import com.bandampla.lojavirtual.model.PessoaJuridica;

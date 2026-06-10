@@ -1,4 +1,4 @@
-package com.bandampla.lojavirtual.dto;
+package com.bandampla.lojavirtual.dto.response;
 
 public class ResponseDefaultDTO<T> {
 

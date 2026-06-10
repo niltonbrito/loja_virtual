@@ -10,9 +10,6 @@ import com.bandampla.lojavirtual.model.Produto;
 @Mapper(componentModel = "spring")
 public interface ProdutoMapper {
 
-	// ==========================================
-	// 🔄 MODEL ➡️ DTO
-	// ==========================================
 	@Mapping(source = "empresa.id", target = "empresaId")
 	@Mapping(source = "categoriaProduto.id", target = "categoriaId") // 🛠️ CORREÇÃO DA ROTA DO ATRIBUTO
 	@Mapping(source = "marcaProduto.id", target = "marcaId") // 🛠️ CORREÇÃO DA ROTA DO ATRIBUTO
@@ -21,9 +18,6 @@ public interface ProdutoMapper {
 	@Mapping(source = "descricao", target = "descricao", qualifiedByName = "limparTexto")
 	ProdutoDTO toDTO(Produto model);
 
-	// ==========================================
-	// 🔄 DTO ➡️ MODEL
-	// ==========================================
 	@Mapping(source = "empresaId", target = "empresa.id")
 	@Mapping(source = "categoriaId", target = "categoriaProduto.id") // 🛠️ CORREÇÃO DA ROTA INVERSA
 	@Mapping(source = "marcaId", target = "marcaProduto.id") // 🛠️ CORREÇÃO DA ROTA INVERSA
@@ -32,9 +26,6 @@ public interface ProdutoMapper {
 	@Mapping(source = "descricao", target = "descricao", qualifiedByName = "limparTexto")
 	Produto toModel(ProdutoDTO dto);
 
-	// ==========================================
-	// 🔄 ATUALIZAR ENTIDADE EXISTENTE
-	// ==========================================
 	@Mapping(source = "empresaId", target = "empresa.id")
 	@Mapping(source = "categoriaId", target = "categoriaProduto.id")
 	@Mapping(source = "marcaId", target = "marcaProduto.id")
@@ -43,9 +34,6 @@ public interface ProdutoMapper {
 	@Mapping(source = "descricao", target = "descricao", qualifiedByName = "limparTexto")
 	void atualizarCamposDoProduto(ProdutoDTO dto, @MappingTarget Produto existente);
 
-	// ==========================================
-	// 🛠️ MÉTODOS DE FORMATAÇÃO CUSTOMIZADOS
-	// ==========================================
 	@Named("limparTexto")
 	default String limparTexto(String texto) {
 		return texto == null ? null : texto.trim();

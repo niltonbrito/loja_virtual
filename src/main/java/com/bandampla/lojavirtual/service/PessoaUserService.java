@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.bandampla.lojavirtual.dto.request.CepDTO;
-import com.bandampla.lojavirtual.dto.request.CnpjDTO;
+import com.bandampla.lojavirtual.dto.CepDTO;
+import com.bandampla.lojavirtual.dto.CnpjDTO;
 import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.enums.TipoPessoa;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
