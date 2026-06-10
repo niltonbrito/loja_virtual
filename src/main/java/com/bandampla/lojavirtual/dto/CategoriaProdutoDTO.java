@@ -4,8 +4,6 @@
 package com.bandampla.lojavirtual.dto;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 
 /**
  * @author: Nilton Brito
@@ -19,8 +17,6 @@ public class CategoriaProdutoDTO {
 	@NotBlank(message = "A Categoria do produto deve ser informado.")
 	private String nomeDescricao;
 
-	@NotNull(message = "O ID da Empresa deve ser informado.")
-	@Positive(message = "O ID da Empresa deve ser maior que zero.")
 	private Long empresaId;
 
 	public Long getId() {

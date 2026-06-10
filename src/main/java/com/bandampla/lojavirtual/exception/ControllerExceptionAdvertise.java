@@ -36,93 +36,122 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 
 	@Autowired
 	private SendMailService sendMailService;
-	
-    @ExceptionHandler(ExceptionCustom.class)
-    protected ResponseEntity<Object> handleExceptionCustom(ExceptionCustom ex) {
-        ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
-        objectErrorDTO.setError(ex.getMessage());
-        objectErrorDTO.setCode(HttpStatus.BAD_REQUEST.toString());
-        ex.printStackTrace();
-        return new ResponseEntity<>(objectErrorDTO, HttpStatus.BAD_REQUEST);
-    }
 
-    @Override
-    protected ResponseEntity<Object> handleExceptionInternal(
-            Exception ex,
-            Object body,
-            HttpHeaders headers,
-            HttpStatus status,
-            WebRequest request) {
+	@ExceptionHandler(ExceptionCustom.class)
+	protected ResponseEntity<Object> handleExceptionCustom(ExceptionCustom ex) {
+		ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
+		objectErrorDTO.setError(ex.getMessage());
+		objectErrorDTO.setCode(HttpStatus.BAD_REQUEST.toString());
+		ex.printStackTrace();
+		return new ResponseEntity<>(objectErrorDTO, HttpStatus.BAD_REQUEST);
+	}
 
-        ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
-        String msg;
+	@Override
+	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
+			HttpStatus status, WebRequest request) {
 
-        if (ex instanceof MethodArgumentNotValidException) {
-            StringBuilder sb = new StringBuilder();
-            ((MethodArgumentNotValidException) ex).getBindingResult()
-                    .getAllErrors()
-                    .forEach(e -> sb.append(e.getDefaultMessage()).append("\n"));
-            msg = sb.toString();
-        } else if (ex instanceof HttpMessageNotReadableException) {
-            msg = "Não está sendo enviado dados para o BODY corpo da requisição";
-        } else if (ex instanceof IllegalArgumentException) {
-            msg = "?";
-        } else {
-            msg = ex.getMessage();
-        }
+		ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
+		String msg;
 
-        objectErrorDTO.setError(msg);
-        objectErrorDTO.setCode(status.value() + " ==> " + status.getReasonPhrase());
+		if (ex instanceof MethodArgumentNotValidException) {
+			StringBuilder sb = new StringBuilder();
+			((MethodArgumentNotValidException) ex).getBindingResult().getAllErrors()
+					.forEach(e -> sb.append(e.getDefaultMessage()).append("\n"));
+			msg = sb.toString();
+		} else if (ex instanceof HttpMessageNotReadableException) {
+			msg = "Não está sendo enviado dados para o BODY corpo da requisição";
+		} else if (ex instanceof IllegalArgumentException) {
+			msg = "?";
+		} else {
+			msg = ex.getMessage();
+		}
 
-        ex.printStackTrace();
+		objectErrorDTO.setError(msg);
+		objectErrorDTO.setCode(status.value() + " ==> " + status.getReasonPhrase());
+
+		ex.printStackTrace();
 
 		StringBuilder mensagemHtml = new StringBuilder();
 		mensagemHtml.append("<b>Olá Desenvolvedor!</b>").append("<br/>");
-		mensagemHtml.append("<b>Alerta: </b>"+"Foi detectado um erro na loja virtual que precisa ser analisado e reparado.").append("<br/>");
-		mensagemHtml.append("<b>Erro: </b>"+ ExceptionUtils.getStackTrace(ex)).append("<br/>");
-		
+		mensagemHtml
+				.append("<b>Alerta: </b>"
+						+ "Foi detectado um erro na loja virtual que precisa ser analisado e reparado.")
+				.append("<br/>");
+		mensagemHtml.append("<b>Erro: </b>" + ExceptionUtils.getStackTrace(ex)).append("<br/>");
+
 		try {
-			sendMailService.enviarEmailHtml("Erro detectado na plataforma Loja Virtual Bandampla!" , mensagemHtml.toString(), "nilton.brito@outlook.com");
+			sendMailService.enviarEmailHtml("Erro detectado na plataforma Loja Virtual Bandampla!",
+					mensagemHtml.toString(), "nilton.brito@outlook.com");
 		} catch (UnsupportedEncodingException | MessagingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        return new ResponseEntity<>(objectErrorDTO, status);
-    }
+		return new ResponseEntity<>(objectErrorDTO, status);
+	}
 
-    @ExceptionHandler({ DataIntegrityViolationException.class, ConstraintViolationException.class, SQLException.class })
-    protected ResponseEntity<Object> handleExceptionDataIntegry(Exception ex) {
-        ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
-        String msg;
+	@ExceptionHandler({ DataIntegrityViolationException.class, ConstraintViolationException.class, SQLException.class })
+	protected ResponseEntity<Object> handleExceptionDataIntegry(Exception ex) {
+		ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
+		String msg;
 
-        if (ex instanceof SQLException) {
-            msg = "Erro de SQL do banco de dados: " + ((SQLException) ex).getCause().getMessage();
-        } else if (ex instanceof DataIntegrityViolationException) {
-            msg = "Erro de integridade no banco de dados: "
-                    + ((DataIntegrityViolationException) ex).getCause().getMessage();
-        } else if (ex instanceof ConstraintViolationException) {
-            msg = "Erro de chave estrangeira no banco de dados: "
-                    + ((ConstraintViolationException) ex).getCause().getMessage();
-        } else {
-            msg = ex.getMessage();
-        }
+		if (ex instanceof SQLException) {
+			msg = "Erro de SQL do banco de dados: " + ((SQLException) ex).getCause().getMessage();
+		} else if (ex instanceof DataIntegrityViolationException) {
+			msg = "Erro de integridade no banco de dados: "
+					+ ((DataIntegrityViolationException) ex).getCause().getMessage();
+		} else if (ex instanceof ConstraintViolationException) {
+			msg = "Erro de chave estrangeira no banco de dados: "
+					+ ((ConstraintViolationException) ex).getCause().getMessage();
+		} else {
+			msg = ex.getMessage();
+		}
 
-        objectErrorDTO.setError(msg);
-        objectErrorDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+		objectErrorDTO.setError(msg);
+		objectErrorDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
 
-        ex.printStackTrace();
+		ex.printStackTrace();
 
 		StringBuilder mensagemHtml = new StringBuilder();
 		mensagemHtml.append("<b>Olá Desenvolvedor!</b>").append("<br/>");
-		mensagemHtml.append("<b>Alerta: </b>"+"Foi detectado um erro na loja virtual que precisa ser analisado e reparado.").append("<br/>");
-		mensagemHtml.append("<b>Erro: </b>"+ ExceptionUtils.getStackTrace(ex)).append("<br/>");
-		
+		mensagemHtml
+				.append("<b>Alerta: </b>"
+						+ "Foi detectado um erro na loja virtual que precisa ser analisado e reparado.")
+				.append("<br/>");
+		mensagemHtml.append("<b>Erro: </b>" + ExceptionUtils.getStackTrace(ex)).append("<br/>");
+
 		try {
-			sendMailService.enviarEmailHtml("Erro detectado na plataforma Loja Virtual Bandampla!" , mensagemHtml.toString(), "nilton.brito@outlook.com");
+			sendMailService.enviarEmailHtml("Erro detectado na plataforma Loja Virtual Bandampla!",
+					mensagemHtml.toString(), "nilton.brito@outlook.com");
 		} catch (UnsupportedEncodingException | MessagingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        return new ResponseEntity<>(objectErrorDTO, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+		return new ResponseEntity<>(objectErrorDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	// Adicione este método dentro do seu ControllerExceptionAdvertise
+	@Override
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+			HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+		// 1. Cria o DTO de erro padrão que você já usa no sistema
+		ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
+
+		// 2. Coleta todas as mensagens de erro do DTO sem acumular quebras de linha
+		// brutas (\n)
+		StringBuilder sb = new StringBuilder();
+		ex.getBindingResult().getFieldErrors().forEach(error -> {
+			sb.append(error.getField()).append(": ").append(error.getDefaultMessage()).append(" ");
+		});
+
+		objectErrorDTO.setError(sb.toString().trim());
+		objectErrorDTO.setCode(status.value() + " ==> " + status.getReasonPhrase());
+
+		// Imprime no console do desenvolvedor para debug rápido
+		ex.printStackTrace();
+
+		// Retorna o HTTP 400 Bad Request bem formatado para o Postman
+		return new ResponseEntity<>(objectErrorDTO, headers, status);
+	}
+
 }

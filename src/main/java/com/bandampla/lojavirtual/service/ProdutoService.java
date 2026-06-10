@@ -12,189 +12,181 @@ import org.springframework.stereotype.Service;
 
 import com.bandampla.lojavirtual.dto.ProdutoDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
+import com.bandampla.lojavirtual.mapper.ProdutoMapper;
+import com.bandampla.lojavirtual.model.CategoriaProduto;
+import com.bandampla.lojavirtual.model.MarcaProduto;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.model.Produto;
+import com.bandampla.lojavirtual.repository.CategoriaProdutoRepository;
+import com.bandampla.lojavirtual.repository.MarcaProdutoRepository;
 import com.bandampla.lojavirtual.repository.PessoaJuridicaRepository;
 import com.bandampla.lojavirtual.repository.ProdutoRepository;
 import com.bandampla.lojavirtual.repository.specification.ProdutoSpec;
-
-/**
- * @author: Nilton Brito
- * @Email: <nilton.brito@outlook.com>
- * @Data: 27 de abr. de 2026
- */
 
 @Service
 public class ProdutoService {
 
 	private final ProdutoRepository produtoRepository;
-
 	private final PessoaJuridicaRepository pessoaJuridicaRepository;
+	private final CategoriaProdutoRepository categoriaProdutoRepository;
+	private final MarcaProdutoRepository marcaProdutoRepository;
+	private final ProdutoMapper produtoMapper;
 
-	public ProdutoService(ProdutoRepository produtoRepository, PessoaJuridicaRepository pessoaJuridicaRepository) {
+	public ProdutoService(ProdutoRepository produtoRepository, PessoaJuridicaRepository pessoaJuridicaRepository,
+			CategoriaProdutoRepository categoriaProdutoRepository, ProdutoMapper produtoMapper,
+			MarcaProdutoRepository marcaProdutoRepository) {
 		this.produtoRepository = produtoRepository;
 		this.pessoaJuridicaRepository = pessoaJuridicaRepository;
+		this.categoriaProdutoRepository = categoriaProdutoRepository;
+		this.marcaProdutoRepository = marcaProdutoRepository;
+		this.produtoMapper = produtoMapper;
 	}
 
 	public ProdutoDTO salvar(ProdutoDTO dto) throws ExceptionCustom {
-
-		// Validação de nome duplicado
 		if (dto.getId() == null) {
-			List<Produto> existentes = produtoRepository.findByNomeIgnoreCaseAndEmpresaId(dto.getNome(),
-					dto.getEmpresaId());
+			Specification<Produto> specDuplicado = Specification.where(ProdutoSpec.nomeExato(dto.getNome()))
+					.and(ProdutoSpec.empresaIgual(dto.getEmpresaId()));
+			List<Produto> existentes = produtoRepository.findAll(specDuplicado);
 			if (!existentes.isEmpty()) {
 				throw new ExceptionCustom("Já existe Produto com nome: '" + dto.getNome()
 						+ "' cadastrado para a empresa de código: " + dto.getEmpresaId());
 			}
 		}
 
-		// Buscar empresa
 		PessoaJuridica empresa = pessoaJuridicaRepository.findById(dto.getEmpresaId())
 				.orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
-		Produto model = toModel(dto, empresa);
 
-		// Salvar
+		CategoriaProduto categoriaProduto = categoriaProdutoRepository.findById(dto.getCategoriaId())
+				.orElseThrow(() -> new ExceptionCustom("Categoria não encontrada"));
+
+		MarcaProduto marcaProduto = marcaProdutoRepository.findById(dto.getMarcaId())
+				.orElseThrow(() -> new ExceptionCustom("Marca do produto não encontrada"));
+
+		if (!categoriaProduto.getEmpresa().getId().equals(empresa.getId())) {
+			throw new ExceptionCustom("Acesso Negado: Esta categoria não pertence à sua empresa.");
+		}
+
+		if (!marcaProduto.getEmpresa().getId().equals(empresa.getId())) {
+			throw new ExceptionCustom("Acesso Negado: Esta marca não pertence à sua empresa.");
+		}
+
+		Produto model = produtoMapper.toModel(dto);
+		model.setEmpresa(empresa);
+		model.setCategoriaProduto(categoriaProduto);
+		model.setMarcaProduto(marcaProduto);
+
 		model = produtoRepository.save(model);
-		return toDTO(model);
+		return produtoMapper.toDTO(model);
 	}
 
 	public ProdutoDTO atualizar(Long id, ProdutoDTO dto) throws ExceptionCustom {
-
-		// 1. Verificar se a Produto existe
 		Produto existente = produtoRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Produto não encontrada"));
 
-		// 2. Buscar empresa
-		PessoaJuridica empresa = pessoaJuridicaRepository.findById(dto.getEmpresaId())
-				.orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
+		if (!existente.getEmpresa().getId().equals(dto.getEmpresaId())) {
+			throw new ExceptionCustom("Acesso Negado: Você não tem permissão para alterar este produto.");
+		}
 
-		// 3. Verificar se houve alteração real
-		boolean nomeIgual = existente.getNome().equalsIgnoreCase(dto.getNome());
-		boolean empresaIgual = existente.getEmpresa().getId().equals(dto.getEmpresaId());
-
-		if (nomeIgual && empresaIgual) {
+		// 🛠️ O PULO DO GATO: Converte o produto atual do banco para DTO e compara com
+		// o do Request.
+		// Graças ao método equals() estruturado, qualquer alteração em 1 dos 30+ campos
+		// libera o fluxo.
+		ProdutoDTO dtoAntigo = produtoMapper.toDTO(existente);
+		if (dtoAntigo.equals(dto)) {
 			throw new ExceptionCustom("Nenhuma alteração detectada para atualizar");
 		}
 
-		// 4. Validação de duplicidade no UPDATE
-		List<Produto> duplicados = produtoRepository.findByNomeIgnoreCaseAndEmpresaId(dto.getNome(),
-				dto.getEmpresaId());
+		PessoaJuridica empresa = pessoaJuridicaRepository.findById(dto.getEmpresaId())
+				.orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
+
+		CategoriaProduto novaCategoria = categoriaProdutoRepository.findById(dto.getCategoriaId())
+				.orElseThrow(() -> new ExceptionCustom("Categoria informada não existe"));
+
+		MarcaProduto marcaProduto = marcaProdutoRepository.findById(dto.getMarcaId())
+				.orElseThrow(() -> new ExceptionCustom("Marca do produto não encontrada"));
+
+		if (!novaCategoria.getEmpresa().getId().equals(empresa.getId())) {
+			throw new ExceptionCustom("Acesso Negado: A nova categoria escolhida não pertence à sua empresa.");
+		}
+
+		if (!marcaProduto.getEmpresa().getId().equals(empresa.getId())) {
+			throw new ExceptionCustom("Acesso Negado: Esta marca não pertence à sua empresa.");
+		}
+
+		Specification<Produto> specDuplicado = Specification.where(ProdutoSpec.nomeExato(dto.getNome()))
+				.and(ProdutoSpec.empresaIgual(dto.getEmpresaId()));
+
+		List<Produto> duplicados = produtoRepository.findAll(specDuplicado);
 
 		if (!duplicados.isEmpty() && !duplicados.get(0).getId().equals(id)) {
 			throw new ExceptionCustom("Já existe Produto com nome: '" + dto.getNome()
 					+ "' cadastrado para a empresa de código: " + dto.getEmpresaId());
 		}
 
-		// 5. Atualizar dados
-		existente.setNome(dto.getNome());
-		existente.setTipoUnidade(dto.getTipoUnidade());
-		existente.setAtivo(dto.getAtivo());
-		existente.setDescricao(dto.getDescricao());
-		existente.setPeso(dto.getPeso());
-		existente.setLargura(dto.getLargura());
-		existente.setAltura(dto.getAltura());
-		existente.setProfundidade(dto.getProfundidade());
-		existente.setValorVenda(dto.getValorVenda());
-		existente.setQtdEstoqueMinimo(dto.getQtdEstoqueMinimo());
-		existente.setQtdEstoque(dto.getQtdEstoque());
-		existente.setAlertaEstoque(dto.getAlertaEstoque());
-		existente.setLinkYoutube(dto.getLinkYoutube());
-		existente.setQtdClickProduto(dto.getQtdClickProduto());
+		// 🔄 MapStruct atualiza os campos mutáveis em memória de forma limpa
+		produtoMapper.atualizarCamposDoProduto(dto, existente);
 		existente.setEmpresa(empresa);
+		existente.setCategoriaProduto(novaCategoria);
+		existente.setMarcaProduto(marcaProduto); // Adicionado o vínculo definitivo que faltava
 
 		existente = produtoRepository.save(existente);
-
-		return toDTO(existente);
+		return produtoMapper.toDTO(existente);
 	}
 
-	public void deletar(Long id) throws ExceptionCustom {
+	public void deletar(Long id, Long empresaId) throws ExceptionCustom {
 		if (id <= 0) {
 			throw new ExceptionCustom("ID inválido");
 		}
 		Produto produto = produtoRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Produto não encontrada"));
+
+		if (!produto.getEmpresa().getId().equals(empresaId)) {
+			throw new ExceptionCustom("Acesso Negado: Você não tem permissão para excluir este produto.");
+		}
+
 		produtoRepository.delete(produto);
 	}
 
-	public List<ProdutoDTO> buscarPorDescricao(String descricao) {
-		List<Produto> produtos = produtoRepository.findByDescricaoContainingIgnoreCase(descricao.toLowerCase());
-		return produtos.stream().map(this::toDTO).collect(Collectors.toList());
+	public List<ProdutoDTO> buscarPorDescricao(String descricao, Long empresaId) {
+		Specification<Produto> spec = Specification.where(ProdutoSpec.descricaoContem(descricao))
+				.and(ProdutoSpec.empresaIgual(empresaId));
+
+		return produtoRepository.findAll(spec).stream().map(produto -> produtoMapper.toDTO(produto))
+				.collect(Collectors.toList());
 	}
 
-	public ProdutoDTO buscarPorId(Long id) throws ExceptionCustom {
+	public ProdutoDTO buscarPorId(Long id, Long empresaId) throws ExceptionCustom {
 		Produto produto = produtoRepository.findById(id)
-				.orElseThrow(() -> new ExceptionCustom("Produto não encontrada"));
-		return toDTO(produto);
+				.orElseThrow(() -> new ExceptionCustom("Produto não encontrada com o código: " + id));
+
+		if (!produto.getEmpresa().getId().equals(empresaId)) {
+			throw new ExceptionCustom("Acesso Negado: Este produto não pertence à sua empresa.");
+		}
+
+		return produtoMapper.toDTO(produto);
 	}
 
 	public List<ProdutoDTO> buscarPorEmpresa(Long id) {
-		List<Produto> produtos = produtoRepository.findByEmpresaId(id);
-		return produtos.stream().map(this::toDTO).collect(Collectors.toList());
+		Specification<Produto> spec = Specification.where(ProdutoSpec.empresaIgual(id));
+		return produtoRepository.findAll(spec).stream().map(produto -> produtoMapper.toDTO(produto))
+				.collect(Collectors.toList());
 	}
 
-	public List<ProdutoDTO> listarTodos() {
-		return produtoRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
-	}
-
-	public Page<ProdutoDTO> listarPaginado(int page, int size, String sort, String direction) {
+	public Page<ProdutoDTO> listarPaginado(int page, int size, String sort, String direction, Long empresaId) {
 		Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sort);
-		return produtoRepository.findAll(pageable).map(this::toDTO);
+
+		Specification<Produto> spec = Specification.where(ProdutoSpec.empresaIgual(empresaId));
+
+		return produtoRepository.findAll(spec, pageable).map(produto -> produtoMapper.toDTO(produto));
 	}
 
-	public Page<ProdutoDTO> buscarAvancado(String descricao, Long empresaId, int page, int size) {
+	public Page<ProdutoDTO> buscarAvancado(String textoBusca, Long empresaId, Boolean ativo, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
-		Specification<Produto> spec = Specification.where(ProdutoSpec.descricaoContem(descricao))
-				.and(ProdutoSpec.empresaIgual(empresaId));
-		return produtoRepository.findAll(spec, pageable).map(this::toDTO);
-	}
 
-	public ProdutoDTO findById(Long id) throws ExceptionCustom {
-		Produto produto = produtoRepository.findById(id)
-				.orElseThrow(() -> new ExceptionCustom("Produto não encontrada com o código: " + id));
-		return toDTO(produto);
-	}
+		Specification<Produto> spec = Specification
+				.where(ProdutoSpec.nomeContem(textoBusca).or(ProdutoSpec.descricaoContem(textoBusca)))
+				.and(ProdutoSpec.empresaIgual(empresaId)).and(ProdutoSpec.statusAtivoEquivalente(ativo));
 
-	private Produto toModel(ProdutoDTO dto, PessoaJuridica empresa) {
-		// Converter DTO → Entidade
-		Produto model = new Produto();
-		model.setId(dto.getId());
-		model.setTipoUnidade(dto.getTipoUnidade());
-		model.setNome(dto.getNome().trim());
-		model.setAtivo(dto.getAtivo());
-		model.setDescricao(dto.getDescricao());
-		model.setPeso(dto.getPeso());
-		model.setLargura(dto.getLargura());
-		model.setAltura(dto.getAltura());
-		model.setProfundidade(dto.getProfundidade());
-		model.setValorVenda(dto.getValorVenda());
-		model.setQtdEstoque(dto.getQtdEstoque());
-		model.setQtdEstoqueMinimo(dto.getQtdEstoqueMinimo());
-		model.setAlertaEstoque(dto.getAlertaEstoque());
-		model.setLinkYoutube(dto.getLinkYoutube());
-		model.setQtdClickProduto(dto.getQtdClickProduto());
-		model.setEmpresa(empresa);
-		return model;
-	}
-
-	private ProdutoDTO toDTO(Produto model) {
-		// Converter Entidade → ResponseDTO
-		ProdutoDTO dto = new ProdutoDTO();
-		dto.setId(model.getId());
-		dto.setTipoUnidade(model.getTipoUnidade());
-		dto.setNome(model.getNome());
-		dto.setAtivo(model.getAtivo());
-		dto.setDescricao(model.getDescricao());
-		dto.setPeso(model.getPeso());
-		dto.setLargura(model.getLargura());
-		dto.setAltura(model.getAltura());
-		dto.setProfundidade(model.getProfundidade());
-		dto.setValorVenda(model.getValorVenda());
-		dto.setQtdEstoque(model.getQtdEstoque());
-		dto.setQtdEstoqueMinimo(model.getQtdEstoqueMinimo());
-		dto.setAlertaEstoque(model.getAlertaEstoque());
-		dto.setLinkYoutube(model.getLinkYoutube());
-		dto.setQtdClickProduto(model.getQtdClickProduto());
-		dto.setEmpresaId(model.getEmpresa().getId()); // ou apenas o ID, depende do seu design
-		return dto;
+		return produtoRepository.findAll(spec, pageable).map(produto -> produtoMapper.toDTO(produto));
 	}
 }

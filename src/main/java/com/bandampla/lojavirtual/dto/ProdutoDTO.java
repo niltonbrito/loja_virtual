@@ -4,11 +4,17 @@
 package com.bandampla.lojavirtual.dto;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
+import javax.validation.constraints.Size;
+
+import org.hibernate.validator.constraints.Length;
+
+import com.bandampla.lojavirtual.enums.TipoUnidadeMedida;
 
 /**
  * @author: Nilton Brito
@@ -18,19 +24,19 @@ import javax.validation.constraints.PositiveOrZero;
 public class ProdutoDTO {
 
 	private Long id;
-	
-	@NotBlank(message = "O tipo da unidade deve ser informado.")
-	private String tipoUnidade;
-	
+
+	@NotNull(message = "O tipo da unidade de medida deve ser informado.")
+	private TipoUnidadeMedida tipoUnidadeMedida;
+
+	@Size(min = 10, message = "O nome do produto deve ter mais de 10 caracteres.")
 	@NotBlank(message = "O Nome do produto deve ser informado.")
 	private String nome;
 	private Boolean ativo;
-	
+
+	@Length(max = 2000)
 	@NotBlank(message = "Informe uma descrição para o produto.")
 	private String descricao;
-	
-	//private NotaItemProduto notaItemProduto;
-	
+
 	@NotNull(message = "Informe o peso do produto")
 	@Positive(message = "O peso deve ser maior que zero.")
 	private Double peso;
@@ -50,19 +56,69 @@ public class ProdutoDTO {
 	@NotNull(message = "Informe o valor de venda do produto")
 	@Positive(message = "O valor de venda deve ser maior que zero.")
 	private BigDecimal valorVenda;
-	
+
 	private Integer qtdEstoque;
 	private Integer qtdEstoqueMinimo;
 	private Boolean alertaEstoque;
 	private String linkYoutube;
-	
+
 	@PositiveOrZero(message = "A quantidade de cliques deve ser maior que zero.")
 	private Integer qtdClickProduto;
-	
-	@NotNull(message = "A empresa deve ser informada")
-	@Positive(message = "O ID da empresa deve ser maior que zero.")
+
 	private Long empresaId;
 
+	@NotNull(message = "A Categoria do Produto deve ser informada")
+	@Positive(message = "O ID da Categoria do Produto deve ser maior que zero.")
+	private Long categoriaId;
+
+	@NotNull(message = "A Marca do Produto deve ser informada")
+	@Positive(message = "O ID da Marca do Produto deve ser maior que zero.")
+	private Long marcaId;
+
+	@NotNull(message = "A Nota Item do Produto deve ser informada")
+	@Positive(message = "O ID da Nota Item do Produto deve ser maior que zero.")
+	private Long notaItemId;
+
+	// =========================================================================
+	// 🔄 MÉTODOS EQUALS E HASHCODE ADICIONADOS (PADRÃO JAVA 11)
+	// =========================================================================
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || getClass() != obj.getClass())
+			return false;
+
+		ProdutoDTO other = (ProdutoDTO) obj;
+
+		// Tratamento especial para BigDecimal (compara o valor matemático ignorando
+		// zeros na escala)
+		boolean precoIgual = (this.valorVenda == null && other.valorVenda == null) || (this.valorVenda != null
+				&& other.valorVenda != null && this.valorVenda.compareTo(other.valorVenda) == 0);
+
+		return Objects.equals(id, other.id) && Objects.equals(tipoUnidadeMedida, other.tipoUnidadeMedida)
+				&& Objects.equals(nome, other.nome) && Objects.equals(ativo, other.ativo)
+				&& Objects.equals(descricao, other.descricao) && Objects.equals(peso, other.peso)
+				&& Objects.equals(largura, other.largura) && Objects.equals(altura, other.altura)
+				&& Objects.equals(profundidade, other.profundidade) && precoIgual
+				&& Objects.equals(qtdEstoque, other.qtdEstoque)
+				&& Objects.equals(qtdEstoqueMinimo, other.qtdEstoqueMinimo)
+				&& Objects.equals(alertaEstoque, other.alertaEstoque) && Objects.equals(linkYoutube, other.linkYoutube)
+				&& Objects.equals(qtdClickProduto, other.qtdClickProduto) && Objects.equals(empresaId, other.empresaId)
+				&& Objects.equals(categoriaId, other.categoriaId) && Objects.equals(marcaId, other.marcaId)
+				&& Objects.equals(notaItemId, other.notaItemId);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, tipoUnidadeMedida, nome, ativo, descricao, peso, largura, altura, profundidade,
+				valorVenda, qtdEstoque, qtdEstoqueMinimo, alertaEstoque, linkYoutube, qtdClickProduto, empresaId,
+				categoriaId, marcaId, notaItemId);
+	}
+
+	// =========================================================================
+	// 🟢 GETTERS AND SETTERS TRADICIONAIS DO SEU ARQUIVO ORIGINAL
+	// =========================================================================
 	public Long getId() {
 		return id;
 	}
@@ -71,12 +127,12 @@ public class ProdutoDTO {
 		this.id = id;
 	}
 
-	public String getTipoUnidade() {
-		return tipoUnidade;
+	public TipoUnidadeMedida getTipoUnidadeMedida() {
+		return tipoUnidadeMedida;
 	}
 
-	public void setTipoUnidade(String tipoUnidade) {
-		this.tipoUnidade = tipoUnidade;
+	public void setTipoUnidadeMedida(TipoUnidadeMedida tipoUnidadeMedida) {
+		this.tipoUnidadeMedida = tipoUnidadeMedida;
 	}
 
 	public String getNome() {
@@ -102,8 +158,6 @@ public class ProdutoDTO {
 	public void setDescricao(String descricao) {
 		this.descricao = descricao;
 	}
-
-
 
 	public Double getPeso() {
 		return peso;
@@ -191,5 +245,29 @@ public class ProdutoDTO {
 
 	public void setEmpresaId(Long empresaId) {
 		this.empresaId = empresaId;
+	}
+
+	public Long getCategoriaId() {
+		return categoriaId;
+	}
+
+	public void setCategoriaId(Long categoriaId) {
+		this.categoriaId = categoriaId;
+	}
+
+	public Long getMarcaId() {
+		return marcaId;
+	}
+
+	public void setMarcaId(Long marcaId) {
+		this.marcaId = marcaId;
+	}
+
+	public Long getNotaItemId() {
+		return notaItemId;
+	}
+
+	public void setNotaItemId(Long notaItemId) {
+		this.notaItemId = notaItemId;
 	}
 }

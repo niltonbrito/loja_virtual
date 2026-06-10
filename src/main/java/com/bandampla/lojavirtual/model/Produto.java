@@ -7,6 +7,8 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,6 +17,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import com.bandampla.lojavirtual.enums.TipoUnidadeMedida;
 
 @Entity
 @Table(name = "produto")
@@ -27,8 +31,9 @@ public class Produto implements Serializable {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_produto")
 	private Long id;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private String tipoUnidade;
+	private TipoUnidadeMedida tipoUnidadeMedida;
 
 	@Column(nullable = false)
 	private String nome;
@@ -38,11 +43,6 @@ public class Produto implements Serializable {
 
 	@Column(columnDefinition = "text", length = 2000, nullable = false)
 	private String descricao;
-
-	// @ManyToOne
-	// @JoinColumn(name = "notaItemProduto_id", nullable = false, foreignKey =
-	// @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "notaItemProduto_fk"))
-	// private NotaItemProduto notaItemProduto;
 
 	@Column(nullable = false)
 	private Double peso;
@@ -74,6 +74,18 @@ public class Produto implements Serializable {
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
 
+	@ManyToOne(targetEntity = CategoriaProduto.class)
+	@JoinColumn(name = "categoria_produto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "categoria_produto_fk"))
+	private CategoriaProduto categoriaProduto;
+
+	@ManyToOne(targetEntity = MarcaProduto.class)
+	@JoinColumn(name = "marca_produto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "marca_produto_fk"))
+	private MarcaProduto marcaProduto;
+
+	@ManyToOne
+	@JoinColumn(name = "nota_item_produto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "nota_item_produto_fk"))
+	private NotaItemProduto notaItemProduto;
+
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
@@ -90,12 +102,12 @@ public class Produto implements Serializable {
 		this.id = id;
 	}
 
-	public String getTipoUnidade() {
-		return tipoUnidade;
+	public TipoUnidadeMedida getTipoUnidadeMedida() {
+		return tipoUnidadeMedida;
 	}
 
-	public void setTipoUnidade(String tipoUnidade) {
-		this.tipoUnidade = tipoUnidade;
+	public void setTipoUnidadeMedida(TipoUnidadeMedida tipoUnidadeMedida) {
+		this.tipoUnidadeMedida = tipoUnidadeMedida;
 	}
 
 	public String getNome() {
@@ -200,6 +212,30 @@ public class Produto implements Serializable {
 
 	public void setQtdClickProduto(Integer qtdClickProduto) {
 		this.qtdClickProduto = qtdClickProduto;
+	}
+
+	public CategoriaProduto getCategoriaProduto() {
+		return categoriaProduto;
+	}
+
+	public void setCategoriaProduto(CategoriaProduto categoriaProduto) {
+		this.categoriaProduto = categoriaProduto;
+	}
+
+	public MarcaProduto getMarcaProduto() {
+		return marcaProduto;
+	}
+
+	public void setMarcaProduto(MarcaProduto marcaProduto) {
+		this.marcaProduto = marcaProduto;
+	}
+
+	public NotaItemProduto getNotaItemProduto() {
+		return notaItemProduto;
+	}
+
+	public void setNotaItemProduto(NotaItemProduto notaItemProduto) {
+		this.notaItemProduto = notaItemProduto;
 	}
 
 	@Override

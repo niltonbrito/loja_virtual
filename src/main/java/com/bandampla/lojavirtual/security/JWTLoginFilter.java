@@ -16,7 +16,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.bandampla.lojavirtual.dto.request.UsuarioLoginRequestDTO;
+import com.bandampla.lojavirtual.dto.request.UsuarioRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
@@ -36,8 +36,8 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException, IOException, ServletException {
 
-        UsuarioLoginRequestDTO loginDTO = new ObjectMapper()
-                .readValue(request.getInputStream(), UsuarioLoginRequestDTO.class);
+        UsuarioRequestDTO loginDTO = new ObjectMapper()
+                .readValue(request.getInputStream(), UsuarioRequestDTO.class);
 
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(loginDTO.getLogin(), loginDTO.getSenha());

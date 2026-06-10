@@ -19,6 +19,7 @@
 
 	<properties>
 		<java.version>11</java.version>
+		<org.mapstruct.version>1.6.3</org.mapstruct.version> <!-- Versão estável e moderna -->
 	</properties>
 
 	<dependencies>
@@ -121,7 +122,12 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-jpa</artifactId>
 		</dependency>
-
+    <!-- Dependência principal do MapStruct -->
+    <dependency>
+        <groupId>org.mapstruct</groupId>
+        <artifactId>mapstruct</artifactId>
+        <version>${org.mapstruct.version}</version>
+    </dependency>
 	</dependencies>
 
 	<build>
@@ -135,6 +141,27 @@
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>3.1.0</version>
 			</plugin>
+			 <!-- Plugin do Compilador do Maven ajustado para o MapStruct -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.13.0</version> <!-- Versão recomendada para Java moderno -->
+            <configuration>
+                <source>${java.version}</source>
+                <target>${java.version}</target>
+                <annotationProcessorPaths>
+                    <!-- Executa a geração de código do MapStruct durante o "mvn clean compile" -->
+                    <path>
+                        <groupId>org.mapstruct</groupId>
+                        <artifactId>mapstruct-processor</artifactId>
+                        <version>${org.mapstruct.version}</version>
+                    </path>
+                    
+                    <!-- ATENÇÃO: Se você usar o Lombok no projeto, a tag do Lombok DEVE vir AQUI ANTES do MapStruct -->
+                    
+                </annotationProcessorPaths>
+            </configuration>
+        </plugin>
 		</plugins>
 	</build>
 </project>

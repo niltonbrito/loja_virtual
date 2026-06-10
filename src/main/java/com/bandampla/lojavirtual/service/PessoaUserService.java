@@ -226,40 +226,43 @@ public class PessoaUserService {
 
 		Usuario usuario = usuarioRepository.finUserByPessoa(pessoa.getId(), pessoa.getEmail());
 
-		if (usuario != null) {
-			return;
-		}
+	    if (usuario != null) {
+	        return; // Usuário já existe, corta a execução
+	    }
 
 		String constraint = usuarioRepository.consultaConstraintAcesso();
 		if (constraint != null) {
 			jdbcTemplate.execute("begin; alter table usuario_acesso drop constraint " + constraint + "; commit;");
 		}
 
+	    // Instancia a nossa entidade limpa, que apenas espelha o banco de dados
 		usuario = new Usuario();
 		usuario.setLogin(pessoa.getEmail());
 
+	    // Gera a senha baseada no timestamp atual
 		String senha = "" + Calendar.getInstance().getTimeInMillis();
 		usuario.setSenha(new BCryptPasswordEncoder().encode(senha));
 
-		usuario.setCreateAt(Calendar.getInstance().getTime());
-		usuario.setUpdateAt(Calendar.getInstance().getTime());
-		usuario.setPessoa(pessoa);
-		usuario.setEmpresa(empresa);
+	    usuario.setCreateAt(Calendar.getInstance().getTime());
+	    usuario.setUpdateAt(Calendar.getInstance().getTime());
+	    usuario.setPessoa(pessoa); // Vincula a Pessoa (Física ou Jurídica)
+	    usuario.setEmpresa(empresa); // Vincula a Empresa Tenant dona deste registro
 
-		usuario = usuarioRepository.save(usuario);
+	    // Salva no banco de dados
+	    usuario = usuarioRepository.save(usuario);
 
 		String role = (pessoa instanceof PessoaJuridica) ? RoleUser.ROLE_ADMIN.name() : RoleUser.ROLE_USER.name();
 		usuarioRepository.insereAcessoUser(usuario.getId(), role);
 
 		// Envio de email opcional
 
-		StringBuilder mensagemHtml = new StringBuilder();
-
-		mensagemHtml.append("<b>Olá!: " + pessoa.getNome() + " </b>").append("<br/>");
-		mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
-		mensagemHtml.append("<b>Login: </b>" + pessoa.getEmail()).append("<br/>");
-		mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
-		mensagemHtml.append("Obrigado");
+	    // Estruturação do e-mail de boas-vindas
+	    StringBuilder mensagemHtml = new StringBuilder();
+	    mensagemHtml.append("<b>Olá!: " + pessoa.getNome() + " </b>").append("<br/>");
+	    mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
+	    mensagemHtml.append("<b>Login: </b>" + pessoa.getEmail()).append("<br/>");
+	    mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
+	    mensagemHtml.append("Obrigado");
 
 		try { // Fazer o envio de e-mail do login e senha
 			sendMailService.enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!",

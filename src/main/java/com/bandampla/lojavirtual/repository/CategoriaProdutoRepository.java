@@ -27,5 +27,5 @@ public interface CategoriaProdutoRepository
 	
 	List<CategoriaProduto> findByNomeDescricaoContainingIgnoreCase(String nome);
 	
-	List<CategoriaProduto> findByEmpresaId(Long empresaId);
+	List<CategoriaProduto> findByEmpresaId(Long empresaId);	
 }
