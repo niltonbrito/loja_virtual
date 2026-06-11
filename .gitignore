@@ -4,17 +4,17 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### Eclipse / STS ###
+### STS ###
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings/
+.settings
 .springBeans
 .sts4-cache
 
 ### IntelliJ IDEA ###
-.idea/
+.idea
 *.iws
 *.iml
 *.ipr
@@ -31,6 +31,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-### Configurações locais com senhas ###
-src/main/resources/*.properties
