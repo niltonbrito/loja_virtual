@@ -37,7 +37,7 @@ public class CategoriaProdutoService {
 	@Autowired
 	private PessoaJuridicaRepository pessoaJuridicaRepository;
 
-	public CategoriaProdutoDTO salvar(CategoriaProdutoDTO dto) throws ExceptionCustom {
+	public CategoriaProdutoDTO cadastrar(CategoriaProdutoDTO dto) throws ExceptionCustom {
 
 		// Validação de nome duplicado
 		if (dto.getId() == null) {

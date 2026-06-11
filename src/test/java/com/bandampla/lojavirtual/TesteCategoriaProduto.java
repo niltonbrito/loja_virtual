@@ -37,7 +37,7 @@ class TesteCategoriaProduto extends TestCase {
 		dto.setNomeDescricao("Casa");
 		dto.setEmpresaId(pessoaJuridicaOpt.get().getId());
 
-		dto = categoriaProdutoService.salvar(dto);
+		dto = categoriaProdutoService.cadastrar(dto);
 
 		assertEquals(true, dto.getId() > 0);
 

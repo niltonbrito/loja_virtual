@@ -7,6 +7,7 @@ package com.bandampla.lojavirtual.repository.specification;
  */
 
 import org.springframework.data.jpa.domain.Specification;
+
 import com.bandampla.lojavirtual.model.CategoriaProduto;
 
 public class CategoriaProdutoSpec {

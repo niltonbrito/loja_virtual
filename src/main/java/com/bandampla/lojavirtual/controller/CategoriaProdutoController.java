@@ -35,12 +35,12 @@ public class CategoriaProdutoController {
 	// 🔵 CRIAR
 	// ============================
 	@PostMapping
-	public ResponseEntity<ResponseDefaultDTO<CategoriaProdutoDTO>> salvar(@Valid @RequestBody CategoriaProdutoDTO dto,
+	public ResponseEntity<ResponseDefaultDTO<CategoriaProdutoDTO>> cadastrar(@Valid @RequestBody CategoriaProdutoDTO dto,
 			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 		dto.setEmpresaId(usuarioLogado.getEmpresaId());
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(new ResponseDefaultDTO<>("Categoria criada com sucesso", categoriaProdutoService.salvar(dto)));
+				.body(new ResponseDefaultDTO<>("Categoria criada com sucesso", categoriaProdutoService.cadastrar(dto)));
 	}
 
 	// ============================

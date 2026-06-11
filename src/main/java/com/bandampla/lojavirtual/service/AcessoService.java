@@ -21,30 +21,32 @@ import com.bandampla.lojavirtual.repository.AcessoRepository;
 
 @Service
 public class AcessoService {
-/*
+
 	@Autowired
 	private AcessoRepository acessoRepository;
 
-	public Acesso save(RoleUser roleUser) throws ExceptionCustom {
-
+	public Acesso cadastrar(Acesso acesso) throws ExceptionCustom {
+		
+		RoleUser roleUser = acesso.getRoleUser();
+		
 		if (acesso.getId() == null) {
 			List<Acesso> acessos = acessoRepository.findByRoleUser(roleUser);
 			if (!acessos.isEmpty()) {
-				throw new ExceptionCustom("Já existe Acesso com a descrição: " + acesso.getRoleUser());
+				throw new ExceptionCustom("Já existe Acesso com a descrição: " + roleUser.getDescricao());
 			}
 		}
 		return acessoRepository.save(acesso);
 	}
 
-	public void delete(Acesso acesso) {
+	public void deletar(Acesso acesso) {
 		acessoRepository.deleteById(acesso.getId());
 	}
 
-	public void deleteById(Long id) {
+	public void deletePorId(Long id) {
 		acessoRepository.deleteById(id);
 	}
 
-	public Acesso buscarById(Long id) throws ExceptionCustom {
+	public Acesso buscarPorId(Long id) throws ExceptionCustom {
 
 		Acesso acesso = acessoRepository.findById(id).orElse(null);
 		if (acesso == null) {
@@ -55,6 +57,6 @@ public class AcessoService {
 
 	public List<Acesso> buscarPorRole(RoleUser roleUser) {
 	    return acessoRepository.findByRoleUser(roleUser);
-	}*/
+	}
 
 }

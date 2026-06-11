@@ -18,7 +18,6 @@ import com.bandampla.lojavirtual.controller.AcessoController;
 import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Acesso;
-import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.repository.AcessoRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -209,7 +208,7 @@ class LojaVirtualApplicationTests extends TestCase {
 
 		/* Teste de cadastro */
 		// Gravou no banco de dados
-		acessoController.salvarAcesso(acesso);
+		acessoController.cadastrar(acesso);
 
 		/* Teste de Validação */
 		// Valida dados da forma correta
@@ -231,9 +230,9 @@ class LojaVirtualApplicationTests extends TestCase {
 		/* Teste de Query */
 		acesso = new Acesso(); // Objeto recebe uma nova instância
 		acesso.setRoleUser(RoleUser.ROLE_GERENTE); // seta o valor no objeto
-		acesso = acessoController.salvarAcesso(acesso).getBody(); // Chama o metodo salvar do controller passando o objeto
+		acesso = acessoController.cadastrar(acesso).getBody(); // Chama o metodo salvar do controller passando o objeto
 		
-		List<Acesso> acessos = acessoRepository.buscarAcessoDesc("ALUNO".trim().toUpperCase()); // cria uma lista de Acessos buscando os acessos no banco
+		List<Acesso> acessos = acessoRepository.findByRoleUser(RoleUser.ROLE_GERENTE); // cria uma lista de Acessos buscando os acessos no banco
 		assertEquals(1, acessos.size()); // valida a quantidade de acessos com o valor passado, travando somente em um unico resultado
 		acessoRepository.deleteById(acesso.getId()); // deletea o valor no banco
 	}

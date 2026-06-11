@@ -32,42 +32,42 @@ import com.bandampla.lojavirtual.service.AcessoService;
 @Controller
 @RestController(value = "acesso")
 public class AcessoController {
-/*
+
 	@Autowired
 	private AcessoService acessoService;
 
 	@ResponseBody // Pode dar um retorno da API
 	@PostMapping(value = "/salvarAcesso") // Mapeandoa url para receber um JSON
-	public ResponseEntity<Acesso> salvarAcesso(@RequestBody Acesso acesso) throws ExceptionCustom {// Recebe o JSON e converte para objeto
+	public ResponseEntity<Acesso> cadastrar(@RequestBody Acesso acesso) throws ExceptionCustom {// Recebe o JSON e converte para objeto
 		
-		return new ResponseEntity<Acesso>(acessoService.save(acesso), HttpStatus.OK);
+		return new ResponseEntity<Acesso>(acessoService.cadastrar(acesso), HttpStatus.OK);
 	}
 
 	@ResponseBody
 	@PostMapping(value = "/deletarAcesso")
-	public ResponseEntity<?> deletarAcesso(@RequestBody Acesso acesso) {
-		acessoService.delete(acesso);
+	public ResponseEntity<?> deletar(@RequestBody Acesso acesso) {
+		acessoService.deletar(acesso);
 		return new ResponseEntity<>("Acesso Removido", HttpStatus.OK);
 	}
 
 	//@Secured(value = {"ROLE_ADMIN", "ROLE_GERENTE"}) //Somente usuario ou requisições com o Role permitido podem utilizar este controler ou end-point
 	@ResponseBody
 	@DeleteMapping(value = "/deletarAcessoPorId/{id}")
-	public ResponseEntity<?> deletarAcessoPorId(@PathVariable Long id) {
-		acessoService.deleteById(id);
+	public ResponseEntity<?> deletarPorId(@PathVariable Long id) {
+		acessoService.deletePorId(id);
 		return new ResponseEntity<>("Acesso Removido", HttpStatus.OK);
 	}
 
 	@ResponseBody
 	@GetMapping(value = "/buscarAcessoPorId/{id}")
-	public ResponseEntity<Acesso> buscarAcessoPorId(@PathVariable Long id) throws ExceptionCustom {		
-		return new ResponseEntity<Acesso>(acessoService.buscarById(id), HttpStatus.OK);
+	public ResponseEntity<Acesso> buscarPorId(@PathVariable Long id) throws ExceptionCustom {		
+		return new ResponseEntity<Acesso>(acessoService.buscarPorId(id), HttpStatus.OK);
 	}
 
 	@ResponseBody
 	@GetMapping(value = "/buscarPorRole/{role}")
 	public ResponseEntity<List<Acesso>> buscarPorRole(@PathVariable("role") RoleUser role) {
 	    return new ResponseEntity<>(acessoService.buscarPorRole(role), HttpStatus.OK);
-	}*/
+	}
 
 }
