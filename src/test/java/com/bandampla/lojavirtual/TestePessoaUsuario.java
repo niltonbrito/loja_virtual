@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Profile;
 import com.bandampla.lojavirtual.controller.PessoaController;
 import com.bandampla.lojavirtual.enums.TipoEndereco;
 import com.bandampla.lojavirtual.enums.TipoPessoa;
+import com.bandampla.lojavirtual.enums.TipoCadastro;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Endereco;
 import com.bandampla.lojavirtual.model.PessoaFisica;
@@ -32,6 +33,7 @@ class TestePessoaUsuario extends TestCase {
 
 	@Autowired
 	private PessoaJuridicaRepository pessoaJuridicaRepository;
+
 	@Test
 	public void testCadastroPessoaJuridica() throws ExceptionCustom {
 
@@ -45,8 +47,9 @@ class TestePessoaUsuario extends TestCase {
 		pessoaJuridica.setInscricaoMunicipal("" + Calendar.getInstance().getTimeInMillis());
 		pessoaJuridica.setNomeFantasia("Bandampla");
 		pessoaJuridica.setRazaoSocial("BAndampla Sistemas");
+		pessoaJuridica.setTipoCadastro(TipoCadastro.EMPRESA);
 		pessoaJuridica.setTipoPessoa(TipoPessoa.JURIDICA);
-		
+
 		Endereco endereco = new Endereco();
 		endereco.setRua("Rua do Ceu");
 		endereco.setNumero("35");
@@ -71,36 +74,36 @@ class TestePessoaUsuario extends TestCase {
 
 		pessoaJuridica.getEnderecos().add(endereco);
 		pessoaJuridica.getEnderecos().add(endereco1);
-		
+
 		pessoaJuridica = pessoaController.salvarPessoaJuridica(pessoaJuridica).getBody();
 
 		assertEquals(true, pessoaJuridica.getId() > 0);
-		
+
 		for (Endereco enderecos : pessoaJuridica.getEnderecos()) {
 			assertEquals(true, enderecos.getId() > 0);
 		}
-		
-		assertEquals(2, pessoaJuridica.getEnderecos().size());		
+
+		assertEquals(2, pessoaJuridica.getEnderecos().size());
 	}
-	
 
 	@Test
 	public void testCadastroPessoFisica() throws ExceptionCustom, ParseException {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		Optional<PessoaJuridica>  pessoaJuridica = pessoaJuridicaRepository.findByCnpj(ValidaCNPJ.cnpjSemMascara("64.916.306/0001-75"));
-		
-		  PessoaFisica pessoaFisica = new PessoaFisica();
-		  
-		  pessoaFisica.setCpf(ValidaCPF.cpfSemMascara("279.281.650-31"));
-		  pessoaFisica.setNome("Nilton Brito");
-		  pessoaFisica.setEmail("nilton.brito@outlook.com");
-		  pessoaFisica.setDataNascimento(sdf.parse("07/10/1985"));
+		Optional<PessoaJuridica> pessoaJuridica = pessoaJuridicaRepository
+				.findByCnpj(ValidaCNPJ.cnpjSemMascara("64.916.306/0001-75"));
 
-		  pessoaFisica.setTelefone("719920456500");
-		  pessoaFisica.setEmpresa(pessoaJuridica.get().getMatriz());
-		  pessoaFisica.setTipoPessoa(TipoPessoa.FISICA);
-		 
-		
+		PessoaFisica pessoaFisica = new PessoaFisica();
+
+		pessoaFisica.setCpf(ValidaCPF.cpfSemMascara("279.281.650-31"));
+		pessoaFisica.setNome("Nilton Brito");
+		pessoaFisica.setEmail("nilton.brito@outlook.com");
+		pessoaFisica.setDataNascimento(sdf.parse("07/10/1985"));
+
+		pessoaFisica.setTelefone("719920456500");
+		pessoaFisica.setEmpresa(pessoaJuridica.get().getMatriz());
+		pessoaFisica.setTipoCadastro(TipoCadastro.CLIENTE);
+		pessoaFisica.setTipoPessoa(TipoPessoa.FISICA);
+
 		Endereco endereco = new Endereco();
 		endereco.setRua("Rua do Ceu");
 		endereco.setNumero("35");
@@ -125,17 +128,17 @@ class TestePessoaUsuario extends TestCase {
 
 		pessoaFisica.getEnderecos().add(endereco);
 		pessoaFisica.getEnderecos().add(endereco1);
-		
+
 		pessoaFisica = pessoaController.salvarPessoaFisica(pessoaFisica).getBody();
 
 		assertEquals(true, pessoaFisica.getId() > 0);
-		
+
 		for (Endereco enderecos : pessoaFisica.getEnderecos()) {
 			assertEquals(true, enderecos.getId() > 0);
 		}
-		
+
 		assertEquals(2, pessoaFisica.getEnderecos().size());
-		
+
 	}
 
 }

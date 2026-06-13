@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.bandampla.lojavirtual.dto.ProdutoDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
-import com.bandampla.lojavirtual.mapper.ProdutoMapper;
+import com.bandampla.lojavirtual.mapper.ProdutoFisicaMapper;
 import com.bandampla.lojavirtual.model.CategoriaProduto;
 import com.bandampla.lojavirtual.model.MarcaProduto;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
@@ -30,10 +30,10 @@ public class ProdutoService {
 	private final PessoaJuridicaRepository pessoaJuridicaRepository;
 	private final CategoriaProdutoRepository categoriaProdutoRepository;
 	private final MarcaProdutoRepository marcaProdutoRepository;
-	private final ProdutoMapper produtoMapper;
+	private final ProdutoFisicaMapper produtoMapper;
 
 	public ProdutoService(ProdutoRepository produtoRepository, PessoaJuridicaRepository pessoaJuridicaRepository,
-			CategoriaProdutoRepository categoriaProdutoRepository, ProdutoMapper produtoMapper,
+			CategoriaProdutoRepository categoriaProdutoRepository, ProdutoFisicaMapper produtoMapper,
 			MarcaProdutoRepository marcaProdutoRepository) {
 		this.produtoRepository = produtoRepository;
 		this.pessoaJuridicaRepository = pessoaJuridicaRepository;
@@ -42,7 +42,7 @@ public class ProdutoService {
 		this.produtoMapper = produtoMapper;
 	}
 
-	public ProdutoDTO salvar(ProdutoDTO dto) throws ExceptionCustom {
+	public ProdutoDTO cadastrar(ProdutoDTO dto) throws ExceptionCustom {
 		if (dto.getId() == null) {
 			Specification<Produto> specDuplicado = Specification.where(ProdutoSpec.nomeExato(dto.getNome()))
 					.and(ProdutoSpec.empresaIgual(dto.getEmpresaId()));
@@ -75,8 +75,7 @@ public class ProdutoService {
 		model.setCategoriaProduto(categoriaProduto);
 		model.setMarcaProduto(marcaProduto);
 
-		model = produtoRepository.save(model);
-		return produtoMapper.toDTO(model);
+		return produtoMapper.toDTO(produtoRepository.save(model));
 	}
 
 	public ProdutoDTO atualizar(Long id, ProdutoDTO dto) throws ExceptionCustom {
@@ -129,8 +128,7 @@ public class ProdutoService {
 		existente.setCategoriaProduto(novaCategoria);
 		existente.setMarcaProduto(marcaProduto); // Adicionado o vínculo definitivo que faltava
 
-		existente = produtoRepository.save(existente);
-		return produtoMapper.toDTO(existente);
+		return produtoMapper.toDTO(produtoRepository.save(existente));
 	}
 
 	public void deletar(Long id, Long empresaId) throws ExceptionCustom {
@@ -155,37 +153,26 @@ public class ProdutoService {
 				.collect(Collectors.toList());
 	}
 
-	public ProdutoDTO buscarPorId(Long id, Long empresaId) throws ExceptionCustom {
-		Produto produto = produtoRepository.findById(id)
-				.orElseThrow(() -> new ExceptionCustom("Produto não encontrada com o código: " + id));
-
-		if (!produto.getEmpresa().getId().equals(empresaId)) {
-			throw new ExceptionCustom("Acesso Negado: Este produto não pertence à sua empresa.");
-		}
-
-		return produtoMapper.toDTO(produto);
-	}
-
-	public List<ProdutoDTO> buscarPorEmpresa(Long id) {
+	public List<ProdutoDTO> buscarTodosPorEmpresa(Long id) {
 		Specification<Produto> spec = Specification.where(ProdutoSpec.empresaIgual(id));
 		return produtoRepository.findAll(spec).stream().map(produto -> produtoMapper.toDTO(produto))
 				.collect(Collectors.toList());
 	}
 
-	public Page<ProdutoDTO> listarPaginado(int page, int size, String sort, String direction, Long empresaId) {
-		Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sort);
+	public Page<ProdutoDTO> buscarAvancado(String descricao, Boolean ativo, int page, int size, Long empresaId) {
+		Pageable pageable = PageRequest.of(page, size);
 
-		Specification<Produto> spec = Specification.where(ProdutoSpec.empresaIgual(empresaId));
+		Specification<Produto> spec = Specification
+				.where(ProdutoSpec.nomeContem(descricao).or(ProdutoSpec.descricaoContem(descricao)))
+				.and(ProdutoSpec.empresaIgual(empresaId)).and(ProdutoSpec.statusAtivoEquivalente(ativo));
 
 		return produtoRepository.findAll(spec, pageable).map(produto -> produtoMapper.toDTO(produto));
 	}
 
-	public Page<ProdutoDTO> buscarAvancado(String textoBusca, Long empresaId, Boolean ativo, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size);
+	public Page<ProdutoDTO> buscarPaginado(int page, int size, String sort, String direction, Long empresaId) {
+		Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sort);
 
-		Specification<Produto> spec = Specification
-				.where(ProdutoSpec.nomeContem(textoBusca).or(ProdutoSpec.descricaoContem(textoBusca)))
-				.and(ProdutoSpec.empresaIgual(empresaId)).and(ProdutoSpec.statusAtivoEquivalente(ativo));
+		Specification<Produto> spec = Specification.where(ProdutoSpec.empresaIgual(empresaId));
 
 		return produtoRepository.findAll(spec, pageable).map(produto -> produtoMapper.toDTO(produto));
 	}

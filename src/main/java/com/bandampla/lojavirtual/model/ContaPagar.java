@@ -37,16 +37,16 @@ public class ContaPagar implements Serializable {
 	@Column(nullable = false)
 	private String descricao;
 
-	@Column(nullable= false)
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private StatusContaPagar status;
-	
-	@Column(nullable= false)
+
+	@Column(nullable = false)
 	private BigDecimal valorTotal;
 
 	private BigDecimal valorDesconto;
 
-	@Column(nullable= false)
+	@Column(nullable = false)
 	@Temporal(TemporalType.DATE)
 	private Date dataVencimento;
 
@@ -59,17 +59,17 @@ public class ContaPagar implements Serializable {
 
 	@ManyToOne(targetEntity = Pessoa.class)
 	@JoinColumn(name = "pessoa_fornecedor_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fornecedor_fk"))
-	private Pessoa pessoaFornecedor;
+	private PessoaJuridica pessoaFornecedor;
 
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-	private Pessoa empresa;
-	
-	public Pessoa getEmpresa() {
+	private PessoaJuridica empresa;
+
+	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
 
-	public void setEmpresa(Pessoa empresa) {
+	public void setEmpresa(PessoaJuridica empresa) {
 		this.empresa = empresa;
 	}
 
@@ -137,11 +137,11 @@ public class ContaPagar implements Serializable {
 		this.pessoa = pessoa;
 	}
 
-	public Pessoa getPessoaFornecedor() {
+	public PessoaJuridica getPessoaFornecedor() {
 		return pessoaFornecedor;
 	}
 
-	public void setPessoaFornecedor(Pessoa pessoaFornecedor) {
+	public void setPessoaFornecedor(PessoaJuridica pessoaFornecedor) {
 		this.pessoaFornecedor = pessoaFornecedor;
 	}
 

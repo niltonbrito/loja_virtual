@@ -26,7 +26,7 @@ public class MarcaProdutoService {
 	private final MarcaProdutoRepository marcaProdutoRepository;
 	private final MarcaProdutoMapper marcaProdutoMapper;
 
-	public MarcaProdutoService(PessoaJuridicaRepository pessoaJuridicaRepository,
+	private MarcaProdutoService(PessoaJuridicaRepository pessoaJuridicaRepository,
 			MarcaProdutoRepository marcaProdutoRepository, MarcaProdutoMapper marcaProdutoMapper) {
 		this.pessoaJuridicaRepository = pessoaJuridicaRepository;
 		this.marcaProdutoRepository = marcaProdutoRepository;
@@ -50,9 +50,8 @@ public class MarcaProdutoService {
 
 		MarcaProduto model = marcaProdutoMapper.toModel(dto);
 		model.setEmpresa(empresa);
-
-		model = marcaProdutoRepository.save(model);
-		return marcaProdutoMapper.toDTO(model);
+		
+		return marcaProdutoMapper.toDTO(marcaProdutoRepository.save(model));
 	}
 
 	public MarcaProdutoDTO atualizar(Long id, MarcaProdutoDTO dto) throws ExceptionCustom {
@@ -60,8 +59,7 @@ public class MarcaProdutoService {
 		MarcaProduto marcaProduto = marcaProdutoRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Marca não encontrada com o código: " + id));
 
-		if (!marcaProduto.getEmpresa().getId().equals(dto.getEmpresaId())
-				&& marcaProduto.getNomeDescricao().equals(dto.getNomeDescricao())) {
+		if (!marcaProduto.getEmpresa().getId().equals(dto.getEmpresaId())) {
 			throw new ExceptionCustom(
 					"Acesso Negado: Você não tem permissão para alterar a marca do produto, não pertence à sua empresa.");
 		}
@@ -83,8 +81,7 @@ public class MarcaProdutoService {
 		marcaProdutoMapper.atualizarCamposDoProduto(dto, marcaProduto);
 		marcaProduto.setEmpresa(empresa);
 
-		marcaProduto = marcaProdutoRepository.save(marcaProduto);
-		return marcaProdutoMapper.toDTO(marcaProduto);
+		return marcaProdutoMapper.toDTO(marcaProdutoRepository.save(marcaProduto));
 	}
 
 	public void deletar(Long id, Long empresaId) throws ExceptionCustom {
@@ -109,37 +106,26 @@ public class MarcaProdutoService {
 				.map(marcaProduto -> marcaProdutoMapper.toDTO(marcaProduto)).collect(Collectors.toList());
 	}
 
-	public MarcaProdutoDTO buscarPorId(Long id, Long empresaId) throws ExceptionCustom {
-		MarcaProduto marcaProduto = marcaProdutoRepository.findById(id)
-				.orElseThrow(() -> new ExceptionCustom("Marca não encontrada com o código: " + id));
-
-		if (!marcaProduto.getEmpresa().getId().equals(empresaId)) {
-			throw new ExceptionCustom("Acesso Negado: Este produto não pertence à sua empresa.");
-		}
-
-		return marcaProdutoMapper.toDTO(marcaProduto);
-	}
-
-	public List<MarcaProdutoDTO> buscarPorEmpresa(Long id) {
-		Specification<MarcaProduto> specMarcaProduto = Specification.where(MarcaProdutoSpec.empresaIgual(id));
+	public List<MarcaProdutoDTO> buscarTodosPorEmpresa(Long empresaId) {
+		Specification<MarcaProduto> specMarcaProduto = Specification.where(MarcaProdutoSpec.empresaIgual(empresaId));
 		return marcaProdutoRepository.findAll(specMarcaProduto).stream()
 				.map(marcaProduto -> marcaProdutoMapper.toDTO(marcaProduto)).collect(Collectors.toList());
 	}
 
-	public Page<MarcaProdutoDTO> listarPaginado(int page, int size, String sort, String direction, Long empresaId) {
-		Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sort);
+	public Page<MarcaProdutoDTO> buscarAvancado(String textoBusca, int page, int size, Long empresaId) {
+		Pageable pageable = PageRequest.of(page, size);
 
-		Specification<MarcaProduto> specMarcaProduto = Specification.where(MarcaProdutoSpec.empresaIgual(empresaId));
+		Specification<MarcaProduto> specMarcaProduto = Specification.where(MarcaProdutoSpec.descricaoContem(textoBusca))
+				.and(MarcaProdutoSpec.empresaIgual(empresaId));
 
 		return marcaProdutoRepository.findAll(specMarcaProduto, pageable)
 				.map(marcaProduto -> marcaProdutoMapper.toDTO(marcaProduto));
 	}
 
-	public Page<MarcaProdutoDTO> buscarAvancado(String textoBusca, Long empresaId, Boolean ativo, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size);
+	public Page<MarcaProdutoDTO> buscarPaginado(int page, int size, String sort, String direction, Long empresaId) {
+		Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sort);
 
-		Specification<MarcaProduto> specMarcaProduto = Specification.where(MarcaProdutoSpec.descricaoContem(textoBusca))
-				.and(MarcaProdutoSpec.empresaIgual(empresaId));
+		Specification<MarcaProduto> specMarcaProduto = Specification.where(MarcaProdutoSpec.empresaIgual(empresaId));
 
 		return marcaProdutoRepository.findAll(specMarcaProduto, pageable)
 				.map(marcaProduto -> marcaProdutoMapper.toDTO(marcaProduto));

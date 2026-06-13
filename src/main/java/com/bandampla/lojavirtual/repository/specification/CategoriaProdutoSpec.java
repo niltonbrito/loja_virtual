@@ -7,11 +7,21 @@ package com.bandampla.lojavirtual.repository.specification;
  */
 
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.StringUtils;
 
 import com.bandampla.lojavirtual.model.CategoriaProduto;
 
 public class CategoriaProdutoSpec {
 
+	// Filtro por Descricao exato (IgnoreCase) para validação de duplicidade
+	public static Specification<CategoriaProduto> descricaoExata(String descricao) {
+		return (root, query, cb) -> {
+			if (!StringUtils.hasText(descricao))
+				return null;
+			return cb.equal(cb.lower(root.get("nomeDescricao")), descricao.trim().toLowerCase());
+		};
+	}
+	
     public static Specification<CategoriaProduto> descricaoContem(String descricao) {
         return (root, query, cb) ->
                 descricao == null ? null :

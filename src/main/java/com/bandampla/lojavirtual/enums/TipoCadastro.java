@@ -1,13 +1,16 @@
 package com.bandampla.lojavirtual.enums;
 
-public enum TipoPessoa {
+public enum TipoCadastro {
 	
-    FISICA("FISICA"),
-    JURIDICA("JURIDICA");
+    CLIENTE("CLIENTE"),
+    FORNECEDOR("FORNECEDOR"),
+    FUNCIONARIO("FUNCIONARIO"),
+    TRANSPORTADORA("TRANSPORTADORA"),
+    EMPRESA("EMPRESA")	;
 	
 	private String descricao;
 	
-	private TipoPessoa(String descricao) {
+	private TipoCadastro(String descricao) {
 		this.descricao = descricao;
 	}
 	

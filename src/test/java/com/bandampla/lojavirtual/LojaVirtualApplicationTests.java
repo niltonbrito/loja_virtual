@@ -174,7 +174,7 @@ class LojaVirtualApplicationTests extends TestCase {
 		ObjectMapper objectMapperAcesso = new ObjectMapper();
 
 		ResultActions resultApiAcesso = mockMvc.perform(MockMvcRequestBuilders
-				.get("/buscarPorDescricao/TE_BUSCAR_DESCRICAO").content(objectMapperAcesso.writeValueAsString(acesso))
+				.get("/buscarPorDescricao/").content(objectMapperAcesso.writeValueAsString(acesso))
 				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON));
 
 		/* Checagem do retorno */

@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import com.bandampla.lojavirtual.dto.CepDTO;
 import com.bandampla.lojavirtual.dto.CnpjDTO;
 import com.bandampla.lojavirtual.enums.RoleUser;
+import com.bandampla.lojavirtual.enums.TipoCadastro;
 import com.bandampla.lojavirtual.enums.TipoPessoa;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Endereco;
@@ -61,7 +62,11 @@ public class PessoaUserService {
 		}
 
 		if (pessoaJuridica.getTipoPessoa() == null) {
-			throw new ExceptionCustom("Informe o tipo de Pessoa Juridica.");
+			throw new ExceptionCustom("Informe o tipo de Pessoa.");
+		}
+		
+		if (pessoaJuridica.getTipoCadastro() == null) {
+			throw new ExceptionCustom("Informe o tipo de Cadastro.");
 		}
 
 		/* Validação de CNPJ */
@@ -92,6 +97,7 @@ public class PessoaUserService {
 
 		cadastrarEnderecos(pessoaJuridica);
 		pessoaJuridica.setTipoPessoa(TipoPessoa.JURIDICA);
+		pessoaJuridica.setTipoCadastro(TipoCadastro.EMPRESA);
 		pessoaJuridica.setCnpj(ValidaCNPJ.cnpjSemMascara(pessoaJuridica.getCnpj().trim()));
 		pessoaJuridica = pessoaJuridicaRepository.save(pessoaJuridica);
 
@@ -108,6 +114,10 @@ public class PessoaUserService {
 
 		if (pessoaFisica.getTipoPessoa() == null) {
 			throw new ExceptionCustom("Informe o tipo de Pessoa.");
+		}
+		
+		if (pessoaFisica.getTipoCadastro() == null) {
+			throw new ExceptionCustom("Informe o tipo de Cadastro.");
 		}
 
 		/* Validação de CPF */
@@ -130,6 +140,7 @@ public class PessoaUserService {
 
 		pessoaFisica.setEmpresa(empresa);
 		pessoaFisica.setTipoPessoa(TipoPessoa.FISICA);
+		pessoaFisica.setTipoCadastro(TipoCadastro.CLIENTE);
 		pessoaFisica.setCpf(ValidaCPF.cpfSemMascara(pessoaFisica.getCpf().trim()));
 		pessoaFisica = pessoaFisicaRepository.save(pessoaFisica);
 

@@ -19,6 +19,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 
+import com.bandampla.lojavirtual.enums.TipoCadastro;
 import com.bandampla.lojavirtual.enums.TipoPessoa;
 
 @Entity
@@ -44,6 +45,10 @@ public abstract class Pessoa implements Serializable {
 	@Column
 	@Enumerated(EnumType.STRING)
 	private TipoPessoa tipoPessoa;
+	
+	@Column
+	@Enumerated(EnumType.STRING)
+	private TipoCadastro tipoCadastro;
 
 	@OneToMany(mappedBy = "pessoa", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Endereco> enderecos = new ArrayList<Endereco>();
@@ -80,6 +85,14 @@ public abstract class Pessoa implements Serializable {
 		this.telefone = telefone;
 	}
 
+	public TipoCadastro getTipoCadastro() {
+		return tipoCadastro;
+	}
+
+	public void setTipoCadastro(TipoCadastro tipoCadastro) {
+		this.tipoCadastro = tipoCadastro;
+	}
+	
 	public TipoPessoa getTipoPessoa() {
 		return tipoPessoa;
 	}
@@ -112,5 +125,4 @@ public abstract class Pessoa implements Serializable {
 		Pessoa other = (Pessoa) obj;
 		return Objects.equals(id, other.id);
 	}
-
 }

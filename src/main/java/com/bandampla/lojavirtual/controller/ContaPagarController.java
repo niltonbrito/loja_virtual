@@ -18,38 +18,37 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bandampla.lojavirtual.dto.CategoriaProdutoDTO;
+import com.bandampla.lojavirtual.dto.ContaPagarDTO;
 import com.bandampla.lojavirtual.dto.response.ResponseDefaultDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
-import com.bandampla.lojavirtual.service.CategoriaProdutoService;
+import com.bandampla.lojavirtual.service.ContaPagarService;
 
 @RestController
-@RequestMapping("/categoria")
-public class CategoriaProdutoController {
+@RequestMapping("/contapagar")
+public class ContaPagarController {
 
 	@Autowired
-	private CategoriaProdutoService categoriaProdutoService;
+	private ContaPagarService contaPagarService;
 
 	@PostMapping
-	public ResponseEntity<ResponseDefaultDTO<CategoriaProdutoDTO>> cadastrar(
-			@Valid @RequestBody CategoriaProdutoDTO dto,
+	public ResponseEntity<ResponseDefaultDTO<ContaPagarDTO>> cadastrar(@Valid @RequestBody ContaPagarDTO dto,
 			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 		dto.setEmpresaId(usuarioLogado.getEmpresaId());
 		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(new ResponseDefaultDTO<>("Categoria criada com sucesso", categoriaProdutoService.cadastrar(dto)));
+				.body(new ResponseDefaultDTO<>("Conta Pagar criada com sucesso", contaPagarService.cadastrar(dto)));
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<ResponseDefaultDTO<CategoriaProdutoDTO>> atualizar(@PathVariable Long id,
-			@Valid @RequestBody CategoriaProdutoDTO dto,
+	public ResponseEntity<ResponseDefaultDTO<ContaPagarDTO>> atualizar(@PathVariable Long id,
+			@Valid @RequestBody ContaPagarDTO dto,
 			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 
 		dto.setEmpresaId(usuarioLogado.getEmpresaId());
-		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDefaultDTO<>("Categoria atualizada com sucesso",
-				categoriaProdutoService.atualizar(id, dto)));
+		return ResponseEntity.status(HttpStatus.OK).body(
+				new ResponseDefaultDTO<>("Conta Pagar atualizada com sucesso", contaPagarService.atualizar(id, dto)));
 	}
 
 	@DeleteMapping("/{id}")
@@ -57,41 +56,40 @@ public class CategoriaProdutoController {
 			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 
-		categoriaProdutoService.deletar(id, usuarioLogado.getEmpresaId());
+		contaPagarService.deletar(id, usuarioLogado.getEmpresaId());
 
 		// Retorna HTTP 200 OK com o JSON estruturado para o front-end ler a string
 		return ResponseEntity.status(HttpStatus.OK)
-				.body(new ResponseDefaultDTO<>("Categoria deletada com sucesso", null));
+				.body(new ResponseDefaultDTO<>("Conta Pagar deletada com sucesso", null));
 	}
 
 	@GetMapping("/buscar")
-	public ResponseEntity<List<CategoriaProdutoDTO>> buscarPorDescricao(@RequestParam String descricao,
+	public ResponseEntity<List<ContaPagarDTO>> buscarPorDescricao(@RequestParam String descricao,
 			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
-		return ResponseEntity.ok(categoriaProdutoService.buscarPorDescricao(descricao, usuarioLogado.getEmpresaId()));
+		return ResponseEntity.ok(contaPagarService.buscarPorDescricao(descricao, usuarioLogado.getEmpresaId()));
 	}
 
 	@GetMapping
-	public ResponseEntity<List<CategoriaProdutoDTO>> buscarTodosPorEmpresa(
+	public ResponseEntity<List<ContaPagarDTO>> buscarTodosPorEmpresa(
 			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
-		return ResponseEntity.ok(categoriaProdutoService.buscarTodosPorEmpresa(usuarioLogado.getEmpresaId()));
+		return ResponseEntity.ok(contaPagarService.buscarTodosPorEmpresa(usuarioLogado.getEmpresaId()));
 	}
 
 	@GetMapping("/busca-avancada")
-	public ResponseEntity<Page<CategoriaProdutoDTO>> buscarAvancado(@RequestParam(required = false) String descricao,
-			@RequestParam(required = false) 
-	@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado, @RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size) {
-		return ResponseEntity.ok(categoriaProdutoService.buscarAvancado(descricao, usuarioLogado.getEmpresaId(), page, size));
+	public ResponseEntity<Page<ContaPagarDTO>> buscarAvancado(@RequestParam(required = false) String descricao,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
+			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
+		return ResponseEntity.ok(contaPagarService.buscarAvancado(descricao, page, size, usuarioLogado.getEmpresaId()));
 	}
-
+	
 	@GetMapping("/paginado")
-	public ResponseEntity<Page<CategoriaProdutoDTO>> buscarPaginado(@RequestParam(defaultValue = "0") int page,
+	public ResponseEntity<Page<ContaPagarDTO>> buscarPaginado(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "id") String sort,
 			@RequestParam(defaultValue = "ASC") String direction,
 			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
 		return ResponseEntity
-				.ok(categoriaProdutoService.buscarPaginado(page, size, sort, direction, usuarioLogado.getEmpresaId()));
+				.ok(contaPagarService.buscarPaginado(page, size, sort, direction, usuarioLogado.getEmpresaId()));
 	}
 }
