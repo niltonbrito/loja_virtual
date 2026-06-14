@@ -79,6 +79,9 @@ public class ProdutoService {
 	}
 
 	public ProdutoDTO atualizar(Long id, ProdutoDTO dto) throws ExceptionCustom {
+		if (id == null || id <= 0) {
+			throw new ExceptionCustom("ID inválido ou ausente");
+		}
 		Produto existente = produtoRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Produto não encontrada"));
 
@@ -132,8 +135,8 @@ public class ProdutoService {
 	}
 
 	public void deletar(Long id, Long empresaId) throws ExceptionCustom {
-		if (id <= 0) {
-			throw new ExceptionCustom("ID inválido");
+		if (id == null || id <= 0) {
+			throw new ExceptionCustom("ID inválido ou ausente");
 		}
 		Produto produto = produtoRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Produto não encontrada"));
@@ -153,8 +156,8 @@ public class ProdutoService {
 				.collect(Collectors.toList());
 	}
 
-	public List<ProdutoDTO> buscarTodosPorEmpresa(Long id) {
-		Specification<Produto> spec = Specification.where(ProdutoSpec.empresaIgual(id));
+	public List<ProdutoDTO> buscarTodosPorEmpresa(Long empresaId) {
+		Specification<Produto> spec = Specification.where(ProdutoSpec.empresaIgual(empresaId));
 		return produtoRepository.findAll(spec).stream().map(produto -> produtoMapper.toDTO(produto))
 				.collect(Collectors.toList());
 	}

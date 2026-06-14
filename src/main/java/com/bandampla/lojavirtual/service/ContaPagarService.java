@@ -1,7 +1,6 @@
 package com.bandampla.lojavirtual.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,16 +38,15 @@ public class ContaPagarService {
 	}
 
 	public ContaPagarDTO cadastrar(ContaPagarDTO dto) throws ExceptionCustom {
-		if (dto.getId() == null) {
 
-			Specification<ContaPagar> specContaPagarDuplicado = Specification
-					.where(ContaPagarSpec.descricaoExata(dto.getDescricao()))
-					.and(ContaPagarSpec.empresaIgual(dto.getEmpresaId()));
-			List<ContaPagar> existentes = contaPagarRepository.findAll(specContaPagarDuplicado);
-			if (!existentes.isEmpty()) {
-				throw new ExceptionCustom("Já existe Conta a pagar com nome: '" + dto.getDescricao()
-						+ "' cadastrado para a empresa de código: " + dto.getEmpresaId());
-			}
+		// Validação de duplicidade
+		Specification<ContaPagar> specDuplicidade = Specification
+				.where(ContaPagarSpec.descricaoExata(dto.getDescricao()))
+				.and(ContaPagarSpec.empresaIgual(dto.getEmpresaId()));
+
+		if (contaPagarRepository.exists(specDuplicidade)) {
+			throw new ExceptionCustom(
+					"Já existe Conta a pagar com nome '" + dto.getDescricao() + "' cadastrada para esta empresa.");
 		}
 
 		PessoaJuridica empresa = pessoaJuridicaRepository.findById(dto.getEmpresaId())
@@ -61,11 +59,13 @@ public class ContaPagarService {
 				.orElseThrow(() -> new ExceptionCustom("Fornecedor não encontrado"));
 
 		if (!pessoaFisica.getEmpresa().getId().equals(dto.getEmpresaId())) {
-			throw new ExceptionCustom("A pessoa informada da Conta a pagar do produto, não pertence à empresa.");
+			throw new ExceptionCustom("A pessoa informada não pertence à empresa.");
 		}
+
 		if (!fornecedor.getId().equals(dto.getEmpresaId())) {
-			throw new ExceptionCustom("O fornecedor informado da Conta a pagar do produto, não pertence à empresa.");
+			throw new ExceptionCustom("O fornecedor informado não pertence à empresa.");
 		}
+
 		ContaPagar model = contaPagarMapper.toModel(dto);
 		model.setEmpresa(empresa);
 		model.setPessoa(pessoaFisica);
@@ -76,23 +76,26 @@ public class ContaPagarService {
 
 	public ContaPagarDTO atualizar(Long id, ContaPagarDTO dto) throws ExceptionCustom {
 
-		ContaPagar contaPagar = contaPagarRepository.findById(id)
-				.orElseThrow(() -> new ExceptionCustom("Marca não encontrada com o código: " + id));
-
-		if (!contaPagar.getEmpresa().getId().equals(dto.getEmpresaId())) {
-			throw new ExceptionCustom(
-					"Acesso Negado: Você não tem permissão para alterar a Conta a pagar do produto, não pertence à sua empresa.");
+		if (id == null || id <= 0) {
+			throw new ExceptionCustom("ID inválido ou ausente");
 		}
 
-		Specification<ContaPagar> specContaPagarDuplicado = Specification
+		ContaPagar contaPagar = contaPagarRepository.findById(id)
+				.orElseThrow(() -> new ExceptionCustom("Conta a pagar não encontrada com o código: " + id));
+
+		// Verifica se o registro pertence à empresa do usuário
+		if (!contaPagar.getEmpresa().getId().equals(dto.getEmpresaId())) {
+			throw new ExceptionCustom("Acesso negado: esta conta não pertence à sua empresa.");
+		}
+
+		// Validação de duplicidade (nome já existe em outro registro)
+		Specification<ContaPagar> specDuplicidade = Specification
 				.where(ContaPagarSpec.descricaoExata(dto.getDescricao()))
-				.and(ContaPagarSpec.empresaIgual(dto.getEmpresaId()));
+				.and(ContaPagarSpec.empresaIgual(dto.getEmpresaId())).and(ContaPagarSpec.idDiferente(id));
 
-		List<ContaPagar> duplicados = contaPagarRepository.findAll(specContaPagarDuplicado);
-
-		if (!duplicados.isEmpty() && !duplicados.get(0).getId().equals(id)) {
-			throw new ExceptionCustom("Já existe Conta a pagar com nome: '" + dto.getDescricao()
-					+ "' cadastrado para a empresa de código: " + dto.getEmpresaId());
+		if (contaPagarRepository.exists(specDuplicidade)) {
+			throw new ExceptionCustom(
+					"Já existe Conta a pagar com nome '" + dto.getDescricao() + "' cadastrada para esta empresa.");
 		}
 
 		PessoaJuridica empresa = pessoaJuridicaRepository.findById(dto.getEmpresaId())
@@ -105,49 +108,41 @@ public class ContaPagarService {
 	}
 
 	public void deletar(Long id, Long empresaId) throws ExceptionCustom {
-		if (id <= 0) {
-			throw new ExceptionCustom("ID inválido");
+
+		if (id == null || id <= 0) {
+			throw new ExceptionCustom("ID inválido ou ausente");
 		}
+
 		ContaPagar contaPagar = contaPagarRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Conta a pagar não encontrada com o código: " + id));
-
 		if (!contaPagar.getEmpresa().getId().equals(empresaId)) {
-			throw new ExceptionCustom("Acesso Negado: Você não tem permissão para excluir esta Conta a pagar.");
+			throw new ExceptionCustom("Acesso negado: esta conta não pertence à sua empresa.");
 		}
 
 		contaPagarRepository.delete(contaPagar);
 	}
 
 	public List<ContaPagarDTO> buscarPorDescricao(String descricao, Long empresaId) {
-		Specification<ContaPagar> specContaPagar = Specification.where(ContaPagarSpec.descricaoContem(descricao))
+		Specification<ContaPagar> spec = Specification.where(ContaPagarSpec.descricaoContem(descricao))
 				.and(ContaPagarSpec.empresaIgual(empresaId));
-
-		return contaPagarRepository.findAll(specContaPagar).stream()
-				.map(contaPagar -> contaPagarMapper.toDTO(contaPagar)).collect(Collectors.toList());
+		return contaPagarRepository.findAll(spec).stream().map(contaPagarMapper::toDTO).toList();
 	}
 
 	public List<ContaPagarDTO> buscarTodosPorEmpresa(Long empresaId) {
-		Specification<ContaPagar> specContaPagar = Specification.where(ContaPagarSpec.empresaIgual(empresaId));
-		return contaPagarRepository.findAll(specContaPagar).stream()
-				.map(contaPagar -> contaPagarMapper.toDTO(contaPagar)).collect(Collectors.toList());
+		Specification<ContaPagar> spec = Specification.where(ContaPagarSpec.empresaIgual(empresaId));
+		return contaPagarRepository.findAll(spec).stream().map(contaPagarMapper::toDTO).toList();
 	}
 
 	public Page<ContaPagarDTO> buscarAvancado(String descricao, int page, int size, Long empresaId) {
 		Pageable pageable = PageRequest.of(page, size);
-
-		Specification<ContaPagar> specContaPagar = Specification.where(ContaPagarSpec.descricaoContem(descricao))
+		Specification<ContaPagar> spec = Specification.where(ContaPagarSpec.descricaoContem(descricao))
 				.and(ContaPagarSpec.empresaIgual(empresaId));
-
-		return contaPagarRepository.findAll(specContaPagar, pageable)
-				.map(contaPagar -> contaPagarMapper.toDTO(contaPagar));
+		return contaPagarRepository.findAll(spec, pageable).map(contaPagarMapper::toDTO);
 	}
 
 	public Page<ContaPagarDTO> buscarPaginado(int page, int size, String sort, String direction, Long empresaId) {
 		Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sort);
-
-		Specification<ContaPagar> specContaPagar = Specification.where(ContaPagarSpec.empresaIgual(empresaId));
-
-		return contaPagarRepository.findAll(specContaPagar, pageable)
-				.map(contaPagar -> contaPagarMapper.toDTO(contaPagar));
+		Specification<ContaPagar> spec = Specification.where(ContaPagarSpec.empresaIgual(empresaId));
+		return contaPagarRepository.findAll(spec, pageable).map(contaPagarMapper::toDTO);
 	}
 }

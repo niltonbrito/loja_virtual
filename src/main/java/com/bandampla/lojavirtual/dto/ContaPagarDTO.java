@@ -1,7 +1,7 @@
 package com.bandampla.lojavirtual.dto;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.validation.constraints.NotBlank;
@@ -14,10 +14,10 @@ public class ContaPagarDTO {
 
 	private Long id;
 
-	@NotBlank(message = "A Descrição de Conta a Pagar deve ser informada.")
+	@NotBlank(message = "A descrição da Conta a Pagar deve ser informada.")
 	private String descricao;
 
-	@NotNull(message = "Informe o Status da Conta a Pagar.")
+	@NotNull(message = "Informe o status da Conta a Pagar.")
 	private StatusContaPagar status;
 
 	@NotNull(message = "Informe o valor total da conta a pagar.")
@@ -27,9 +27,9 @@ public class ContaPagarDTO {
 	private BigDecimal valorDesconto;
 
 	@NotNull(message = "Informe a data de vencimento da conta a pagar.")
-	private Date dataVencimento;
+	private LocalDate dataVencimento;
 
-	private Date dataPagamento;
+	private LocalDate dataPagamento;
 
 	@NotNull(message = "O ID da pessoa deve ser informado.")
 	@Positive(message = "O ID da pessoa deve ser maior que zero.")
@@ -115,19 +115,19 @@ public class ContaPagarDTO {
 		this.valorDesconto = valorDesconto;
 	}
 
-	public Date getDataVencimento() {
+	public LocalDate getDataVencimento() {
 		return dataVencimento;
 	}
 
-	public void setDataVencimento(Date dataVencimento) {
+	public void setDataVencimento(LocalDate dataVencimento) {
 		this.dataVencimento = dataVencimento;
 	}
 
-	public Date getDataPagamento() {
+	public LocalDate getDataPagamento() {
 		return dataPagamento;
 	}
 
-	public void setDataPagamento(Date dataPagamento) {
+	public void setDataPagamento(LocalDate dataPagamento) {
 		this.dataPagamento = dataPagamento;
 	}
 

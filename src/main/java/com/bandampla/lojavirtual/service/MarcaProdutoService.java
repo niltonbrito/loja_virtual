@@ -55,7 +55,9 @@ public class MarcaProdutoService {
 	}
 
 	public MarcaProdutoDTO atualizar(Long id, MarcaProdutoDTO dto) throws ExceptionCustom {
-
+		if (id == null || id <= 0) {
+			throw new ExceptionCustom("ID inválido ou ausente");
+		}
 		MarcaProduto marcaProduto = marcaProdutoRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Marca não encontrada com o código: " + id));
 
@@ -85,8 +87,8 @@ public class MarcaProdutoService {
 	}
 
 	public void deletar(Long id, Long empresaId) throws ExceptionCustom {
-		if (id <= 0) {
-			throw new ExceptionCustom("ID inválido");
+		if (id == null || id <= 0) {
+			throw new ExceptionCustom("ID inválido ou ausente");
 		}
 		MarcaProduto marcaProduto = marcaProdutoRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Marca não encontrada com o código: " + id));
