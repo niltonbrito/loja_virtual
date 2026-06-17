@@ -75,10 +75,6 @@ public class ProdutoDTO {
 	@Positive(message = "O ID da Marca do Produto deve ser maior que zero.")
 	private Long marcaId;
 
-	@NotNull(message = "A Nota Item do Produto deve ser informada")
-	@Positive(message = "O ID da Nota Item do Produto deve ser maior que zero.")
-	private Long notaItemId;
-
 	// =========================================================================
 	// 🔄 MÉTODOS EQUALS E HASHCODE ADICIONADOS (PADRÃO JAVA 11)
 	// =========================================================================
@@ -105,20 +101,16 @@ public class ProdutoDTO {
 				&& Objects.equals(qtdEstoqueMinimo, other.qtdEstoqueMinimo)
 				&& Objects.equals(alertaEstoque, other.alertaEstoque) && Objects.equals(linkYoutube, other.linkYoutube)
 				&& Objects.equals(qtdClickProduto, other.qtdClickProduto) && Objects.equals(empresaId, other.empresaId)
-				&& Objects.equals(categoriaId, other.categoriaId) && Objects.equals(marcaId, other.marcaId)
-				&& Objects.equals(notaItemId, other.notaItemId);
+				&& Objects.equals(categoriaId, other.categoriaId) && Objects.equals(marcaId, other.marcaId);
 	}
 
 	@Override
 	public int hashCode() {
 		return Objects.hash(id, tipoUnidadeMedida, nome, ativo, descricao, peso, largura, altura, profundidade,
 				valorVenda, qtdEstoque, qtdEstoqueMinimo, alertaEstoque, linkYoutube, qtdClickProduto, empresaId,
-				categoriaId, marcaId, notaItemId);
+				categoriaId, marcaId);
 	}
 
-	// =========================================================================
-	// 🟢 GETTERS AND SETTERS TRADICIONAIS DO SEU ARQUIVO ORIGINAL
-	// =========================================================================
 	public Long getId() {
 		return id;
 	}
@@ -261,13 +253,5 @@ public class ProdutoDTO {
 
 	public void setMarcaId(Long marcaId) {
 		this.marcaId = marcaId;
-	}
-
-	public Long getNotaItemId() {
-		return notaItemId;
-	}
-
-	public void setNotaItemId(Long notaItemId) {
-		this.notaItemId = notaItemId;
 	}
 }

@@ -8,9 +8,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "pessoa_juridica")
+@Table(name = "pessoa_juridica", uniqueConstraints = {
+		@UniqueConstraint(columnNames = { "cnpj", "empresa_id" }, name = "uk_cnpj_por_empresa") })
 @PrimaryKeyJoinColumn(name = "id")
 public class PessoaJuridica extends Pessoa {
 
@@ -32,12 +34,16 @@ public class PessoaJuridica extends Pessoa {
 	private String razaoSocial;
 
 	private String categoria;
+
+	// MATRIZ / FILIAL
+	@ManyToOne
+	@JoinColumn(name = "matriz_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "matriz_fk"))
+	private PessoaJuridica matriz;
 	
-    // MATRIZ / FILIAL
-    @ManyToOne
-    @JoinColumn(name = "matriz_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "matriz_fk"))
-    private PessoaJuridica matriz;
-    
+	@ManyToOne
+	@JoinColumn(name = "empresa_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+	private PessoaJuridica empresa; // O Tenant pai (Será nulo apenas se a PJ for a própria Matriz Suprema)
+
 	public String getCnpj() {
 		return cnpj;
 	}

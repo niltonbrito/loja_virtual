@@ -1,6 +1,7 @@
 package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -40,12 +41,12 @@ public class NotaFiscalVenda implements Serializable {
 	private String descricao;
 	
 	@Column(nullable= false)
-	private Double valorTotal;
+	private BigDecimal valorTotal;
 	
-	private Double valorDesconto;
+	private BigDecimal valorDesconto;
 	
 	@Column(nullable= false)
-	private Double valorIcms;
+	private BigDecimal valorIcms;
 
 	@Column(columnDefinition = "text", nullable = false)
 	private String xml;
@@ -59,13 +60,13 @@ public class NotaFiscalVenda implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-	private Pessoa empresa;
+	private PessoaJuridica empresa;
 	
-	public Pessoa getEmpresa() {
+	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
 
-	public void setEmpresa(Pessoa empresa) {
+	public void setEmpresa(PessoaJuridica empresa) {
 		this.empresa = empresa;
 	}
 
@@ -109,27 +110,27 @@ public class NotaFiscalVenda implements Serializable {
 		this.descricao = descricao;
 	}
 
-	public Double getValorTotal() {
+	public BigDecimal getValorTotal() {
 		return valorTotal;
 	}
 
-	public void setValorTotal(Double valorTotal) {
+	public void setValorTotal(BigDecimal valorTotal) {
 		this.valorTotal = valorTotal;
 	}
 
-	public Double getValorDesconto() {
+	public BigDecimal getValorDesconto() {
 		return valorDesconto;
 	}
 
-	public void setValorDesconto(Double valorDesconto) {
+	public void setValorDesconto(BigDecimal valorDesconto) {
 		this.valorDesconto = valorDesconto;
 	}
 
-	public Double getValorIcms() {
+	public BigDecimal getValorIcms() {
 		return valorIcms;
 	}
 
-	public void setValorIcms(Double valorIcms) {
+	public void setValorIcms(BigDecimal valorIcms) {
 		this.valorIcms = valorIcms;
 	}
 

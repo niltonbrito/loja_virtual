@@ -1,6 +1,7 @@
 package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -29,6 +30,9 @@ public class NotaItemProduto implements Serializable {
 	@Column(nullable = false)
 	private Double quantidade;
 
+	@Column(nullable = false)
+	private BigDecimal valorUnitarioCusto;
+
 	@ManyToOne
 	@JoinColumn(name = "nota_fiscal_compra_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "nota_fiscal_compra_fk"))
 	private NotaFiscalCompra notaFiscalCompra;
@@ -40,7 +44,7 @@ public class NotaItemProduto implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
-	
+
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
