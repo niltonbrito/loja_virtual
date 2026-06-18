@@ -69,6 +69,14 @@ public class NotaItemProduto implements Serializable {
 		this.quantidade = quantidade;
 	}
 
+	public BigDecimal getValorUnitarioCusto() {
+		return valorUnitarioCusto;
+	}
+
+	public void setValorUnitarioCusto(BigDecimal valorUnitarioCusto) {
+		this.valorUnitarioCusto = valorUnitarioCusto;
+	}
+
 	public NotaFiscalCompra getNotaFiscalCompra() {
 		return notaFiscalCompra;
 	}

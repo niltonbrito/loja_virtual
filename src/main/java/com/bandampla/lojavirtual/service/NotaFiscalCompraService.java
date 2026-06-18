@@ -55,7 +55,6 @@ public class NotaFiscalCompraService {
 
 		Specification<NotaFiscalCompra> specDuplicidade = Specification
 				.where(NotaFiscalCompraSpec.numeroNotaExato(dto.getNumeroNota()))
-				.and(NotaFiscalCompraSpec.contaPagarIgual(dto.getContaPagarId()))
 				.and(NotaFiscalCompraSpec.empresaIgual(usuarioLogado.getEmpresaId()));
 
 		if (notaFiscalCompraRepository.exists(specDuplicidade)) {
@@ -68,18 +67,18 @@ public class NotaFiscalCompraService {
 
 		PessoaFisica pessoaFisica = pessoaFisicaRepository.findById(dto.getPessoaId())
 				.orElseThrow(() -> new ExceptionCustom("Pessoa não encontrada"));
-
+/*
 		ContaPagar contaPagar = contaPagarRepository.findById(dto.getContaPagarId())
 				.orElseThrow(() -> new ExceptionCustom("Conta a Pagar não encontrada"));
 
 		if (!contaPagar.getEmpresa().getId().equals(usuarioLogado.getEmpresaId())) {
 			throw new ExceptionCustom("A Conta a Pagar informada não pertence à empresa.");
-		}
+		}*/
 
 		NotaFiscalCompra model = notaFiscalCompraMapper.toModel(dto);
 		model.setEmpresa(empresa);
 		model.setPessoa(pessoaFisica);
-		model.setContaPagar(contaPagar);
+		//model.setContaPagar(contaPagar);
 
 		// 4. 🔥 CORREÇÃO CRÍTICA: Processamento e amarração dos Itens da Nota
 		if (model.getItens() != null && !model.getItens().isEmpty()) {

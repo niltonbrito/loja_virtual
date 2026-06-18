@@ -22,6 +22,7 @@ import com.bandampla.lojavirtual.repository.MarcaProdutoRepository;
 import com.bandampla.lojavirtual.repository.PessoaJuridicaRepository;
 import com.bandampla.lojavirtual.repository.ProdutoRepository;
 import com.bandampla.lojavirtual.repository.specification.ProdutoSpec;
+import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
 
 @Service
 public class ProdutoService {
@@ -42,18 +43,18 @@ public class ProdutoService {
 		this.produtoMapper = produtoMapper;
 	}
 
-	public ProdutoDTO cadastrar(ProdutoDTO dto) throws ExceptionCustom {
+	public ProdutoDTO cadastrar(ProdutoDTO dto, UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		if (dto.getId() == null) {
 			Specification<Produto> specDuplicado = Specification.where(ProdutoSpec.nomeExato(dto.getNome()))
-					.and(ProdutoSpec.empresaIgual(dto.getEmpresaId()));
+					.and(ProdutoSpec.empresaIgual(usuarioLogado.getEmpresaId()));
 			List<Produto> existentes = produtoRepository.findAll(specDuplicado);
 			if (!existentes.isEmpty()) {
 				throw new ExceptionCustom("Já existe Produto com nome: '" + dto.getNome()
-						+ "' cadastrado para a empresa de código: " + dto.getEmpresaId());
+						+ "' cadastrado para a empresa de código: " + usuarioLogado.getEmpresaId());
 			}
 		}
 
-		PessoaJuridica empresa = pessoaJuridicaRepository.findById(dto.getEmpresaId())
+		PessoaJuridica empresa = pessoaJuridicaRepository.findById(usuarioLogado.getEmpresaId())
 				.orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
 
 		CategoriaProduto categoriaProduto = categoriaProdutoRepository.findById(dto.getCategoriaId())
@@ -78,7 +79,7 @@ public class ProdutoService {
 		return produtoMapper.toDTO(produtoRepository.save(model));
 	}
 
-	public ProdutoDTO atualizar(Long id, ProdutoDTO dto) throws ExceptionCustom {
+	public ProdutoDTO atualizar(Long id, ProdutoDTO dto,UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		if (id == null || id <= 0) {
 			throw new ExceptionCustom("ID inválido ou ausente");
 		}
@@ -98,7 +99,7 @@ public class ProdutoService {
 			throw new ExceptionCustom("Nenhuma alteração detectada para atualizar");
 		}
 
-		PessoaJuridica empresa = pessoaJuridicaRepository.findById(dto.getEmpresaId())
+		PessoaJuridica empresa = pessoaJuridicaRepository.findById(usuarioLogado.getEmpresaId())
 				.orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
 
 		CategoriaProduto novaCategoria = categoriaProdutoRepository.findById(dto.getCategoriaId())
@@ -116,13 +117,13 @@ public class ProdutoService {
 		}
 
 		Specification<Produto> specDuplicado = Specification.where(ProdutoSpec.nomeExato(dto.getNome()))
-				.and(ProdutoSpec.empresaIgual(dto.getEmpresaId()));
+				.and(ProdutoSpec.empresaIgual(usuarioLogado.getEmpresaId()));
 
 		List<Produto> duplicados = produtoRepository.findAll(specDuplicado);
 
 		if (!duplicados.isEmpty() && !duplicados.get(0).getId().equals(id)) {
 			throw new ExceptionCustom("Já existe Produto com nome: '" + dto.getNome()
-					+ "' cadastrado para a empresa de código: " + dto.getEmpresaId());
+					+ "' cadastrado para a empresa de código: " + usuarioLogado.getEmpresaId());
 		}
 
 		// 🔄 MapStruct atualiza os campos mutáveis em memória de forma limpa
@@ -134,48 +135,48 @@ public class ProdutoService {
 		return produtoMapper.toDTO(produtoRepository.save(existente));
 	}
 
-	public void deletar(Long id, Long empresaId) throws ExceptionCustom {
+	public void deletar(Long id, UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		if (id == null || id <= 0) {
 			throw new ExceptionCustom("ID inválido ou ausente");
 		}
 		Produto produto = produtoRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Produto não encontrada"));
 
-		if (!produto.getEmpresa().getId().equals(empresaId)) {
+		if (!produto.getEmpresa().getId().equals(usuarioLogado.getEmpresaId())) {
 			throw new ExceptionCustom("Acesso Negado: Você não tem permissão para excluir este produto.");
 		}
 
 		produtoRepository.delete(produto);
 	}
 
-	public List<ProdutoDTO> buscarPorDescricao(String descricao, Long empresaId) {
+	public List<ProdutoDTO> buscarPorDescricao(String descricao, UsuarioLogadoPrincipal usuarioLogado) {
 		Specification<Produto> spec = Specification.where(ProdutoSpec.descricaoContem(descricao))
-				.and(ProdutoSpec.empresaIgual(empresaId));
+				.and(ProdutoSpec.empresaIgual(usuarioLogado.getEmpresaId()));
 
 		return produtoRepository.findAll(spec).stream().map(produto -> produtoMapper.toDTO(produto))
 				.collect(Collectors.toList());
 	}
 
-	public List<ProdutoDTO> buscarTodosPorEmpresa(Long empresaId) {
-		Specification<Produto> spec = Specification.where(ProdutoSpec.empresaIgual(empresaId));
+	public List<ProdutoDTO> buscarTodosPorEmpresa(UsuarioLogadoPrincipal usuarioLogado) {
+		Specification<Produto> spec = Specification.where(ProdutoSpec.empresaIgual(usuarioLogado.getEmpresaId()));
 		return produtoRepository.findAll(spec).stream().map(produto -> produtoMapper.toDTO(produto))
 				.collect(Collectors.toList());
 	}
 
-	public Page<ProdutoDTO> buscarAvancado(String descricao, Boolean ativo, int page, int size, Long empresaId) {
+	public Page<ProdutoDTO> buscarAvancado(String descricao, Boolean ativo, int page, int size,UsuarioLogadoPrincipal usuarioLogado) {
 		Pageable pageable = PageRequest.of(page, size);
 
 		Specification<Produto> spec = Specification
 				.where(ProdutoSpec.nomeContem(descricao).or(ProdutoSpec.descricaoContem(descricao)))
-				.and(ProdutoSpec.empresaIgual(empresaId)).and(ProdutoSpec.statusAtivoEquivalente(ativo));
+				.and(ProdutoSpec.empresaIgual(usuarioLogado.getEmpresaId())).and(ProdutoSpec.statusAtivoEquivalente(ativo));
 
 		return produtoRepository.findAll(spec, pageable).map(produto -> produtoMapper.toDTO(produto));
 	}
 
-	public Page<ProdutoDTO> buscarPaginado(int page, int size, String sort, String direction, Long empresaId) {
+	public Page<ProdutoDTO> buscarPaginado(int page, int size, String sort, String direction, UsuarioLogadoPrincipal usuarioLogado) {
 		Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sort);
 
-		Specification<Produto> spec = Specification.where(ProdutoSpec.empresaIgual(empresaId));
+		Specification<Produto> spec = Specification.where(ProdutoSpec.empresaIgual(usuarioLogado.getEmpresaId()));
 
 		return produtoRepository.findAll(spec, pageable).map(produto -> produtoMapper.toDTO(produto));
 	}

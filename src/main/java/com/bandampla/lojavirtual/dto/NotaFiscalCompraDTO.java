@@ -43,8 +43,8 @@ public class NotaFiscalCompraDTO {
 
 	private Long empresaId;
 
-	@NotNull(message = "O ID da Conta a Pagar vinculada deve ser informado.")
-	@Positive(message = "O ID da conta a pagar deve ser maior que zero.")
+	//@NotNull(message = "O ID da Conta a Pagar vinculada deve ser informado.")
+	//@Positive(message = "O ID da conta a pagar deve ser maior que zero.")
 	private Long contaPagarId;
 
 	public Long getId() {

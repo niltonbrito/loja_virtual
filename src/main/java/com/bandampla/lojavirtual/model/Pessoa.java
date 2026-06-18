@@ -16,6 +16,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 
@@ -49,6 +51,10 @@ public abstract class Pessoa implements Serializable {
 	@Column
 	@Enumerated(EnumType.STRING)
 	private TipoCadastro tipoCadastro;
+	
+	@ManyToOne
+	@JoinColumn(name = "setor_id")
+	private Setor setor;
 
 	@OneToMany(mappedBy = "pessoa", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Endereco> enderecos = new ArrayList<Endereco>();
@@ -99,6 +105,14 @@ public abstract class Pessoa implements Serializable {
 
 	public void setTipoPessoa(TipoPessoa tipoPessoa) {
 		this.tipoPessoa = tipoPessoa;
+	}
+
+	public Setor getSetor() {
+		return setor;
+	}
+
+	public void setSetor(Setor setor) {
+		this.setor = setor;
 	}
 
 	public void setEnderecos(List<Endereco> enderecos) {

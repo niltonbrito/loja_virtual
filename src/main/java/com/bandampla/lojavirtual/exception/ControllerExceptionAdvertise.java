@@ -78,14 +78,14 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 						+ "Foi detectado um erro na loja virtual que precisa ser analisado e reparado.")
 				.append("<br/>");
 		mensagemHtml.append("<b>Erro: </b>" + ExceptionUtils.getStackTrace(ex)).append("<br/>");
-
+/*
 		try {
 			sendMailService.enviarEmailHtml("Erro detectado na plataforma Loja Virtual Bandampla!",
 					mensagemHtml.toString(), "nilton.brito@outlook.com");
 		} catch (UnsupportedEncodingException | MessagingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		return new ResponseEntity<>(objectErrorDTO, status);
 	}
 

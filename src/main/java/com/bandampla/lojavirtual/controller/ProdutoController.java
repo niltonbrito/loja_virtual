@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,30 +34,26 @@ public class ProdutoController {
 
 	@PostMapping
 	public ResponseEntity<ResponseDefaultDTO<ProdutoDTO>> cadastrar(@Valid @RequestBody ProdutoDTO dto,
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
-			throws ExceptionCustom {
-		dto.setEmpresaId(usuarioLogado.getEmpresaId());
-		return ResponseEntity.status(HttpStatus.CREATED)
-				.body(new ResponseDefaultDTO<>("Produto criada com sucesso", produtoService.cadastrar(dto)));
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
+		return ResponseEntity.status(HttpStatus.CREATED).body(
+				new ResponseDefaultDTO<>("Produto criada com sucesso", produtoService.cadastrar(dto, usuarioLogado)));
 	}
 
 	@PutMapping("/{id}")
 	public ResponseEntity<ResponseDefaultDTO<ProdutoDTO>> atualizar(@PathVariable Long id,
-			@Valid @RequestBody ProdutoDTO dto,
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
+			@Valid @RequestBody ProdutoDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 
 		dto.setEmpresaId(usuarioLogado.getEmpresaId());
-		return ResponseEntity.status(HttpStatus.OK)
-				.body(new ResponseDefaultDTO<>("Produto atualizada com sucesso", produtoService.atualizar(id, dto)));
+		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDefaultDTO<>("Produto atualizada com sucesso",
+				produtoService.atualizar(id, dto, usuarioLogado)));
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ResponseDefaultDTO<Void>> deletar(@PathVariable Long id,
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
-			throws ExceptionCustom {
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 
-		produtoService.deletar(id, usuarioLogado.getEmpresaId());
+		produtoService.deletar(id, usuarioLogado);
 
 		// Retorna HTTP 200 OK com o JSON estruturado para o front-end ler a string
 		return ResponseEntity.status(HttpStatus.OK)
@@ -65,33 +62,29 @@ public class ProdutoController {
 
 	@GetMapping("/buscar")
 	public ResponseEntity<List<ProdutoDTO>> buscarPorDescricao(@RequestParam String descricao,
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
-			throws ExceptionCustom {
-		return ResponseEntity.ok(produtoService.buscarPorDescricao(descricao, usuarioLogado.getEmpresaId()));
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
+		return ResponseEntity.ok(produtoService.buscarPorDescricao(descricao, usuarioLogado));
 	}
 
 	@GetMapping
 	public ResponseEntity<List<ProdutoDTO>> buscarTodosPorEmpresa(
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
-			throws ExceptionCustom {
-		return ResponseEntity.ok(produtoService.buscarTodosPorEmpresa(usuarioLogado.getEmpresaId()));
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
+		return ResponseEntity.ok(produtoService.buscarTodosPorEmpresa(usuarioLogado));
 	}
 
 	@GetMapping("/busca-avancada")
 	public ResponseEntity<Page<ProdutoDTO>> buscarAvancado(@RequestParam(required = false) String descricao,
 			@RequestParam(required = false) Boolean ativo, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size,
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
-		return ResponseEntity
-				.ok(produtoService.buscarAvancado(descricao, ativo, page, size, usuarioLogado.getEmpresaId()));
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
+		return ResponseEntity.ok(produtoService.buscarAvancado(descricao, ativo, page, size, usuarioLogado));
 	}
 
 	@GetMapping("/paginado")
 	public ResponseEntity<Page<ProdutoDTO>> buscarPaginado(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "id") String sort,
 			@RequestParam(defaultValue = "ASC") String direction,
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
-		return ResponseEntity
-				.ok(produtoService.buscarPaginado(page, size, sort, direction, usuarioLogado.getEmpresaId()));
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
+		return ResponseEntity.ok(produtoService.buscarPaginado(page, size, sort, direction, usuarioLogado));
 	}
 }

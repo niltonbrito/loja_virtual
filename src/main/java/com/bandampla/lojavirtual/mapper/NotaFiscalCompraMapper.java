@@ -12,16 +12,16 @@ public interface NotaFiscalCompraMapper {
 
     @Mapping(source = "empresa.id", target = "empresaId")
     @Mapping(source = "pessoa.id", target = "pessoaId")
-    @Mapping(source = "contaPagar.id", target = "contaPagarId")
+   // @Mapping(source = "contaPagar.id", target = "contaPagarId")
     NotaFiscalCompraDTO toDTO(NotaFiscalCompra model);
 
     @Mapping(source = "empresaId", target = "empresa.id")
     @Mapping(target = "pessoa", ignore = true)
-    @Mapping(source = "contaPagarId", target = "contaPagar.id")
+  //  @Mapping(source = "contaPagarId", target = "contaPagar.id")
     NotaFiscalCompra toModel(NotaFiscalCompraDTO dto);
 
     @Mapping(source = "empresaId", target = "empresa.id")
     @Mapping(target = "pessoa", ignore = true)
-    @Mapping(source = "contaPagarId", target = "contaPagar.id")
+  //  @Mapping(source = "contaPagarId", target = "contaPagar.id")
     void atualizarCamposDaConta(NotaFiscalCompraDTO dto, @MappingTarget NotaFiscalCompra existente);
 }

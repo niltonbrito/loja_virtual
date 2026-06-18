@@ -38,7 +38,6 @@ public class ContaPagarService {
 	}
 
 	public ContaPagarDTO cadastrar(ContaPagarDTO dto) throws ExceptionCustom {
-
 		// Validação de duplicidade
 		Specification<ContaPagar> specDuplicidade = Specification
 				.where(ContaPagarSpec.descricaoExata(dto.getDescricao()))
@@ -75,7 +74,6 @@ public class ContaPagarService {
 	}
 
 	public ContaPagarDTO atualizar(Long id, ContaPagarDTO dto) throws ExceptionCustom {
-
 		if (id == null || id <= 0) {
 			throw new ExceptionCustom("ID inválido ou ausente");
 		}
@@ -108,7 +106,6 @@ public class ContaPagarService {
 	}
 
 	public void deletar(Long id, Long empresaId) throws ExceptionCustom {
-
 		if (id == null || id <= 0) {
 			throw new ExceptionCustom("ID inválido ou ausente");
 		}
