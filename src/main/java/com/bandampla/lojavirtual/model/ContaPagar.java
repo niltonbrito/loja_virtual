@@ -2,8 +2,8 @@ package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -22,8 +22,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import com.bandampla.lojavirtual.enums.StatusContaPagar;
 @Entity
@@ -51,16 +49,14 @@ public class ContaPagar implements Serializable {
     private BigDecimal valorDesconto;
 
     @Column(nullable = false)
-    @Temporal(TemporalType.DATE)
-    private Date dataVencimento;
-
-    @Temporal(TemporalType.DATE)
-    private Date dataPagamento;
+    private LocalDate dataVencimento;
+    
+    private LocalDate  dataPagamento;
 
     @ManyToOne(targetEntity = Pessoa.class)
     @JoinColumn(name = "pessoa_id", nullable = false,
             foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
-    private Pessoa pessoa;
+    private PessoaJuridica pessoa;
 
     @ManyToOne(targetEntity = PessoaJuridica.class)
     @JoinColumn(name = "pessoa_fornecedor_id", nullable = false,
@@ -123,27 +119,27 @@ public class ContaPagar implements Serializable {
 		this.valorDesconto = valorDesconto;
 	}
 
-	public Date getDataVencimento() {
+	public LocalDate getDataVencimento() {
 		return dataVencimento;
 	}
 
-	public void setDataVencimento(Date dataVencimento) {
+	public void setDataVencimento(LocalDate dataVencimento) {
 		this.dataVencimento = dataVencimento;
 	}
 
-	public Date getDataPagamento() {
+	public LocalDate getDataPagamento() {
 		return dataPagamento;
 	}
 
-	public void setDataPagamento(Date dataPagamento) {
+	public void setDataPagamento(LocalDate dataPagamento) {
 		this.dataPagamento = dataPagamento;
 	}
 
-	public Pessoa getPessoa() {
+	public PessoaJuridica getPessoa() {
 		return pessoa;
 	}
 
-	public void setPessoa(Pessoa pessoa) {
+	public void setPessoa(PessoaJuridica pessoa) {
 		this.pessoa = pessoa;
 	}
 

@@ -51,13 +51,13 @@ public class ContaPagarService {
 		PessoaJuridica empresa = pessoaJuridicaRepository.findById(dto.getEmpresaId())
 				.orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
 
-		PessoaFisica pessoaFisica = pessoaFisicaRepository.findById(dto.getPessoaId())
+		PessoaJuridica pessoaFisica = pessoaJuridicaRepository.findById(dto.getPessoaId())
 				.orElseThrow(() -> new ExceptionCustom("Pessoa não encontrada"));
 
 		PessoaJuridica fornecedor = pessoaJuridicaRepository.findById(dto.getPessoaFornecedorId())
 				.orElseThrow(() -> new ExceptionCustom("Fornecedor não encontrado"));
 
-		if (!pessoaFisica.getEmpresa().getId().equals(dto.getEmpresaId())) {
+		if (!pessoaFisica.getId().equals(dto.getEmpresaId())) {
 			throw new ExceptionCustom("A pessoa informada não pertence à empresa.");
 		}
 
