@@ -8,6 +8,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
+import com.bandampla.lojavirtual.enums.TipoPessoa;
+
 public class NotaFiscalCompraDTO {
 
 	private Long id;
@@ -33,19 +35,20 @@ public class NotaFiscalCompraDTO {
     @NotNull(message = "Informe a data da compra.")
     private LocalDate dataCompra;
 
-    @NotNull(message = "Informe ao menos um item na nota fiscal.")
-    private List<NotaItemProdutoDTO> itens;
-
     @NotNull(message = "Informe a pessoa (fornecedor) da nota.")
     @Positive(message = "O ID da pessoa deve ser maior que zero.")
-    private Long pessoaId;
+    private Long pessoaId; // fornecedor
 
     private Long empresaId;
 
-	// @NotNull(message = "O ID da Conta a Pagar vinculada deve ser informado.")
-	// @Positive(message = "O ID da conta a pagar deve ser maior que zero.")
+    @NotNull(message = "Tipo de pessoa do fornecedor deve ser informado (FISICA ou JURIDICA).")
+    private TipoPessoa tipoPessoaFornecedor;
+    
 	private Long contaPagarId;
 
+    @NotNull(message = "Informe ao menos um item na nota fiscal.")
+    private List<NotaItemProdutoDTO> itens;
+    
 	public Long getId() {
 		return id;
 	}
@@ -132,6 +135,14 @@ public class NotaFiscalCompraDTO {
 
 	public void setEmpresaId(Long empresaId) {
 		this.empresaId = empresaId;
+	}
+
+	public TipoPessoa getTipoPessoaFornecedor() {
+		return tipoPessoaFornecedor;
+	}
+
+	public void setTipoPessoaFornecedor(TipoPessoa tipoPessoaFornecedor) {
+		this.tipoPessoaFornecedor = tipoPessoaFornecedor;
 	}
 
 	public Long getContaPagarId() {

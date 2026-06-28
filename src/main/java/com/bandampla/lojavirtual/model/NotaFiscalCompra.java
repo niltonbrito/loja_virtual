@@ -57,7 +57,7 @@ public class NotaFiscalCompra implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
-	private PessoaJuridica pessoa; // fornecedor ou pessoa relacionada
+	private Pessoa pessoa; // fornecedor PF ou PJ
 
 	@ManyToOne
 	@JoinColumn(name = "conta_pagar_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "conta_pagar_fk"))
@@ -151,11 +151,11 @@ public class NotaFiscalCompra implements Serializable {
 		this.itens = itens;
 	}
 
-	public PessoaJuridica getPessoa() {
+	public Pessoa getPessoa() {
 		return pessoa;
 	}
 
-	public void setPessoa(PessoaJuridica pessoa) {
+	public void setPessoa(Pessoa pessoa) {
 		this.pessoa = pessoa;
 	}
 

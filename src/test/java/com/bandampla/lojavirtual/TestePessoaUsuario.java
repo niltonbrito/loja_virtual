@@ -2,6 +2,7 @@ package com.bandampla.lojavirtual;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Optional;
 
@@ -11,9 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
 
 import com.bandampla.lojavirtual.controller.PessoaController;
+import com.bandampla.lojavirtual.enums.TipoCadastro;
 import com.bandampla.lojavirtual.enums.TipoEndereco;
 import com.bandampla.lojavirtual.enums.TipoPessoa;
-import com.bandampla.lojavirtual.enums.TipoCadastro;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Endereco;
 import com.bandampla.lojavirtual.model.PessoaFisica;
@@ -97,7 +98,7 @@ class TestePessoaUsuario extends TestCase {
 		pessoaFisica.setCpf(ValidaCPF.cpfSemMascara("279.281.650-31"));
 		pessoaFisica.setNome("Nilton Brito");
 		pessoaFisica.setEmail("nilton.brito@outlook.com");
-		pessoaFisica.setDataNascimento(sdf.parse("07/10/1985"));
+		pessoaFisica.setDataNascimento(LocalDate.parse("1985-10-07"));
 
 		pessoaFisica.setTelefone("719920456500");
 		pessoaFisica.setEmpresa(pessoaJuridica.get().getMatriz());

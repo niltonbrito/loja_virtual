@@ -24,52 +24,49 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.bandampla.lojavirtual.enums.StatusContaPagar;
+
 @Entity
 @Table(name = "conta_pagar")
-@SequenceGenerator(name = "seq_conta_pagar", sequenceName = "seq_conta_pagar",
-        allocationSize = 1, initialValue = 1)
+@SequenceGenerator(name = "seq_conta_pagar", sequenceName = "seq_conta_pagar", allocationSize = 1, initialValue = 1)
 public class ContaPagar implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_conta_pagar")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_conta_pagar")
+	private Long id;
 
-    @Column(nullable = false)
-    private String descricao;
+	@Column(nullable = false)
+	private String descricao;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private StatusContaPagar status;
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private StatusContaPagar status;
 
-    @Column(nullable = false)
-    private BigDecimal valorTotal;
+	@Column(nullable = false)
+	private BigDecimal valorTotal;
 
-    private BigDecimal valorDesconto;
+	private BigDecimal valorDesconto;
 
-    @Column(nullable = false)
-    private LocalDate dataVencimento;
-    
-    private LocalDate  dataPagamento;
+	@Column(nullable = false)
+	private LocalDate dataVencimento;
 
-    @ManyToOne(targetEntity = Pessoa.class)
-    @JoinColumn(name = "pessoa_id", nullable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
-    private PessoaJuridica pessoa;
+	private LocalDate dataPagamento;
 
-    @ManyToOne(targetEntity = PessoaJuridica.class)
-    @JoinColumn(name = "pessoa_fornecedor_id", nullable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fornecedor_fk"))
-    private PessoaJuridica pessoaFornecedor;
+	@ManyToOne
+	@JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
+	private PessoaJuridica pessoa; // quem paga: empresa
 
-    @ManyToOne
-    @JoinColumn(name = "empresa_id", nullable = false,
-            foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-    private PessoaJuridica empresa;
+	@ManyToOne
+	@JoinColumn(name = "pessoa_fornecedor_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fornecedor_fk"))
+	private Pessoa pessoaFornecedor; // fornecedor PF ou PJ
 
-    @OneToMany(mappedBy = "contaPagar", fetch = FetchType.LAZY)
-    private List<NotaFiscalCompra> notasFiscais = new ArrayList<>();
+	@ManyToOne
+	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+	private PessoaJuridica empresa;
+
+	@OneToMany(mappedBy = "contaPagar", fetch = FetchType.LAZY)
+	private List<NotaFiscalCompra> notasFiscais = new ArrayList<>();
 
 	public PessoaJuridica getEmpresa() {
 		return empresa;
@@ -143,15 +140,14 @@ public class ContaPagar implements Serializable {
 		this.pessoa = pessoa;
 	}
 
-	public PessoaJuridica getPessoaFornecedor() {
+	public Pessoa getPessoaFornecedor() {
 		return pessoaFornecedor;
 	}
 
-	public void setPessoaFornecedor(PessoaJuridica pessoaFornecedor) {
+	public void setPessoaFornecedor(Pessoa pessoaFornecedor) {
 		this.pessoaFornecedor = pessoaFornecedor;
 	}
 
-	
 	public List<NotaFiscalCompra> getNotasFiscais() {
 		return notasFiscais;
 	}

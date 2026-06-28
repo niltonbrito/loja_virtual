@@ -1,10 +1,8 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.exception;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.util.UUID;
 
 import javax.mail.MessagingException;
 
@@ -16,20 +14,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.bandampla.lojavirtual.dto.ObjectErrorDTO;
+import com.bandampla.lojavirtual.dto.ErrorResponseDTO;
 import com.bandampla.lojavirtual.service.SendMailService;
-
-/**
- * @author: Nilton Brito
- * @Email: <nilton.brito@outlook.com>
- * @Data: 3 de mai. de 2026
- */
 
 @RestControllerAdvice
 public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler {
@@ -37,121 +31,182 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 	@Autowired
 	private SendMailService sendMailService;
 
-	@ExceptionHandler(ExceptionCustom.class)
-	protected ResponseEntity<Object> handleExceptionCustom(ExceptionCustom ex) {
-		ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
-		objectErrorDTO.setError(ex.getMessage());
-		objectErrorDTO.setCode(HttpStatus.BAD_REQUEST.toString());
-		ex.printStackTrace();
-		return new ResponseEntity<>(objectErrorDTO, HttpStatus.BAD_REQUEST);
+	// =========================
+	// UTILITÁRIOS
+	// =========================
+	private String generateTraceId() {
+		return UUID.randomUUID().toString();
 	}
 
+	private String extractPath(WebRequest request) {
+		return request.getDescription(false).replace("uri=", "");
+	}
+
+	private void enviarEmailErro(Exception ex) {
+		StringBuilder mensagemHtml = new StringBuilder();
+		mensagemHtml.append("<b>Olá Desenvolvedor!</b><br/>")
+				.append("<b>Alerta:</b> Foi detectado um erro na plataforma Loja Virtual Bandampla.<br/>")
+				.append("<b>Erro:</b><br/>").append(ExceptionUtils.getStackTrace(ex));
+
+		try {
+			sendMailService.enviarEmailHtml("Erro detectado na plataforma Loja Virtual Bandampla!",
+					mensagemHtml.toString(), "nilton.brito@outlook.com");
+		} catch (UnsupportedEncodingException | MessagingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// =========================
+	// EXCEPTION DE REGRA DE NEGÓCIO
+	// =========================
+	@ExceptionHandler(ExceptionCustom.class)
+	protected ResponseEntity<Object> handleExceptionCustom(ExceptionCustom ex, WebRequest request) {
+
+		ErrorResponseDTO error = new ErrorResponseDTO("400", "Erro de negócio", ex.getMessage(), extractPath(request),
+				generateTraceId());
+
+		ex.printStackTrace();
+		// enviarEmailErro(ex);
+
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+	}
+
+	// =========================
+	// ERROS DE JSON / ENUM / CORPO MAL FORMADO
+	// =========================
 	@Override
 	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
 
-		ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
-		String msg;
+		String traceId = generateTraceId();
+		String path = extractPath(request);
+		ErrorResponseDTO errorResponseDTO;
 
+		// -------------------------
+		// ERRO DE VALIDAÇÃO (Bean Validation)
+		// -------------------------
 		if (ex instanceof MethodArgumentNotValidException) {
+
 			StringBuilder sb = new StringBuilder();
-			((MethodArgumentNotValidException) ex).getBindingResult().getAllErrors()
-					.forEach(e -> sb.append(e.getDefaultMessage()).append("\n"));
-			msg = sb.toString();
-		} else if (ex instanceof HttpMessageNotReadableException) {
-			msg = "Não está sendo enviado dados para o BODY corpo da requisição";
-		} else if (ex instanceof IllegalArgumentException) {
-			msg = "?";
-		} else {
-			msg = ex.getMessage();
+			((MethodArgumentNotValidException) ex).getBindingResult().getFieldErrors().forEach(
+					err -> sb.append(err.getField()).append(": ").append(err.getDefaultMessage()).append(" | "));
+
+			errorResponseDTO = new ErrorResponseDTO("400", "Erro de validação", sb.toString().trim(), path, traceId);
+
+			ex.printStackTrace();
+			// enviarEmailErro(ex);
+			return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
 		}
 
-		objectErrorDTO.setError(msg);
-		objectErrorDTO.setCode(status.value() + " ==> " + status.getReasonPhrase());
+		// -------------------------
+		// ERRO DE JSON MAL FORMADO
+		// -------------------------
+		if (ex instanceof HttpMessageNotReadableException) {
+
+			Throwable rootCause = ExceptionUtils.getRootCause(ex);
+
+			if (rootCause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException) {
+
+				com.fasterxml.jackson.databind.exc.InvalidFormatException ife = (com.fasterxml.jackson.databind.exc.InvalidFormatException) rootCause;
+
+				String field = ife.getPath() != null && !ife.getPath().isEmpty() ? ife.getPath().get(0).getFieldName() : "campo";
+				String enumClass = ife.getTargetType() != null ? ife.getTargetType().getSimpleName() : "";
+
+				if ("TipoPessoa".equals(enumClass)) {
+					errorResponseDTO = new ErrorResponseDTO("400", "Valor inválido para '" + field + "'",
+							"Use apenas: FISICA ou JURIDICA", path, traceId);
+				} else {
+					errorResponseDTO = new ErrorResponseDTO("400", "Valor inválido para o campo '" + field + "'",
+							"Tipo de dado incompatível", path, traceId);
+				}
+			} else {
+				errorResponseDTO = new ErrorResponseDTO("400", "Erro ao ler o JSON enviado",
+						"Verifique o corpo da requisição", path, traceId);
+			}
+			ex.printStackTrace();
+			// enviarEmailErro(ex);
+			return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+		}
+
+		// -------------------------
+		// ERRO DE PARÂMETRO INVÁLIDO
+		// -------------------------
+		if (ex instanceof IllegalArgumentException) {
+
+			errorResponseDTO = new ErrorResponseDTO("400", "Parâmetro inválido", ex.getMessage(), path, traceId);
+
+			ex.printStackTrace();
+			enviarEmailErro(ex);
+			return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+		}
+
+		// -------------------------
+		// ERRO DE MÉTODO HTTP NÃO SUPORTADO
+		// -------------------------
+		if (ex instanceof HttpRequestMethodNotSupportedException) {
+
+			errorResponseDTO = new ErrorResponseDTO("405", "Método HTTP não suportado",
+					"Use o método correto para este endpoint", path, traceId);
+
+			ex.printStackTrace();
+			// enviarEmailErro(ex);
+			return new ResponseEntity<>(errorResponseDTO, HttpStatus.METHOD_NOT_ALLOWED);
+		}
+
+		// -------------------------
+		// ERRO DE PERMISSÃO NEGADA
+		// -------------------------
+		if (ex instanceof AccessDeniedException) {
+
+			errorResponseDTO = new ErrorResponseDTO("403", "Acesso negado",
+					"Você não possui permissão para acessar este recurso", path, traceId);
+
+			ex.printStackTrace();
+			// enviarEmailErro(ex);
+			return new ResponseEntity<>(errorResponseDTO, HttpStatus.FORBIDDEN);
+		}
+
+		// -------------------------
+		// ERRO GENÉRICO
+		// -------------------------
+		errorResponseDTO = new ErrorResponseDTO(String.valueOf(status.value()), status.getReasonPhrase(),
+				ex.getMessage(), path, traceId);
 
 		ex.printStackTrace();
+		// enviarEmailErro(ex);
 
-		StringBuilder mensagemHtml = new StringBuilder();
-		mensagemHtml.append("<b>Olá Desenvolvedor!</b>").append("<br/>");
-		mensagemHtml
-				.append("<b>Alerta: </b>"
-						+ "Foi detectado um erro na loja virtual que precisa ser analisado e reparado.")
-				.append("<br/>");
-		mensagemHtml.append("<b>Erro: </b>" + ExceptionUtils.getStackTrace(ex)).append("<br/>");
-/*
-		try {
-			sendMailService.enviarEmailHtml("Erro detectado na plataforma Loja Virtual Bandampla!",
-					mensagemHtml.toString(), "nilton.brito@outlook.com");
-		} catch (UnsupportedEncodingException | MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		return new ResponseEntity<>(objectErrorDTO, status);
+		return new ResponseEntity<>(errorResponseDTO, status);
 	}
 
+	// =========================
+	// ERROS DE BANCO (FK, INTEGRIDADE, SQL)
+	// =========================
 	@ExceptionHandler({ DataIntegrityViolationException.class, ConstraintViolationException.class, SQLException.class })
-	protected ResponseEntity<Object> handleExceptionDataIntegry(Exception ex) {
-		ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
-		String msg;
+	protected ResponseEntity<Object> handleExceptionDataIntegry(Exception ex, WebRequest request) {
+
+		String detalhes;
 
 		if (ex instanceof SQLException) {
-			msg = "Erro de SQL do banco de dados: " + ((SQLException) ex).getCause().getMessage();
+			detalhes = ((SQLException) ex).getCause() != null ? ((SQLException) ex).getCause().getMessage()
+					: ex.getMessage();
 		} else if (ex instanceof DataIntegrityViolationException) {
-			msg = "Erro de integridade no banco de dados: "
-					+ ((DataIntegrityViolationException) ex).getCause().getMessage();
+			detalhes = ((DataIntegrityViolationException) ex).getCause() != null
+					? ((DataIntegrityViolationException) ex).getCause().getMessage()
+					: ex.getMessage();
 		} else if (ex instanceof ConstraintViolationException) {
-			msg = "Erro de chave estrangeira no banco de dados: "
-					+ ((ConstraintViolationException) ex).getCause().getMessage();
+			detalhes = ((ConstraintViolationException) ex).getCause() != null
+					? ((ConstraintViolationException) ex).getCause().getMessage()
+					: ex.getMessage();
 		} else {
-			msg = ex.getMessage();
+			detalhes = ex.getMessage();
 		}
 
-		objectErrorDTO.setError(msg);
-		objectErrorDTO.setCode(HttpStatus.INTERNAL_SERVER_ERROR.toString());
+		ErrorResponseDTO error = new ErrorResponseDTO("500", "Erro de integridade no banco de dados", detalhes,
+				extractPath(request), generateTraceId());
 
 		ex.printStackTrace();
+		enviarEmailErro(ex);
 
-		StringBuilder mensagemHtml = new StringBuilder();
-		mensagemHtml.append("<b>Olá Desenvolvedor!</b>").append("<br/>");
-		mensagemHtml
-				.append("<b>Alerta: </b>"
-						+ "Foi detectado um erro na loja virtual que precisa ser analisado e reparado.")
-				.append("<br/>");
-		mensagemHtml.append("<b>Erro: </b>" + ExceptionUtils.getStackTrace(ex)).append("<br/>");
-
-		try {
-			sendMailService.enviarEmailHtml("Erro detectado na plataforma Loja Virtual Bandampla!",
-					mensagemHtml.toString(), "nilton.brito@outlook.com");
-		} catch (UnsupportedEncodingException | MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return new ResponseEntity<>(objectErrorDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
-
-	// Adicione este método dentro do seu ControllerExceptionAdvertise
-	@Override
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-			HttpHeaders headers, HttpStatus status, WebRequest request) {
-
-		// 1. Cria o DTO de erro padrão que você já usa no sistema
-		ObjectErrorDTO objectErrorDTO = new ObjectErrorDTO();
-
-		// 2. Coleta todas as mensagens de erro do DTO sem acumular quebras de linha
-		// brutas (\n)
-		StringBuilder sb = new StringBuilder();
-		ex.getBindingResult().getFieldErrors().forEach(error -> {
-			sb.append(error.getField()).append(": ").append(error.getDefaultMessage()).append(" ");
-		});
-
-		objectErrorDTO.setError(sb.toString().trim());
-		objectErrorDTO.setCode(status.value() + " ==> " + status.getReasonPhrase());
-
-		// Imprime no console do desenvolvedor para debug rápido
-		ex.printStackTrace();
-
-		// Retorna o HTTP 400 Bad Request bem formatado para o Postman
-		return new ResponseEntity<>(objectErrorDTO, headers, status);
-	}
-
 }

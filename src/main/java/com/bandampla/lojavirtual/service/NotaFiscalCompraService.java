@@ -15,11 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.bandampla.lojavirtual.dto.NotaFiscalCompraDTO;
 import com.bandampla.lojavirtual.dto.NotaItemProdutoDTO;
 import com.bandampla.lojavirtual.enums.StatusContaPagar;
+import com.bandampla.lojavirtual.enums.TipoPessoa;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.mapper.NotaFiscalCompraMapper;
 import com.bandampla.lojavirtual.model.ContaPagar;
 import com.bandampla.lojavirtual.model.NotaFiscalCompra;
 import com.bandampla.lojavirtual.model.NotaItemProduto;
+import com.bandampla.lojavirtual.model.Pessoa;
+import com.bandampla.lojavirtual.model.PessoaFisica;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.model.Produto;
 import com.bandampla.lojavirtual.repository.ContaPagarRepository;
@@ -34,6 +37,7 @@ import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
 public class NotaFiscalCompraService {
 
 	private final PessoaJuridicaRepository pessoaJuridicaRepository;
+	private final PessoaFisicaRepository pessoaFisicaRepository;
 	private final NotaFiscalCompraRepository notaFiscalCompraRepository;
 	private final ContaPagarRepository contaPagarRepository;
 	private final ProdutoRepository produtoRepository;
@@ -45,90 +49,106 @@ public class NotaFiscalCompraService {
 			ProdutoRepository produtoRepository) {
 
 		this.pessoaJuridicaRepository = pessoaJuridicaRepository;
+		this.pessoaFisicaRepository = pessoaFisicaRepository;
 		this.notaFiscalCompraRepository = notaFiscalCompraRepository;
 		this.contaPagarRepository = contaPagarRepository;
 		this.produtoRepository = produtoRepository;
 		this.notaFiscalCompraMapper = notaFiscalCompraMapper;
 	}
 
-	// ============================================================================================
-	// CADASTRAR NOTA FISCAL (BigDecimal + Conta a Pagar automática + PF/PJ)
-	// ============================================================================================
+	// CADASTRAR
 	@Transactional(rollbackFor = Exception.class)
 	public NotaFiscalCompraDTO cadastrar(NotaFiscalCompraDTO dto, UsuarioLogadoPrincipal usuarioLogado)
-	        throws ExceptionCustom {
+			throws ExceptionCustom {
 
-	    PessoaJuridica empresa = pessoaJuridicaRepository.findById(usuarioLogado.getEmpresaId())
-	            .orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
+		Specification<NotaFiscalCompra> specDuplicidade = Specification
+				.where(NotaFiscalCompraSpec.numeroNotaExato(dto.getNumeroNota()))
+				.and(NotaFiscalCompraSpec.empresaIgual(usuarioLogado.getEmpresaId()));
 
-	    PessoaJuridica fornecedor = pessoaJuridicaRepository.findById(dto.getPessoaId())
-	            .orElseThrow(() -> new ExceptionCustom("Fornecedor não encontrado"));
+		if (notaFiscalCompraRepository.exists(specDuplicidade)) {
+			throw new ExceptionCustom("Já existe Nota Fiscal de Compra com número '" + dto.getNumeroNota()
+					+ "' cadastrada para esta empresa.");
+		}
 
-	    NotaFiscalCompra nf = notaFiscalCompraMapper.toModel(dto);
-	    nf.setEmpresa(empresa);
-	    nf.setPessoa(fornecedor);
-	    nf.setItens(new ArrayList<>());
+		PessoaJuridica empresa = pessoaJuridicaRepository.findById(usuarioLogado.getEmpresaId())
+				.orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
 
-	    for (NotaItemProdutoDTO itemDTO : dto.getItens()) {
+		Pessoa fornecedor = buscarFornecedor(dto.getPessoaId(), dto.getTipoPessoaFornecedor());
 
-	        Produto produto = produtoRepository.findById(itemDTO.getProdutoId())
-	                .orElseThrow(() -> new ExceptionCustom("Produto não encontrado"));
+		if (dto.getItens() == null || dto.getItens().isEmpty()) {
+			throw new ExceptionCustom("A nota fiscal deve conter ao menos um item.");
+		}
 
-	        NotaItemProduto item = new NotaItemProduto();
-	        item.setEmpresa(empresa);
-	        item.setNotaFiscalCompra(nf);
-	        item.setProduto(produto);
-	        item.setValorUnitarioCusto(itemDTO.getValorUnitarioCusto());
-	        item.setQuantidade(itemDTO.getQuantidade());
+		NotaFiscalCompra nf = notaFiscalCompraMapper.toModel(dto);
+		nf.setEmpresa(empresa);
+		nf.setPessoa(fornecedor);
+		nf.setItens(new ArrayList<>());
 
-	        // Atualizar estoque
+		for (NotaItemProdutoDTO itemDTO : dto.getItens()) {
 
-            BigDecimal estoqueAtual = produto.getQtdEstoque() == null ? BigDecimal.ZERO : produto.getQtdEstoque();
-            BigDecimal entrada = item.getQuantidade();
-            produto.setQtdEstoque(estoqueAtual.add(entrada));
-            produtoRepository.save(produto);
-	        nf.getItens().add(item);
-	    }
+			Produto produto = produtoRepository.findById(itemDTO.getProdutoId())
+					.orElseThrow(() -> new ExceptionCustom("Produto ID " + itemDTO.getProdutoId() + " não encontrado"));
 
-	    nf = notaFiscalCompraRepository.save(nf);
+			if (!produto.getEmpresa().getId().equals(empresa.getId())) {
+				throw new ExceptionCustom("Produto ID " + produto.getId() + " não pertence à empresa.");
+			}
 
-	    // Criar conta a pagar
-	    ContaPagar conta = new ContaPagar();
-	    conta.setDescricao("NF Compra nº " + nf.getNumeroNota());
-	    conta.setEmpresa(empresa);
-	    conta.setPessoa(empresa); // quem paga é a empresa
-	    conta.setPessoaFornecedor(fornecedor);
-	    conta.setValorTotal(nf.getValorTotal());
-	    conta.setStatus(StatusContaPagar.ABERTA);
-	    conta.setDataVencimento(nf.getDataCompra());
+			NotaItemProduto item = new NotaItemProduto();
+			item.setEmpresa(empresa);
+			item.setNotaFiscalCompra(nf);
+			item.setProduto(produto);
+			item.setValorUnitarioCusto(itemDTO.getValorUnitarioCusto());
+			item.setQuantidade(itemDTO.getQuantidade());
 
-	    conta = contaPagarRepository.save(conta);
+			BigDecimal estoqueAtual = produto.getQtdEstoque() == null ? BigDecimal.ZERO : produto.getQtdEstoque();
+			BigDecimal entrada = item.getQuantidade();
+			produto.setQtdEstoque(estoqueAtual.add(entrada));
+			produtoRepository.save(produto);
 
-	    nf.setContaPagar(conta);
-	    nf = notaFiscalCompraRepository.save(nf);
+			nf.getItens().add(item);
+		}
 
-	    // Montar retorno com itens
-	    NotaFiscalCompraDTO dtoRetorno = notaFiscalCompraMapper.toDTO(nf);
-	    dtoRetorno.setItens(
-	        nf.getItens().stream().map(item -> {
-	            NotaItemProdutoDTO itemDTO = new NotaItemProdutoDTO();
-	            itemDTO.setId(item.getId());
-	            itemDTO.setQuantidade(item.getQuantidade());
-	            itemDTO.setValorUnitarioCusto(item.getValorUnitarioCusto());
-	            itemDTO.setProdutoId(item.getProduto().getId());
-	            itemDTO.setNotaFiscalCompra(item.getNotaFiscalCompra().getId());
-	            return itemDTO;
-	        }).toList()
-	    );
+		nf = notaFiscalCompraRepository.save(nf);
 
-	    return dtoRetorno;
+		ContaPagar conta = new ContaPagar();
+		conta.setDescricao("NF Compra nº " + nf.getNumeroNota());
+		conta.setEmpresa(empresa);
+		conta.setPessoa(empresa); // quem paga é a empresa
+		conta.setPessoaFornecedor(fornecedor);
+		conta.setValorTotal(nf.getValorTotal());
+		conta.setStatus(StatusContaPagar.ABERTA);
+		conta.setDataVencimento(nf.getDataCompra());
+
+		conta = contaPagarRepository.save(conta);
+
+		nf.setContaPagar(conta);
+		nf = notaFiscalCompraRepository.save(nf);
+
+		NotaFiscalCompraDTO dtoRetorno = notaFiscalCompraMapper.toDTO(nf);
+		dtoRetorno.setItens(mapItensToDTO(nf.getItens()));
+
+		return dtoRetorno;
 	}
 
+	private Pessoa buscarFornecedor(Long pessoaId, TipoPessoa tipoPessoa) throws ExceptionCustom {
+		if (pessoaId == null || pessoaId <= 0) {
+			throw new ExceptionCustom("ID do fornecedor inválido ou ausente.");
+		}
 
-	// ============================================================================================
-	// ATUALIZAR NOTA FISCAL (reversão e reentrada de estoque + atualizar Conta a
-	// Pagar)
-	// ============================================================================================
+		if (tipoPessoa == TipoPessoa.FISICA) {
+			PessoaFisica pf = pessoaFisicaRepository.findById(pessoaId)
+					.orElseThrow(() -> new ExceptionCustom("Pessoa Física não encontrada para o ID: " + pessoaId));
+			return pf;
+		} else if (tipoPessoa == TipoPessoa.JURIDICA) {
+			PessoaJuridica pj = pessoaJuridicaRepository.findById(pessoaId)
+					.orElseThrow(() -> new ExceptionCustom("Pessoa Jurídica não encontrada para o ID: " + pessoaId));
+			return pj;
+		} else {
+			throw new ExceptionCustom("Tipo de pessoa do fornecedor inválido.");
+		}
+	}
+
+	// ATUALIZAR
 	@Transactional(rollbackFor = Exception.class)
 	public NotaFiscalCompraDTO atualizar(Long id, NotaFiscalCompraDTO dto, UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
@@ -154,8 +174,11 @@ public class NotaFiscalCompraService {
 					+ "' cadastrada para esta empresa.");
 		}
 
-		PessoaJuridica fornecedor = pessoaJuridicaRepository.findById(dto.getPessoaId())
-				.orElseThrow(() -> new ExceptionCustom("Fornecedor não encontrado"));
+		if (dto.getTipoPessoaFornecedor() == null) {
+			throw new ExceptionCustom("Tipo de pessoa do fornecedor deve ser informado (FISICA ou JURIDICA).");
+		}
+
+		Pessoa fornecedor = buscarFornecedor(dto.getPessoaId(), dto.getTipoPessoaFornecedor());
 
 		if (dto.getItens() == null || dto.getItens().isEmpty()) {
 			throw new ExceptionCustom("A nota fiscal deve conter ao menos um item.");
@@ -164,7 +187,6 @@ public class NotaFiscalCompraService {
 		notaFiscalCompraMapper.atualizarCamposDaConta(dto, nf);
 		nf.setPessoa(fornecedor);
 
-		// Reverter estoque dos itens antigos
 		if (nf.getItens() != null) {
 			for (NotaItemProduto antigo : nf.getItens()) {
 				Produto produto = antigo.getProduto();
@@ -177,7 +199,6 @@ public class NotaFiscalCompraService {
 
 		nf.getItens().clear();
 
-		// Processar novos itens
 		for (NotaItemProdutoDTO itemDTO : dto.getItens()) {
 
 			Produto produto = produtoRepository.findById(itemDTO.getProdutoId())
@@ -202,7 +223,6 @@ public class NotaFiscalCompraService {
 			nf.getItens().add(item);
 		}
 
-		// Atualizar Conta a Pagar vinculada
 		if (nf.getContaPagar() != null) {
 			ContaPagar conta = nf.getContaPagar();
 			conta.setDescricao("NF Compra nº " + nf.getNumeroNota());
@@ -213,12 +233,14 @@ public class NotaFiscalCompraService {
 		}
 
 		nf = notaFiscalCompraRepository.save(nf);
-		return notaFiscalCompraMapper.toDTO(nf);
+
+		NotaFiscalCompraDTO dtoRetorno = notaFiscalCompraMapper.toDTO(nf);
+		dtoRetorno.setItens(mapItensToDTO(nf.getItens()));
+
+		return dtoRetorno;
 	}
 
-	// ============================================================================================
-	// DELETAR (reversão de estoque)
-	// ============================================================================================
+	// DELETAR
 	@Transactional(rollbackFor = Exception.class)
 	public void deletar(Long id, UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 
@@ -246,16 +268,18 @@ public class NotaFiscalCompraService {
 		notaFiscalCompraRepository.delete(nf);
 	}
 
-	// ============================================================================================
 	// CONSULTAS
-	// ============================================================================================
 	public Page<NotaFiscalCompraDTO> buscarPaginado(int page, int size, String sort, String direction,
 			UsuarioLogadoPrincipal usuarioLogado) {
 
 		Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sort);
 		Specification<NotaFiscalCompra> spec = Specification
 				.where(NotaFiscalCompraSpec.empresaIgual(usuarioLogado.getEmpresaId()));
-		return notaFiscalCompraRepository.findAll(spec, pageable).map(notaFiscalCompraMapper::toDTO);
+		return notaFiscalCompraRepository.findAll(spec, pageable).map(nf -> {
+			NotaFiscalCompraDTO dto = notaFiscalCompraMapper.toDTO(nf);
+			dto.setItens(mapItensToDTO(nf.getItens()));
+			return dto;
+		});
 	}
 
 	public Page<NotaFiscalCompraDTO> buscarAvancado(String numeroNota, int page, int size,
@@ -264,18 +288,46 @@ public class NotaFiscalCompraService {
 		Pageable pageable = PageRequest.of(page, size);
 		Specification<NotaFiscalCompra> spec = Specification.where(NotaFiscalCompraSpec.numeroNotaContem(numeroNota))
 				.and(NotaFiscalCompraSpec.empresaIgual(usuarioLogado.getEmpresaId()));
-		return notaFiscalCompraRepository.findAll(spec, pageable).map(notaFiscalCompraMapper::toDTO);
+		return notaFiscalCompraRepository.findAll(spec, pageable).map(nf -> {
+			NotaFiscalCompraDTO dto = notaFiscalCompraMapper.toDTO(nf);
+			dto.setItens(mapItensToDTO(nf.getItens()));
+			return dto;
+		});
 	}
 
 	public List<NotaFiscalCompraDTO> buscarTodosPorEmpresa(UsuarioLogadoPrincipal usuarioLogado) {
 		Specification<NotaFiscalCompra> spec = Specification
 				.where(NotaFiscalCompraSpec.empresaIgual(usuarioLogado.getEmpresaId()));
-		return notaFiscalCompraRepository.findAll(spec).stream().map(notaFiscalCompraMapper::toDTO).toList();
+		return notaFiscalCompraRepository.findAll(spec).stream().map(nf -> {
+			NotaFiscalCompraDTO dto = notaFiscalCompraMapper.toDTO(nf);
+			dto.setItens(mapItensToDTO(nf.getItens()));
+			return dto;
+		}).toList();
 	}
 
 	public List<NotaFiscalCompraDTO> buscarPorDescricao(String numeroNota, UsuarioLogadoPrincipal usuarioLogado) {
 		Specification<NotaFiscalCompra> spec = Specification.where(NotaFiscalCompraSpec.numeroNotaContem(numeroNota))
 				.and(NotaFiscalCompraSpec.empresaIgual(usuarioLogado.getEmpresaId()));
-		return notaFiscalCompraRepository.findAll(spec).stream().map(notaFiscalCompraMapper::toDTO).toList();
+		return notaFiscalCompraRepository.findAll(spec).stream().map(nf -> {
+			NotaFiscalCompraDTO dto = notaFiscalCompraMapper.toDTO(nf);
+			dto.setItens(mapItensToDTO(nf.getItens()));
+			return dto;
+		}).toList();
+	}
+
+	private List<NotaItemProdutoDTO> mapItensToDTO(List<NotaItemProduto> itens) {
+		if (itens == null)
+			return List.of();
+		List<NotaItemProdutoDTO> lista = new ArrayList<>();
+		for (NotaItemProduto item : itens) {
+			NotaItemProdutoDTO dto = new NotaItemProdutoDTO();
+			dto.setId(item.getId());
+			dto.setQuantidade(item.getQuantidade());
+			dto.setValorUnitarioCusto(item.getValorUnitarioCusto());
+			dto.setProdutoId(item.getProduto().getId());
+			dto.setNotaFiscalCompraId(item.getNotaFiscalCompra().getId());
+			lista.add(dto);
+		}
+		return lista;
 	}
 }

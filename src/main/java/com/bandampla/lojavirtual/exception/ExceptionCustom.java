@@ -7,7 +7,7 @@ import java.io.Serializable;
  * @Email: <nilton.brito@outlook.com>
  * @Data: 5 de mai. de 2026
  */
-public class ExceptionCustom extends Exception implements Serializable {
+public class ExceptionCustom extends RuntimeException implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

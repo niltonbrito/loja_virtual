@@ -35,14 +35,13 @@ public class PessoaJuridica extends Pessoa {
 
 	private String categoria;
 
-	// MATRIZ / FILIAL
 	@ManyToOne
 	@JoinColumn(name = "matriz_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "matriz_fk"))
 	private PessoaJuridica matriz;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
-	private PessoaJuridica empresa; // O Tenant pai (Será nulo apenas se a PJ for a própria Matriz Suprema)
+	private PessoaJuridica empresa;
 
 	public String getCnpj() {
 		return cnpj;
@@ -98,5 +97,13 @@ public class PessoaJuridica extends Pessoa {
 
 	public void setMatriz(PessoaJuridica matriz) {
 		this.matriz = matriz;
+	}
+
+	public PessoaJuridica getEmpresa() {
+		return empresa;
+	}
+
+	public void setEmpresa(PessoaJuridica empresa) {
+		this.empresa = empresa;
 	}
 }

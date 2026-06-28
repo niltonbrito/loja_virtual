@@ -47,17 +47,17 @@ public abstract class Pessoa implements Serializable {
 	@Column
 	@Enumerated(EnumType.STRING)
 	private TipoPessoa tipoPessoa;
-	
+
 	@Column
 	@Enumerated(EnumType.STRING)
 	private TipoCadastro tipoCadastro;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "setor_id")
 	private Setor setor;
 
 	@OneToMany(mappedBy = "pessoa", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<Endereco> enderecos = new ArrayList<Endereco>();
+	private List<Endereco> enderecos = new ArrayList<>();
 
 	public Long getId() {
 		return id;
@@ -91,20 +91,20 @@ public abstract class Pessoa implements Serializable {
 		this.telefone = telefone;
 	}
 
-	public TipoCadastro getTipoCadastro() {
-		return tipoCadastro;
-	}
-
-	public void setTipoCadastro(TipoCadastro tipoCadastro) {
-		this.tipoCadastro = tipoCadastro;
-	}
-	
 	public TipoPessoa getTipoPessoa() {
 		return tipoPessoa;
 	}
 
 	public void setTipoPessoa(TipoPessoa tipoPessoa) {
 		this.tipoPessoa = tipoPessoa;
+	}
+
+	public TipoCadastro getTipoCadastro() {
+		return tipoCadastro;
+	}
+
+	public void setTipoCadastro(TipoCadastro tipoCadastro) {
+		this.tipoCadastro = tipoCadastro;
 	}
 
 	public Setor getSetor() {
@@ -115,12 +115,12 @@ public abstract class Pessoa implements Serializable {
 		this.setor = setor;
 	}
 
-	public void setEnderecos(List<Endereco> enderecos) {
-		this.enderecos = enderecos;
-	}
-
 	public List<Endereco> getEnderecos() {
 		return enderecos;
+	}
+
+	public void setEnderecos(List<Endereco> enderecos) {
+		this.enderecos = enderecos;
 	}
 
 	@Override

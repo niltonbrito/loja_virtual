@@ -57,11 +57,11 @@ public class NotaItemProdutoDTO {
 		this.valorUnitarioCusto = valorUnitarioCusto;
 	}
 
-	public Long getNotaFiscalCompra() {
+	public Long getNotaFiscalCompraId() {
 		return notaFiscalCompraId;
 	}
 
-	public void setNotaFiscalCompra(Long notaFiscalCompraId) {
+	public void setNotaFiscalCompraId(Long notaFiscalCompraId) {
 		this.notaFiscalCompraId = notaFiscalCompraId;
 	}
 
