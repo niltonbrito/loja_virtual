@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.dto;
 
 import java.math.BigDecimal;
@@ -16,242 +13,260 @@ import org.hibernate.validator.constraints.Length;
 
 import com.bandampla.lojavirtual.enums.TipoUnidadeMedida;
 
-/**
- * @author: Nilton Brito
- * @Email: <nilton.brito@outlook.com>
- * @Data: 18 de mai. de 2026
- */
 public class ProdutoDTO {
 
-	private Long id;
+    private Long id;
 
-	@NotNull(message = "O tipo da unidade de medida deve ser informado.")
-	private TipoUnidadeMedida tipoUnidadeMedida;
+    @NotNull(message = "O tipo da unidade de medida deve ser informado.")
+    private TipoUnidadeMedida tipoUnidadeMedida;
 
-	@Size(min = 10, message = "O nome do produto deve ter mais de 10 caracteres.")
-	@NotBlank(message = "O Nome do produto deve ser informado.")
-	private String nome;
-	private Boolean ativo;
+    @Size(min = 10, message = "O nome do produto deve ter mais de 10 caracteres.")
+    @NotBlank(message = "O Nome do produto deve ser informado.")
+    private String nome;
 
-	@Length(max = 2000)
-	@NotBlank(message = "Informe uma descrição para o produto.")
-	private String descricao;
+    private Boolean ativo;
 
-	@NotNull(message = "Informe o peso do produto")
-	@Positive(message = "O peso deve ser maior que zero.")
-	private Double peso;
+    @Length(max = 2000)
+    @NotBlank(message = "Informe uma descrição para o produto.")
+    private String descricao;
 
-	@NotNull(message = "Informe a largura do produto")
-	@Positive(message = "O largura deve ser maior que zero.")
-	private Double largura;
+    @NotNull(message = "Informe o peso do produto")
+    @Positive(message = "O peso deve ser maior que zero.")
+    private Double peso;
 
-	@NotNull(message = "Informe a altura do produto")
-	@Positive(message = "O altura deve ser maior que zero.")
-	private Double altura;
+    @NotNull(message = "Informe a largura do produto")
+    @Positive(message = "O largura deve ser maior que zero.")
+    private Double largura;
 
-	@NotNull(message = "Informe a profundidade do produto")
-	@Positive(message = "O profundidade deve ser maior que zero.")
-	private Double profundidade;
+    @NotNull(message = "Informe a altura do produto")
+    @Positive(message = "O altura deve ser maior que zero.")
+    private Double altura;
 
-	@NotNull(message = "Informe o valor de venda do produto")
-	@Positive(message = "O valor de venda deve ser maior que zero.")
-	private BigDecimal valorVenda;
+    @NotNull(message = "Informe a profundidade do produto")
+    @Positive(message = "O profundidade deve ser maior que zero.")
+    private Double profundidade;
 
-	private Integer qtdEstoque;
-	private Integer qtdEstoqueMinimo;
-	private Boolean alertaEstoque;
-	private String linkYoutube;
+    @NotNull(message = "Informe o valor de venda do produto")
+    @Positive(message = "O valor de venda deve ser maior que zero.")
+    private BigDecimal valorVenda;
 
-	@PositiveOrZero(message = "A quantidade de cliques deve ser maior que zero.")
-	private Integer qtdClickProduto;
+    private Integer qtdEstoque;
+    private Integer qtdEstoqueMinimo;
+    private Boolean alertaEstoque;
+    private String linkYoutube;
 
-	private Long empresaId;
+    @PositiveOrZero(message = "A quantidade de cliques deve ser maior que zero.")
+    private Integer qtdClickProduto;
 
-	@NotNull(message = "A Categoria do Produto deve ser informada")
-	@Positive(message = "O ID da Categoria do Produto deve ser maior que zero.")
-	private Long categoriaId;
+    private Long empresaId;
 
-	@NotNull(message = "A Marca do Produto deve ser informada")
-	@Positive(message = "O ID da Marca do Produto deve ser maior que zero.")
-	private Long marcaId;
+    @NotNull(message = "A Categoria do Produto deve ser informada")
+    @Positive(message = "O ID da Categoria do Produto deve ser maior que zero.")
+    private Long categoriaId;
 
-	// =========================================================================
-	// 🔄 MÉTODOS EQUALS E HASHCODE ADICIONADOS (PADRÃO JAVA 11)
-	// =========================================================================
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null || getClass() != obj.getClass())
-			return false;
+    @NotNull(message = "A Marca do Produto deve ser informada")
+    @Positive(message = "O ID da Marca do Produto deve ser maior que zero.")
+    private Long marcaId;
 
-		ProdutoDTO other = (ProdutoDTO) obj;
+    @NotNull(message = "O fornecedor do produto deve ser informado.")
+    @Positive(message = "O ID do fornecedor deve ser maior que zero.")
+    private Long fornecedorId;
 
-		// Tratamento especial para BigDecimal (compara o valor matemático ignorando
-		// zeros na escala)
-		boolean precoIgual = (this.valorVenda == null && other.valorVenda == null) || (this.valorVenda != null
-				&& other.valorVenda != null && this.valorVenda.compareTo(other.valorVenda) == 0);
+    @NotBlank(message = "O código do produto do fornecedor deve ser informado.")
+    private String codigoProdutoFornecedor;
 
-		return Objects.equals(id, other.id) && Objects.equals(tipoUnidadeMedida, other.tipoUnidadeMedida)
-				&& Objects.equals(nome, other.nome) && Objects.equals(ativo, other.ativo)
-				&& Objects.equals(descricao, other.descricao) && Objects.equals(peso, other.peso)
-				&& Objects.equals(largura, other.largura) && Objects.equals(altura, other.altura)
-				&& Objects.equals(profundidade, other.profundidade) && precoIgual
-				&& Objects.equals(qtdEstoque, other.qtdEstoque)
-				&& Objects.equals(qtdEstoqueMinimo, other.qtdEstoqueMinimo)
-				&& Objects.equals(alertaEstoque, other.alertaEstoque) && Objects.equals(linkYoutube, other.linkYoutube)
-				&& Objects.equals(qtdClickProduto, other.qtdClickProduto) && Objects.equals(empresaId, other.empresaId)
-				&& Objects.equals(categoriaId, other.categoriaId) && Objects.equals(marcaId, other.marcaId);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, tipoUnidadeMedida, nome, ativo, descricao, peso, largura, altura, profundidade,
-				valorVenda, qtdEstoque, qtdEstoqueMinimo, alertaEstoque, linkYoutube, qtdClickProduto, empresaId,
-				categoriaId, marcaId);
-	}
+        ProdutoDTO other = (ProdutoDTO) obj;
 
-	public Long getId() {
-		return id;
-	}
+        boolean precoIgual = (this.valorVenda == null && other.valorVenda == null) || (this.valorVenda != null
+                && other.valorVenda != null && this.valorVenda.compareTo(other.valorVenda) == 0);
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+        return Objects.equals(id, other.id) && Objects.equals(tipoUnidadeMedida, other.tipoUnidadeMedida)
+                && Objects.equals(nome, other.nome) && Objects.equals(ativo, other.ativo)
+                && Objects.equals(descricao, other.descricao) && Objects.equals(peso, other.peso)
+                && Objects.equals(largura, other.largura) && Objects.equals(altura, other.altura)
+                && Objects.equals(profundidade, other.profundidade) && precoIgual
+                && Objects.equals(qtdEstoque, other.qtdEstoque)
+                && Objects.equals(qtdEstoqueMinimo, other.qtdEstoqueMinimo)
+                && Objects.equals(alertaEstoque, other.alertaEstoque) && Objects.equals(linkYoutube, other.linkYoutube)
+                && Objects.equals(qtdClickProduto, other.qtdClickProduto) && Objects.equals(empresaId, other.empresaId)
+                && Objects.equals(categoriaId, other.categoriaId) && Objects.equals(marcaId, other.marcaId)
+                && Objects.equals(fornecedorId, other.fornecedorId)
+                && Objects.equals(codigoProdutoFornecedor, other.codigoProdutoFornecedor);
+    }
 
-	public TipoUnidadeMedida getTipoUnidadeMedida() {
-		return tipoUnidadeMedida;
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, tipoUnidadeMedida, nome, ativo, descricao, peso, largura, altura, profundidade,
+                valorVenda, qtdEstoque, qtdEstoqueMinimo, alertaEstoque, linkYoutube, qtdClickProduto, empresaId,
+                categoriaId, marcaId, fornecedorId, codigoProdutoFornecedor);
+    }
 
-	public void setTipoUnidadeMedida(TipoUnidadeMedida tipoUnidadeMedida) {
-		this.tipoUnidadeMedida = tipoUnidadeMedida;
-	}
+    // Getters e Setters
 
-	public String getNome() {
-		return nome;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setNome(String nome) {
-		this.nome = nome;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Boolean getAtivo() {
-		return ativo;
-	}
+    public TipoUnidadeMedida getTipoUnidadeMedida() {
+        return tipoUnidadeMedida;
+    }
 
-	public void setAtivo(Boolean ativo) {
-		this.ativo = ativo;
-	}
+    public void setTipoUnidadeMedida(TipoUnidadeMedida tipoUnidadeMedida) {
+        this.tipoUnidadeMedida = tipoUnidadeMedida;
+    }
 
-	public String getDescricao() {
-		return descricao;
-	}
+    public String getNome() {
+        return nome;
+    }
 
-	public void setDescricao(String descricao) {
-		this.descricao = descricao;
-	}
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
-	public Double getPeso() {
-		return peso;
-	}
+    public Boolean getAtivo() {
+        return ativo;
+    }
 
-	public void setPeso(Double peso) {
-		this.peso = peso;
-	}
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
+    }
 
-	public Double getLargura() {
-		return largura;
-	}
+    public String getDescricao() {
+        return descricao;
+    }
 
-	public void setLargura(Double largura) {
-		this.largura = largura;
-	}
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
 
-	public Double getAltura() {
-		return altura;
-	}
+    public Double getPeso() {
+        return peso;
+    }
 
-	public void setAltura(Double altura) {
-		this.altura = altura;
-	}
+    public void setPeso(Double peso) {
+        this.peso = peso;
+    }
 
-	public Double getProfundidade() {
-		return profundidade;
-	}
+    public Double getLargura() {
+        return largura;
+    }
 
-	public void setProfundidade(Double profundidade) {
-		this.profundidade = profundidade;
-	}
+    public void setLargura(Double largura) {
+        this.largura = largura;
+    }
 
-	public BigDecimal getValorVenda() {
-		return valorVenda;
-	}
+    public Double getAltura() {
+        return altura;
+    }
 
-	public void setValorVenda(BigDecimal valorVenda) {
-		this.valorVenda = valorVenda;
-	}
+    public void setAltura(Double altura) {
+        this.altura = altura;
+    }
 
-	public Integer getQtdEstoque() {
-		return qtdEstoque;
-	}
+    public Double getProfundidade() {
+        return profundidade;
+    }
 
-	public void setQtdEstoque(Integer qtdEstoque) {
-		this.qtdEstoque = qtdEstoque;
-	}
+    public void setProfundidade(Double profundidade) {
+        this.profundidade = profundidade;
+    }
 
-	public Integer getQtdEstoqueMinimo() {
-		return qtdEstoqueMinimo;
-	}
+    public BigDecimal getValorVenda() {
+        return valorVenda;
+    }
 
-	public void setQtdEstoqueMinimo(Integer qtdEstoqueMinimo) {
-		this.qtdEstoqueMinimo = qtdEstoqueMinimo;
-	}
+    public void setValorVenda(BigDecimal valorVenda) {
+        this.valorVenda = valorVenda;
+    }
 
-	public Boolean getAlertaEstoque() {
-		return alertaEstoque;
-	}
+    public Integer getQtdEstoque() {
+        return qtdEstoque;
+    }
 
-	public void setAlertaEstoque(Boolean alertaEstoque) {
-		this.alertaEstoque = alertaEstoque;
-	}
+    public void setQtdEstoque(Integer qtdEstoque) {
+        this.qtdEstoque = qtdEstoque;
+    }
 
-	public String getLinkYoutube() {
-		return linkYoutube;
-	}
+    public Integer getQtdEstoqueMinimo() {
+        return qtdEstoqueMinimo;
+    }
 
-	public void setLinkYoutube(String linkYoutube) {
-		this.linkYoutube = linkYoutube;
-	}
+    public void setQtdEstoqueMinimo(Integer qtdEstoqueMinimo) {
+        this.qtdEstoqueMinimo = qtdEstoqueMinimo;
+    }
 
-	public Integer getQtdClickProduto() {
-		return qtdClickProduto;
-	}
+    public Boolean getAlertaEstoque() {
+        return alertaEstoque;
+    }
 
-	public void setQtdClickProduto(Integer qtdClickProduto) {
-		this.qtdClickProduto = qtdClickProduto;
-	}
+    public void setAlertaEstoque(Boolean alertaEstoque) {
+        this.alertaEstoque = alertaEstoque;
+    }
 
-	public Long getEmpresaId() {
-		return empresaId;
-	}
+    public String getLinkYoutube() {
+        return linkYoutube;
+    }
 
-	public void setEmpresaId(Long empresaId) {
-		this.empresaId = empresaId;
-	}
+    public void setLinkYoutube(String linkYoutube) {
+        this.linkYoutube = linkYoutube;
+    }
 
-	public Long getCategoriaId() {
-		return categoriaId;
-	}
+    public Integer getQtdClickProduto() {
+        return qtdClickProduto;
+    }
 
-	public void setCategoriaId(Long categoriaId) {
-		this.categoriaId = categoriaId;
-	}
+    public void setQtdClickProduto(Integer qtdClickProduto) {
+        this.qtdClickProduto = qtdClickProduto;
+    }
 
-	public Long getMarcaId() {
-		return marcaId;
-	}
+    public Long getEmpresaId() {
+        return empresaId;
+    }
 
-	public void setMarcaId(Long marcaId) {
-		this.marcaId = marcaId;
-	}
+    public void setEmpresaId(Long empresaId) {
+        this.empresaId = empresaId;
+    }
+
+    public Long getCategoriaId() {
+        return categoriaId;
+    }
+
+    public void setCategoriaId(Long categoriaId) {
+        this.categoriaId = categoriaId;
+    }
+
+    public Long getMarcaId() {
+        return marcaId;
+    }
+
+    public void setMarcaId(Long marcaId) {
+        this.marcaId = marcaId;
+    }
+
+    public Long getFornecedorId() {
+        return fornecedorId;
+    }
+
+    public void setFornecedorId(Long fornecedorId) {
+        this.fornecedorId = fornecedorId;
+    }
+
+    public String getCodigoProdutoFornecedor() {
+        return codigoProdutoFornecedor;
+    }
+
+    public void setCodigoProdutoFornecedor(String codigoProdutoFornecedor) {
+        this.codigoProdutoFornecedor = codigoProdutoFornecedor;
+    }
 }

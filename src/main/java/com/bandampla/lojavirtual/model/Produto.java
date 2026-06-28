@@ -60,9 +60,9 @@ public class Produto implements Serializable {
 	private BigDecimal valorVenda = BigDecimal.ZERO;
 
 	@Column(nullable = false)
-	private Integer qtdEstoque = 0;
+	private BigDecimal qtdEstoque = BigDecimal.ZERO;
 
-	private Integer qtdEstoqueMinimo = 0;
+	private BigDecimal qtdEstoqueMinimo = BigDecimal.ZERO;
 
 	private Boolean alertaEstoque = Boolean.FALSE;
 
@@ -170,19 +170,19 @@ public class Produto implements Serializable {
 		this.valorVenda = valorVenda;
 	}
 
-	public Integer getQtdEstoque() {
+	public BigDecimal getQtdEstoque() {
 		return qtdEstoque;
 	}
 
-	public void setQtdEstoque(Integer qtdEstoque) {
+	public void setQtdEstoque(BigDecimal qtdEstoque) {
 		this.qtdEstoque = qtdEstoque;
 	}
 
-	public Integer getQtdEstoqueMinimo() {
+	public BigDecimal getQtdEstoqueMinimo() {
 		return qtdEstoqueMinimo;
 	}
 
-	public void setQtdEstoqueMinimo(Integer qtdEstoqueMinimo) {
+	public void setQtdEstoqueMinimo(BigDecimal qtdEstoqueMinimo) {
 		this.qtdEstoqueMinimo = qtdEstoqueMinimo;
 	}
 

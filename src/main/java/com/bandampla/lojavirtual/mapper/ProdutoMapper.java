@@ -9,7 +9,7 @@ import com.bandampla.lojavirtual.dto.ProdutoDTO;
 import com.bandampla.lojavirtual.model.Produto;
 
 @Mapper(componentModel = "spring")
-public interface ProdutoFisicaMapper {
+public interface ProdutoMapper {
 
 	@Mapping(source = "empresa.id", target = "empresaId")
 	@Mapping(source = "categoriaProduto.id", target = "categoriaId") // 🛠️ CORREÇÃO DA ROTA DO ATRIBUTO
