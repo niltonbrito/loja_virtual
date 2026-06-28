@@ -28,7 +28,7 @@ public class NotaItemProduto implements Serializable {
 	private Long id;
 
 	@Column(nullable = false)
-	private Double quantidade;
+	private BigDecimal quantidade;
 
 	@Column(nullable = false)
 	private BigDecimal valorUnitarioCusto;
@@ -61,11 +61,11 @@ public class NotaItemProduto implements Serializable {
 		this.id = id;
 	}
 
-	public Double getQuantidade() {
+	public BigDecimal getQuantidade() {
 		return quantidade;
 	}
 
-	public void setQuantidade(Double quantidade) {
+	public void setQuantidade(BigDecimal quantidade) {
 		this.quantidade = quantidade;
 	}
 
