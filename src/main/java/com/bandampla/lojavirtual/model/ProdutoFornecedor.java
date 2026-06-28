@@ -12,9 +12,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "produto_fornecedor")
+@Table(name = "produto_fornecedor", uniqueConstraints = @UniqueConstraint(name = "uk_produto_fornecedor", columnNames = {
+		"produto_id", "fornecedor_id" }))
 @SequenceGenerator(name = "seq_produto_fornecedor", sequenceName = "seq_produto_fornecedor", allocationSize = 1, initialValue = 1)
 public class ProdutoFornecedor implements Serializable {
 
@@ -32,8 +34,8 @@ public class ProdutoFornecedor implements Serializable {
 	@JoinColumn(name = "fornecedor_id", nullable = false)
 	private PessoaJuridica fornecedor;
 
-	@Column(nullable = false)
-	private String codigoProdutoNoFornecedor;
+	@Column(nullable = false, unique = true)
+	private String codigoProdutoFornecedor;
 
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false)
@@ -63,12 +65,12 @@ public class ProdutoFornecedor implements Serializable {
 		this.fornecedor = fornecedor;
 	}
 
-	public String getCodigoProdutoNoFornecedor() {
-		return codigoProdutoNoFornecedor;
+	public String getCodigoProdutoFornecedor() {
+		return codigoProdutoFornecedor;
 	}
 
-	public void setCodigoProdutoNoFornecedor(String codigoProdutoNoFornecedor) {
-		this.codigoProdutoNoFornecedor = codigoProdutoNoFornecedor;
+	public void setCodigoProdutoFornecedor(String codigoProdutoFornecedor) {
+		this.codigoProdutoFornecedor = codigoProdutoFornecedor;
 	}
 
 	public PessoaJuridica getEmpresa() {
