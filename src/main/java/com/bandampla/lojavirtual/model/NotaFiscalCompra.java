@@ -2,8 +2,8 @@ package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,8 +21,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "nota_fiscal_compra")
@@ -52,15 +50,14 @@ public class NotaFiscalCompra implements Serializable {
 	private BigDecimal valorIcms;
 
 	@Column(nullable = false)
-	@Temporal(TemporalType.DATE)
-	private Date dataCompra;
+	private LocalDate dataCompra;
 
 	@OneToMany(mappedBy = "notaFiscalCompra", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<NotaItemProduto> itens = new ArrayList<>();
 
 	@ManyToOne
 	@JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
-	private Pessoa pessoa; // fornecedor ou pessoa relacionada
+	private PessoaJuridica pessoa; // fornecedor ou pessoa relacionada
 
 	@ManyToOne
 	@JoinColumn(name = "conta_pagar_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "conta_pagar_fk"))
@@ -138,11 +135,11 @@ public class NotaFiscalCompra implements Serializable {
 		this.valorIcms = valorIcms;
 	}
 
-	public Date getDataCompra() {
+	public LocalDate getDataCompra() {
 		return dataCompra;
 	}
 
-	public void setDataCompra(Date dataCompra) {
+	public void setDataCompra(LocalDate dataCompra) {
 		this.dataCompra = dataCompra;
 	}
 
@@ -154,11 +151,11 @@ public class NotaFiscalCompra implements Serializable {
 		this.itens = itens;
 	}
 
-	public Pessoa getPessoa() {
+	public PessoaJuridica getPessoa() {
 		return pessoa;
 	}
 
-	public void setPessoa(Pessoa pessoa) {
+	public void setPessoa(PessoaJuridica pessoa) {
 		this.pessoa = pessoa;
 	}
 

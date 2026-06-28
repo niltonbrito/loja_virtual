@@ -8,8 +8,7 @@ import com.bandampla.lojavirtual.model.NotaFiscalCompra;
 public class NotaFiscalCompraSpec {
 
 	/*
-	 * =========================== FILTROS POR ID DA NOTA
-	 * ===========================
+	 * =================== FILTROS POR ID DA NOTA ===================
 	 */
 
 	public static Specification<NotaFiscalCompra> idIgual(Long id) {
@@ -21,8 +20,7 @@ public class NotaFiscalCompraSpec {
 	}
 
 	/*
-	 * =========================== FILTROS POR NÚMERO DA NOTA
-	 * ===========================
+	 * =================== FILTROS POR NÚMERO DA NOTA ===================
 	 */
 
 	public static Specification<NotaFiscalCompra> numeroNotaExato(String numeroNota) {
@@ -36,8 +34,7 @@ public class NotaFiscalCompraSpec {
 	}
 
 	/*
-	 * =========================== FILTROS POR RELACIONAMENTOS
-	 * ===========================
+	 * =================== FILTROS POR RELACIONAMENTOS ===================
 	 */
 
 	// Equivalente ao método buscarPorPessoa()

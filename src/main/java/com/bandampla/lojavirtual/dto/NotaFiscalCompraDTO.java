@@ -1,21 +1,19 @@
 package com.bandampla.lojavirtual.dto;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
-import com.bandampla.lojavirtual.model.NotaItemProduto;
-
 public class NotaFiscalCompraDTO {
 
 	private Long id;
 
-	@NotBlank(message = "O número da Nota Fiscal deve ser informado.")
-	private String numeroNota;
+    @NotBlank(message = "O número da nota fiscal deve ser informado.")
+    private String numeroNota;
 
 	@NotBlank(message = "A série da Nota Fiscal deve ser informada.")
 	private String serieNota;
@@ -32,19 +30,20 @@ public class NotaFiscalCompraDTO {
 	@Positive(message = "O valor do ICMS deve ser maior que zero.")
 	private BigDecimal valorIcms;
 
-	@NotNull(message = "Informe a data da compra da Nota Fiscal.")
-	private Date dataCompra;
+    @NotNull(message = "Informe a data da compra.")
+    private LocalDate dataCompra;
 
-	private List<NotaItemProduto> itens;
-	
-	@NotNull(message = "O ID da pessoa (comprador/responsável) deve ser informado.")
-	@Positive(message = "O ID da pessoa deve ser maior que zero.")
-	private Long pessoaId;
+    @NotNull(message = "Informe ao menos um item na nota fiscal.")
+    private List<NotaItemProdutoDTO> itens;
 
-	private Long empresaId;
+    @NotNull(message = "Informe a pessoa (fornecedor) da nota.")
+    @Positive(message = "O ID da pessoa deve ser maior que zero.")
+    private Long pessoaId;
 
-	//@NotNull(message = "O ID da Conta a Pagar vinculada deve ser informado.")
-	//@Positive(message = "O ID da conta a pagar deve ser maior que zero.")
+    private Long empresaId;
+
+	// @NotNull(message = "O ID da Conta a Pagar vinculada deve ser informado.")
+	// @Positive(message = "O ID da conta a pagar deve ser maior que zero.")
 	private Long contaPagarId;
 
 	public Long getId() {
@@ -103,20 +102,19 @@ public class NotaFiscalCompraDTO {
 		this.valorIcms = valorIcms;
 	}
 
-	public Date getDataCompra() {
+	public LocalDate getDataCompra() {
 		return dataCompra;
 	}
 
-	public void setDataCompra(Date dataCompra) {
+	public void setDataCompra(LocalDate dataCompra) {
 		this.dataCompra = dataCompra;
 	}
 
-	
-	public List<NotaItemProduto> getItens() {
+	public List<NotaItemProdutoDTO> getItens() {
 		return itens;
 	}
 
-	public void setItens(List<NotaItemProduto> itens) {
+	public void setItens(List<NotaItemProdutoDTO> itens) {
 		this.itens = itens;
 	}
 
