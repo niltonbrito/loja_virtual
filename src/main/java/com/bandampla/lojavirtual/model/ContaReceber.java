@@ -2,7 +2,7 @@ package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -18,8 +18,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import com.bandampla.lojavirtual.enums.StatusContaReceber;
 
@@ -42,11 +40,9 @@ public class ContaReceber implements Serializable {
 	private StatusContaReceber status;
 
 	@Column(nullable = false)
-	@Temporal(TemporalType.DATE)
-	private Date dataVencimento;
+	private LocalDate dataVencimento;
 
-	@Temporal(TemporalType.DATE)
-	private Date dataPagamento;
+	private LocalDate dataPagamento;
 
 	@Column(nullable = false)
 	private BigDecimal valorTotal;
@@ -60,7 +56,7 @@ public class ContaReceber implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
-	
+
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
@@ -93,19 +89,19 @@ public class ContaReceber implements Serializable {
 		this.status = status;
 	}
 
-	public Date getDataVencimento() {
+	public LocalDate getDataVencimento() {
 		return dataVencimento;
 	}
 
-	public void setDataVencimento(Date dataVencimento) {
+	public void setDataVencimento(LocalDate dataVencimento) {
 		this.dataVencimento = dataVencimento;
 	}
 
-	public Date getDataPagamento() {
+	public LocalDate getDataPagamento() {
 		return dataPagamento;
 	}
 
-	public void setDataPagamento(Date dataPagamento) {
+	public void setDataPagamento(LocalDate dataPagamento) {
 		this.dataPagamento = dataPagamento;
 	}
 

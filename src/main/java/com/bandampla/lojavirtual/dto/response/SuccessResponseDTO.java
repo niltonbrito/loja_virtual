@@ -16,7 +16,7 @@ public class SuccessResponseDTO<T> implements Serializable {
 	private String traceId;
 
 	public SuccessResponseDTO() {
-		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
+		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}
 
 	public SuccessResponseDTO(String codigo, String mensagem, T dados, String path, String traceId) {
@@ -25,7 +25,7 @@ public class SuccessResponseDTO<T> implements Serializable {
 		this.dados = dados;
 		this.path = path;
 		this.traceId = traceId;
-		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
+		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}
 
 	public String getCodigo() {

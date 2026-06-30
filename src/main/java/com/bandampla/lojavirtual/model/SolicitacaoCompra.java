@@ -4,8 +4,8 @@
 package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,8 +25,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import com.bandampla.lojavirtual.enums.StatusSolicitacaoCompra;
 
@@ -50,17 +48,16 @@ public class SolicitacaoCompra implements Serializable {
 	private String descricao;
 
 	@Column(nullable = false)
-	@Temporal(TemporalType.DATE)
-	private Date dataSolicitacao;
+	private LocalDate dataSolicitacao;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private StatusSolicitacaoCompra status; // ABERTA, APROVADA, REJEITADA, CANCELADA
-	
+
 	@ManyToOne
 	@JoinColumn(name = "solicitante_id", nullable = false)
 	private Pessoa solicitante;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "setor_solicitante_id")
 	private Setor setorSolicitante;
@@ -88,11 +85,11 @@ public class SolicitacaoCompra implements Serializable {
 		this.descricao = descricao;
 	}
 
-	public Date getDataSolicitacao() {
+	public LocalDate getDataSolicitacao() {
 		return dataSolicitacao;
 	}
 
-	public void setDataSolicitacao(Date dataSolicitacao) {
+	public void setDataSolicitacao(LocalDate dataSolicitacao) {
 		this.dataSolicitacao = dataSolicitacao;
 	}
 

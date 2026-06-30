@@ -1,13 +1,15 @@
 package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
@@ -19,9 +21,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
+
+import com.bandampla.lojavirtual.enums.StatusUsuario;
 
 @Entity
 @Table(name = "usuario")
@@ -40,11 +42,14 @@ public class Usuario implements Serializable {
 	@Column(nullable = false)
 	private String senha;
 
-	@Temporal(TemporalType.DATE)
-	private Date createAt;
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private StatusUsuario statusUsuario;
 
-	@Temporal(TemporalType.DATE)
-	private Date updateAt;
+	@Column(nullable = false)
+	private LocalDate createAt;
+
+	private LocalDate updateAt;
 
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "usuario_acesso", uniqueConstraints = @UniqueConstraint(columnNames = { "usuario_id",
@@ -84,19 +89,27 @@ public class Usuario implements Serializable {
 		this.senha = senha;
 	}
 
-	public Date getCreateAt() {
+	public StatusUsuario getStatusUsuario() {
+		return statusUsuario;
+	}
+
+	public void setStatusUsuario(StatusUsuario statusUsuario) {
+		this.statusUsuario = statusUsuario;
+	}
+
+	public LocalDate getCreateAt() {
 		return createAt;
 	}
 
-	public void setCreateAt(Date createAt) {
+	public void setCreateAt(LocalDate createAt) {
 		this.createAt = createAt;
 	}
 
-	public Date getUpdateAt() {
+	public LocalDate getUpdateAt() {
 		return updateAt;
 	}
 
-	public void setUpdateAt(Date updateAt) {
+	public void setUpdateAt(LocalDate updateAt) {
 		this.updateAt = updateAt;
 	}
 

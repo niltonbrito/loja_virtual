@@ -2,7 +2,7 @@ package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -17,8 +17,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "venda_compra_loja_virtual")
@@ -67,17 +65,15 @@ public class VendaCompraLojaVirtual implements Serializable {
 	private Integer diasEntrega;
 
 	@Column(nullable = false)
-	@Temporal(TemporalType.DATE)
-	private Date dataVenda;
+	private LocalDate dataVenda;
 
 	@Column(nullable = false)
-	@Temporal(TemporalType.DATE)
-	private Date dataEntrega;
+	private LocalDate dataEntrega;
 
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
-	
+
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
@@ -174,19 +170,19 @@ public class VendaCompraLojaVirtual implements Serializable {
 		this.diasEntrega = diasEntrega;
 	}
 
-	public Date getDataVenda() {
+	public LocalDate getDataVenda() {
 		return dataVenda;
 	}
 
-	public void setDataVenda(Date dataVenda) {
+	public void setDataVenda(LocalDate dataVenda) {
 		this.dataVenda = dataVenda;
 	}
 
-	public Date getDataEntrega() {
+	public LocalDate getDataEntrega() {
 		return dataEntrega;
 	}
 
-	public void setDataEntrega(Date dataEntrega) {
+	public void setDataEntrega(LocalDate dataEntrega) {
 		this.dataEntrega = dataEntrega;
 	}
 

@@ -37,20 +37,13 @@ public class WebConfigSecurity extends WebSecurityConfigurerAdapter implements H
 
 		http.csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).disable()
 
-				.authorizeRequests().antMatchers("/", "/index").permitAll().antMatchers(HttpMethod.OPTIONS, "/**")
-				.permitAll()
-
-				// Swagger liberado
+				.authorizeRequests()
+				.antMatchers("/", "/index").permitAll()
+				.antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 				.antMatchers(SWAGGER_WHITELIST).permitAll()
-
-				// Login liberado
 				.antMatchers("/auth/login").permitAll()
-
-				// Qualquer outra requisição precisa de autenticação
 				.anyRequest().authenticated()
-
 				.and().logout().logoutSuccessUrl("/index").logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-
 				.and()
 
 				// Filtro de login

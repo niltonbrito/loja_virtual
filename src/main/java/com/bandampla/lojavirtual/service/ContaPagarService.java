@@ -13,7 +13,6 @@ import com.bandampla.lojavirtual.dto.ContaPagarDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.mapper.ContaPagarMapper;
 import com.bandampla.lojavirtual.model.ContaPagar;
-import com.bandampla.lojavirtual.model.PessoaFisica;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.repository.ContaPagarRepository;
 import com.bandampla.lojavirtual.repository.PessoaFisicaRepository;

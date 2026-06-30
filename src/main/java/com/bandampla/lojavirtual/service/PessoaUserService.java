@@ -1,5 +1,6 @@
 package com.bandampla.lojavirtual.service;
 
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
@@ -254,8 +255,7 @@ public class PessoaUserService {
 		String senha = "" + Calendar.getInstance().getTimeInMillis();
 		usuario.setSenha(new BCryptPasswordEncoder().encode(senha));
 
-	    usuario.setCreateAt(Calendar.getInstance().getTime());
-	    usuario.setUpdateAt(Calendar.getInstance().getTime());
+	    usuario.setCreateAt(LocalDate.now());
 	    usuario.setPessoa(pessoa); // Vincula a Pessoa (Física ou Jurídica)
 	    usuario.setEmpresa(empresa); // Vincula a Empresa Tenant dona deste registro
 

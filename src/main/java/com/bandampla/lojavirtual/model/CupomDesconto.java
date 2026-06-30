@@ -2,7 +2,7 @@ package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -16,8 +16,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 @Entity
 @Table(name = "cupom_desconto")
@@ -40,14 +38,13 @@ public class CupomDesconto implements Serializable {
 
 	private BigDecimal valorPorcentagemDesconto;
 
-	@Column(nullable= false)
-	@Temporal(TemporalType.DATE)
-	private Date dataValidade;
+	@Column(nullable = false)
+	private LocalDate dataValidade;
 
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
-	
+
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
@@ -88,11 +85,11 @@ public class CupomDesconto implements Serializable {
 		this.valorPorcentagemDesconto = valorPorcentagemDesconto;
 	}
 
-	public Date getDataValidade() {
+	public LocalDate getDataValidade() {
 		return dataValidade;
 	}
 
-	public void setDataValidade(Date dataValidade) {
+	public void setDataValidade(LocalDate dataValidade) {
 		this.dataValidade = dataValidade;
 	}
 

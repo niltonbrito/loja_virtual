@@ -4,8 +4,8 @@
 package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,8 +25,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import com.bandampla.lojavirtual.enums.StatusPedidoCompra;
 
@@ -49,9 +47,8 @@ public class PedidoCompra implements Serializable {
 	@Column(nullable = false)
 	private String numeroPedido;
 
-	@Temporal(TemporalType.DATE)
 	@Column(nullable = false)
-	private Date dataPedido;
+	private LocalDate dataPedido;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -91,11 +88,11 @@ public class PedidoCompra implements Serializable {
 		this.numeroPedido = numeroPedido;
 	}
 
-	public Date getDataPedido() {
+	public LocalDate getDataPedido() {
 		return dataPedido;
 	}
 
-	public void setDataPedido(Date dataPedido) {
+	public void setDataPedido(LocalDate dataPedido) {
 		this.dataPedido = dataPedido;
 	}
 
