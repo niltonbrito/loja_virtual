@@ -330,4 +330,26 @@ public class NotaFiscalCompraService {
 		}
 		return lista;
 	}
+
+	public List<NotaFiscalCompraDTO> buscarPorProduto(Long produtoId, UsuarioLogadoPrincipal usuarioLogado)
+			throws ExceptionCustom {
+
+		if (produtoId == null || produtoId <= 0) {
+			throw new ExceptionCustom("ID do produto inválido.");
+		}
+		Specification<NotaFiscalCompra> spec = Specification.where(NotaFiscalCompraSpec.produtoIgual(produtoId))
+				.and(NotaFiscalCompraSpec.empresaIgual(usuarioLogado.getEmpresaId()));
+
+		List<NotaFiscalCompra> notas = notaFiscalCompraRepository.findAll(spec);
+
+		if (notas.isEmpty()) {
+			throw new ExceptionCustom("Não foi encontrado Notas Fiscais lançadas para este produto informado.");
+		}
+		return notas.stream().map(nf -> {
+			NotaFiscalCompraDTO dto = notaFiscalCompraMapper.toDTO(nf);
+			dto.setItens(mapItensToDTO(nf.getItens()));
+			return dto;
+		}).toList();
+	}
+
 }

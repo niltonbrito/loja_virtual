@@ -1,7 +1,9 @@
 package com.bandampla.lojavirtual.controller;
 
 import java.util.List;
+import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bandampla.lojavirtual.dto.NotaFiscalCompraDTO;
 import com.bandampla.lojavirtual.dto.response.ResponseDefaultDTO;
+import com.bandampla.lojavirtual.dto.response.SuccessResponseDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
 import com.bandampla.lojavirtual.service.NotaFiscalCompraService;
@@ -42,7 +45,7 @@ public class NotaFiscalCompraController {
 			@Valid @RequestBody NotaFiscalCompraDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDefaultDTO<>(
-				"Nota Fiscal de Compra criada com sucesso", notaFiscalCompraService.cadastrar(dto,usuarioLogado)));
+				"Nota Fiscal de Compra criada com sucesso", notaFiscalCompraService.cadastrar(dto, usuarioLogado)));
 	}
 
 	@PutMapping("/{id}")
@@ -51,7 +54,7 @@ public class NotaFiscalCompraController {
 			@Valid @RequestBody NotaFiscalCompraDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 		return ResponseEntity.ok(new ResponseDefaultDTO<>("Nota Fiscal de Compra atualizada com sucesso",
-				notaFiscalCompraService.atualizar(id, dto,usuarioLogado)));
+				notaFiscalCompraService.atualizar(id, dto, usuarioLogado)));
 	}
 
 	@DeleteMapping("/{id}")
@@ -81,8 +84,7 @@ public class NotaFiscalCompraController {
 	public ResponseEntity<Page<NotaFiscalCompraDTO>> buscarAvancado(@RequestParam(required = false) String numeroNota,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
-		return ResponseEntity
-				.ok(notaFiscalCompraService.buscarAvancado(numeroNota, page, size, usuarioLogado));
+		return ResponseEntity.ok(notaFiscalCompraService.buscarAvancado(numeroNota, page, size, usuarioLogado));
 	}
 
 	@GetMapping("/paginado")
@@ -91,7 +93,29 @@ public class NotaFiscalCompraController {
 			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "id") String sort,
 			@RequestParam(defaultValue = "ASC") String direction,
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
-		return ResponseEntity
-				.ok(notaFiscalCompraService.buscarPaginado(page, size, sort, direction, usuarioLogado));
+		return ResponseEntity.ok(notaFiscalCompraService.buscarPaginado(page, size, sort, direction, usuarioLogado));
 	}
+
+	@GetMapping("/produto/{produtoId}")
+	@Operation(summary = "Listar Notas Fiscais por Produto", description = "Retorna todas as notas fiscais de compra que possuem itens com o produto informado.")
+	public ResponseEntity<SuccessResponseDTO<List<NotaFiscalCompraDTO>>> buscarPorProduto(@PathVariable Long produtoId,
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado, HttpServletRequest request)
+			throws ExceptionCustom {
+
+		String traceId = UUID.randomUUID().toString();
+
+		List<NotaFiscalCompraDTO> notas = notaFiscalCompraService.buscarPorProduto(produtoId, usuarioLogado);
+
+		SuccessResponseDTO<List<NotaFiscalCompraDTO>> response = new SuccessResponseDTO<>("200",
+				"Notas fiscais encontradas para o produto " + produtoId, notas, request.getRequestURI(), traceId);
+
+		/*
+		 * MDC.put("traceId", traceId);
+		 * log.info("Consulta de NF por produto {} realizada pela empresa {}",
+		 * produtoId, usuarioLogado.getEmpresaId()); MDC.clear();
+		 */
+
+		return ResponseEntity.ok(response);
+	}
+
 }

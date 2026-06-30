@@ -1,5 +1,7 @@
 package com.bandampla.lojavirtual.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,9 +13,13 @@ import com.bandampla.lojavirtual.model.NotaFiscalCompra;
 
 @Repository
 public interface NotaFiscalCompraRepository
-		extends JpaRepository<NotaFiscalCompra, Long>, JpaSpecificationExecutor<NotaFiscalCompra> {@Transactional
+		extends JpaRepository<NotaFiscalCompra, Long>, JpaSpecificationExecutor<NotaFiscalCompra> {
+	@Transactional
 	@Modifying(flushAutomatically = true, clearAutomatically = true)
-		@Query(nativeQuery = true, value = "delete from nota_item_produto where nota_fiscal_compra_id = ?1")
-		void deleteItemNotaFiscal(Long notaFiscalCompraId);
+	@Query(nativeQuery = true, value = "delete from nota_item_produto where nota_fiscal_compra_id = ?1")
+	void deleteItemNotaFiscal(Long notaFiscalCompraId);
+
+	@Query("SELECT nf FROM NotaFiscalCompra nf JOIN nf.itens itens WHERE itens.produto.id = :produtoId AND nf.empresa.id = :empresaId")
+	List<NotaFiscalCompra> buscarNotasPorProduto(Long produtoId, Long empresaId);
 
 }

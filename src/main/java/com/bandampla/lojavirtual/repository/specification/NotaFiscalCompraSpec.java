@@ -1,9 +1,12 @@
 package com.bandampla.lojavirtual.repository.specification;
 
+import javax.persistence.criteria.Join;
+
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
 import com.bandampla.lojavirtual.model.NotaFiscalCompra;
+import com.bandampla.lojavirtual.model.NotaItemProduto;
 
 public class NotaFiscalCompraSpec {
 
@@ -75,4 +78,12 @@ public class NotaFiscalCompraSpec {
 			return cb.like(cb.lower(root.get("descricaoObservacao")), "%" + descricao.trim().toLowerCase() + "%");
 		};
 	}
+
+	public static Specification<NotaFiscalCompra> produtoIgual(Long produtoId) {
+		return (root, query, builder) -> {
+			Join<NotaFiscalCompra, NotaItemProduto> itens = root.join("itens");
+			return builder.equal(itens.get("produto").get("id"), produtoId);
+		};
+	}
+
 }
