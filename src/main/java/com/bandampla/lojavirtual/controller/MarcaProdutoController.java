@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,8 +34,7 @@ public class MarcaProdutoController {
 
 	@PostMapping
 	public ResponseEntity<ResponseDefaultDTO<MarcaProdutoDTO>> cadastrar(@Valid @RequestBody MarcaProdutoDTO dto,
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
-			throws ExceptionCustom {
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		dto.setEmpresaId(usuarioLogado.getEmpresaId());
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body(new ResponseDefaultDTO<>("Marca Produto criada com sucesso", marcaProdutoService.cadastrar(dto)));
@@ -42,8 +42,7 @@ public class MarcaProdutoController {
 
 	@PutMapping("/{id}")
 	public ResponseEntity<ResponseDefaultDTO<MarcaProdutoDTO>> atualizar(@PathVariable Long id,
-			@Valid @RequestBody MarcaProdutoDTO dto,
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
+			@Valid @RequestBody MarcaProdutoDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 
 		dto.setEmpresaId(usuarioLogado.getEmpresaId());
@@ -53,8 +52,7 @@ public class MarcaProdutoController {
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ResponseDefaultDTO<Void>> deletar(@PathVariable Long id,
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
-			throws ExceptionCustom {
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 
 		marcaProdutoService.deletar(id, usuarioLogado.getEmpresaId());
 
@@ -65,22 +63,20 @@ public class MarcaProdutoController {
 
 	@GetMapping("/buscar")
 	public ResponseEntity<List<MarcaProdutoDTO>> buscarPorDescricao(@RequestParam String descricao,
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
-			throws ExceptionCustom {
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		return ResponseEntity.ok(marcaProdutoService.buscarPorDescricao(descricao, usuarioLogado.getEmpresaId()));
 	}
 
 	@GetMapping
 	public ResponseEntity<List<MarcaProdutoDTO>> buscarTodosPorEmpresa(
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
-			throws ExceptionCustom {
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		return ResponseEntity.ok(marcaProdutoService.buscarTodosPorEmpresa(usuarioLogado.getEmpresaId()));
 	}
 
 	@GetMapping("/busca-avancada")
 	public ResponseEntity<Page<MarcaProdutoDTO>> buscarAvancado(@RequestParam(required = false) String descricao,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
 		return ResponseEntity
 				.ok(marcaProdutoService.buscarAvancado(descricao, page, size, usuarioLogado.getEmpresaId()));
 	}
@@ -89,7 +85,7 @@ public class MarcaProdutoController {
 	public ResponseEntity<Page<MarcaProdutoDTO>> buscarPaginado(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "id") String sort,
 			@RequestParam(defaultValue = "ASC") String direction,
-			@org.springframework.security.core.annotation.AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
 		return ResponseEntity
 				.ok(marcaProdutoService.buscarPaginado(page, size, sort, direction, usuarioLogado.getEmpresaId()));
 	}

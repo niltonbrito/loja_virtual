@@ -1,28 +1,91 @@
 package com.bandampla.lojavirtual.dto.response;
 
-public class ResponseDefaultDTO<T> {
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-    private String mensagem;
-    private T dados;
+public class ResponseDefaultDTO<T> implements Serializable {
 
-    public ResponseDefaultDTO(String mensagem, T dados) {
-        this.mensagem = mensagem;
-        this.dados = dados;
-    }
+	private static final long serialVersionUID = 1L;
 
-    public String getMensagem() {
-        return mensagem;
-    }
+	private String codigo;
+	private String mensagem;
+	private T dados;
+	private String timestamp;
+	private String path;
+	private String traceId;
 
-    public void setMensagem(String mensagem) {
-        this.mensagem = mensagem;
-    }
+	public ResponseDefaultDTO() {
+		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	}
 
-    public T getDados() {
-        return dados;
-    }
+	public ResponseDefaultDTO(String mensagem, T dados) {
+		this.mensagem = mensagem;
+		this.dados = dados;
+		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	}
 
-    public void setDados(T dados) {
-        this.dados = dados;
-    }
+	public ResponseDefaultDTO(String codigo, String mensagem, T dados) {
+		this.codigo = codigo;
+		this.mensagem = mensagem;
+		this.dados = dados;
+		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	}
+
+	public ResponseDefaultDTO(String codigo, String mensagem, T dados, String path, String traceId) {
+		this.codigo = codigo;
+		this.mensagem = mensagem;
+		this.dados = dados;
+		this.path = path;
+		this.traceId = traceId;
+		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	}
+
+	public String getCodigo() {
+		return codigo;
+	}
+
+	public void setCodigo(String codigo) {
+		this.codigo = codigo;
+	}
+
+	public String getMensagem() {
+		return mensagem;
+	}
+
+	public void setMensagem(String mensagem) {
+		this.mensagem = mensagem;
+	}
+
+	public T getDados() {
+		return dados;
+	}
+
+	public void setDados(T dados) {
+		this.dados = dados;
+	}
+
+	public String getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(String timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public String getTraceId() {
+		return traceId;
+	}
+
+	public void setTraceId(String traceId) {
+		this.traceId = traceId;
+	}
 }

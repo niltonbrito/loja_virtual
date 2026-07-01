@@ -56,9 +56,9 @@ public class ContaPagarController {
 	// ATUALIZAR
 	// -----------------------------
 
-    @PutMapping("/{id}")
-    @Operation(summary = "Atualizar Conta a Pagar", description = "Atualiza uma conta a pagar existente, validando empresa e duplicidade.")
-    public ResponseEntity<ResponseDefaultDTO<ContaPagarDTO>> atualizar(@PathVariable Long id,
+	@PutMapping("/{id}")
+	@Operation(summary = "Atualizar Conta a Pagar", description = "Atualiza uma conta a pagar existente, validando empresa e duplicidade.")
+	public ResponseEntity<ResponseDefaultDTO<ContaPagarDTO>> atualizar(@PathVariable Long id,
 			@Valid @RequestBody ContaPagarDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 
@@ -72,9 +72,9 @@ public class ContaPagarController {
 	// -----------------------------
 	// DELETAR
 	// -----------------------------
-    @DeleteMapping("/{id}")
-    @Operation(summary = "Deletar Conta a Pagar", description = "Remove uma conta a pagar da empresa do usuário logado.")
-    public ResponseEntity<ResponseDefaultDTO<Void>> deletar(@PathVariable Long id,
+	@DeleteMapping("/{id}")
+	@Operation(summary = "Deletar Conta a Pagar", description = "Remove uma conta a pagar da empresa do usuário logado.")
+	public ResponseEntity<ResponseDefaultDTO<Void>> deletar(@PathVariable Long id,
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 
 		contaPagarService.deletar(id, usuarioLogado.getEmpresaId());
@@ -85,9 +85,9 @@ public class ContaPagarController {
 	// -----------------------------
 	// BUSCAR POR DESCRIÇÃO
 	// -----------------------------
-    @GetMapping("/buscar")
-    @Operation(summary = "Buscar por descrição", description = "Retorna contas a pagar filtradas pela descrição e empresa.")
-    public ResponseEntity<List<ContaPagarDTO>> buscarPorDescricao(@RequestParam String descricao,
+	@GetMapping("/buscar")
+	@Operation(summary = "Buscar por descrição", description = "Retorna contas a pagar filtradas pela descrição e empresa.")
+	public ResponseEntity<List<ContaPagarDTO>> buscarPorDescricao(@RequestParam String descricao,
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
 
 		List<ContaPagarDTO> lista = contaPagarService.buscarPorDescricao(descricao, usuarioLogado.getEmpresaId());
@@ -97,9 +97,9 @@ public class ContaPagarController {
 	// -----------------------------
 	// BUSCAR TODOS
 	// -----------------------------
-    @GetMapping
-    @Operation(summary = "Listar todas as contas a pagar", description = "Lista todas as contas a pagar da empresa do usuário.")
-    public ResponseEntity<List<ContaPagarDTO>> buscarTodos(
+	@GetMapping
+	@Operation(summary = "Listar todas as contas a pagar", description = "Lista todas as contas a pagar da empresa do usuário.")
+	public ResponseEntity<List<ContaPagarDTO>> buscarTodos(
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
 
 		List<ContaPagarDTO> lista = contaPagarService.buscarTodosPorEmpresa(usuarioLogado.getEmpresaId());
@@ -109,9 +109,9 @@ public class ContaPagarController {
 	// -----------------------------
 	// BUSCA AVANÇADA
 	// -----------------------------
-    @GetMapping("/busca-avancada")
-    @Operation(summary = "Busca avançada", description = "Busca contas a pagar com filtros e paginação.")
-    public ResponseEntity<Page<ContaPagarDTO>> buscarAvancado(@RequestParam(required = false) String descricao,
+	@GetMapping("/busca-avancada")
+	@Operation(summary = "Busca avançada", description = "Busca contas a pagar com filtros e paginação.")
+	public ResponseEntity<Page<ContaPagarDTO>> buscarAvancado(@RequestParam(required = false) String descricao,
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
 
@@ -124,9 +124,9 @@ public class ContaPagarController {
 	// -----------------------------
 	// PAGINADO
 	// -----------------------------
-    @GetMapping("/paginado")
-    @Operation(summary = "Listar paginado", description = "Lista contas a pagar com paginação e ordenação.")
-    public ResponseEntity<Page<ContaPagarDTO>> buscarPaginado(@RequestParam(defaultValue = "0") int page,
+	@GetMapping("/paginado")
+	@Operation(summary = "Listar paginado", description = "Lista contas a pagar com paginação e ordenação.")
+	public ResponseEntity<Page<ContaPagarDTO>> buscarPaginado(@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "id") String sort,
 			@RequestParam(defaultValue = "ASC") String direction,
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {

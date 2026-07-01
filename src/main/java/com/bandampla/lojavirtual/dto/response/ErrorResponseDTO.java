@@ -1,4 +1,4 @@
-package com.bandampla.lojavirtual.dto;
+package com.bandampla.lojavirtual.dto.response;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -16,7 +16,20 @@ public class ErrorResponseDTO implements Serializable {
 	private String traceId;
 
 	public ErrorResponseDTO() {
-		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
+		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	}
+
+	public ErrorResponseDTO(String codigo, String mensagem) {
+		this.codigo = codigo;
+		this.mensagem = mensagem;
+		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+	}
+
+	public ErrorResponseDTO(String codigo, String mensagem, String detalhes) {
+		this.codigo = codigo;
+		this.mensagem = mensagem;
+		this.detalhes = detalhes;
+		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}
 
 	public ErrorResponseDTO(String codigo, String mensagem, String detalhes, String path, String traceId) {
@@ -25,7 +38,7 @@ public class ErrorResponseDTO implements Serializable {
 		this.detalhes = detalhes;
 		this.path = path;
 		this.traceId = traceId;
-		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME);
+		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}
 
 	public String getCodigo() {

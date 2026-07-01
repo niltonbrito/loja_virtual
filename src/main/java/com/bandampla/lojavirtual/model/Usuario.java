@@ -42,7 +42,7 @@ public class Usuario implements Serializable {
 	@Column(nullable = false)
 	private String senha;
 
-	@Column(nullable = false)
+	@Column(nullable = true)
 	@Enumerated(EnumType.STRING)
 	private StatusUsuario statusUsuario;
 

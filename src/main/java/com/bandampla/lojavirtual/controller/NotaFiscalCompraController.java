@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bandampla.lojavirtual.dto.NotaFiscalCompraDTO;
 import com.bandampla.lojavirtual.dto.response.ResponseDefaultDTO;
-import com.bandampla.lojavirtual.dto.response.SuccessResponseDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
 import com.bandampla.lojavirtual.service.NotaFiscalCompraService;
@@ -42,10 +41,13 @@ public class NotaFiscalCompraController {
 	@PostMapping
 	@Operation(summary = "Cadastrar Nota Fiscal de Compra", description = "Cria uma nova Nota Fiscal de Compra vinculada à empresa do usuário logado.")
 	public ResponseEntity<ResponseDefaultDTO<NotaFiscalCompraDTO>> cadastrar(
-			@Valid @RequestBody NotaFiscalCompraDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
+			@Valid @RequestBody NotaFiscalCompraDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado, HttpServletRequest request)
 			throws ExceptionCustom {
-		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDefaultDTO<>(
-				"Nota Fiscal de Compra criada com sucesso", notaFiscalCompraService.cadastrar(dto, usuarioLogado)));
+
+		String traceId = UUID.randomUUID().toString();
+		
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.CREATED.toString(),
+				"Nota Fiscal de Compra criada com sucesso", notaFiscalCompraService.cadastrar(dto, usuarioLogado), request.getRequestURI(), traceId));
 	}
 
 	@PutMapping("/{id}")
@@ -53,7 +55,7 @@ public class NotaFiscalCompraController {
 	public ResponseEntity<ResponseDefaultDTO<NotaFiscalCompraDTO>> atualizar(@PathVariable Long id,
 			@Valid @RequestBody NotaFiscalCompraDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
-		return ResponseEntity.ok(new ResponseDefaultDTO<>("Nota Fiscal de Compra atualizada com sucesso",
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.CREATED.toString(),"Nota Fiscal de Compra atualizada com sucesso",
 				notaFiscalCompraService.atualizar(id, dto, usuarioLogado)));
 	}
 
@@ -98,7 +100,7 @@ public class NotaFiscalCompraController {
 
 	@GetMapping("/produto/{produtoId}")
 	@Operation(summary = "Listar Notas Fiscais por Produto", description = "Retorna todas as notas fiscais de compra que possuem itens com o produto informado.")
-	public ResponseEntity<SuccessResponseDTO<List<NotaFiscalCompraDTO>>> buscarPorProduto(@PathVariable Long produtoId,
+	public ResponseEntity<ResponseDefaultDTO<List<NotaFiscalCompraDTO>>> buscarPorProduto(@PathVariable Long produtoId,
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado, HttpServletRequest request)
 			throws ExceptionCustom {
 
@@ -106,7 +108,7 @@ public class NotaFiscalCompraController {
 
 		List<NotaFiscalCompraDTO> notas = notaFiscalCompraService.buscarPorProduto(produtoId, usuarioLogado);
 
-		SuccessResponseDTO<List<NotaFiscalCompraDTO>> response = new SuccessResponseDTO<>("200",
+		ResponseDefaultDTO<List<NotaFiscalCompraDTO>> response = new ResponseDefaultDTO<>("200",
 				"Notas fiscais encontradas para o produto " + produtoId, notas, request.getRequestURI(), traceId);
 
 		/*
