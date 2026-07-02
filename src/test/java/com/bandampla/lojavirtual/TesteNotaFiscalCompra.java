@@ -1,6 +1,6 @@
 package com.bandampla.lojavirtual;
 
-import static org.hamcrest.CoreMatchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -60,9 +60,9 @@ class TesteNotaFiscalCompra extends TestCase {
 	private NotaFiscalCompraService notaFiscalCompraService;
 	@Autowired
 	private ContaPagarService contaPagarService;
-	
 
 	private UsuarioLogadoPrincipal usuarioLogado;
+
 	@Test
 	void deveCadastrarNotaFiscalComFornecedorPJ() throws ExceptionCustom {
 

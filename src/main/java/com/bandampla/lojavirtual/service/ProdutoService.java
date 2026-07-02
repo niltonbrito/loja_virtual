@@ -58,7 +58,6 @@ public class ProdutoService {
 		if (dto.getId() == null) {
 			Specification<Produto> specDuplicado = Specification.where(ProdutoSpec.nomeExato(dto.getNome()))
 					.and(ProdutoSpec.empresaIgual(usuarioLogado.getEmpresaId()));
-
 			if (!produtoRepository.findAll(specDuplicado).isEmpty()) {
 				throw new ExceptionCustom("Já existe Produto com nome '" + dto.getNome() + "' cadastrado.");
 			}

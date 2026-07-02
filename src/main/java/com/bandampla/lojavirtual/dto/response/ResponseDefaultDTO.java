@@ -24,7 +24,7 @@ public class ResponseDefaultDTO<T> implements Serializable {
 		this.dados = dados;
 		this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 	}
-
+	
 	public ResponseDefaultDTO(String codigo, String mensagem, T dados) {
 		this.codigo = codigo;
 		this.mensagem = mensagem;

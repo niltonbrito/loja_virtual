@@ -24,6 +24,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.bandampla.lojavirtual.dto.response.ErrorResponseDTO;
 import com.bandampla.lojavirtual.service.SendMailService;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 @RestControllerAdvice
 public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler {
@@ -61,14 +62,11 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 	// =========================
 	@ExceptionHandler(ExceptionCustom.class)
 	protected ResponseEntity<Object> handleExceptionCustom(ExceptionCustom ex, WebRequest request) {
-
-		ErrorResponseDTO error = new ErrorResponseDTO("400", "Erro de negócio", ex.getMessage(), extractPath(request),
-				generateTraceId());
-
 		ex.printStackTrace();
 		// enviarEmailErro(ex);
 
-		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(new ErrorResponseDTO(HttpStatus.BAD_REQUEST.toString(), "Erro de negócio",
+				ex.getMessage(), extractPath(request), generateTraceId()), HttpStatus.BAD_REQUEST);
 	}
 
 	// =========================
@@ -105,16 +103,23 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 
 			Throwable rootCause = ExceptionUtils.getRootCause(ex);
 
-			if (rootCause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException) {
+			if (rootCause instanceof InvalidFormatException) {
 
-				com.fasterxml.jackson.databind.exc.InvalidFormatException ife = (com.fasterxml.jackson.databind.exc.InvalidFormatException) rootCause;
+				InvalidFormatException ife = (InvalidFormatException) rootCause;
 
-				String field = ife.getPath() != null && !ife.getPath().isEmpty() ? ife.getPath().get(0).getFieldName() : "campo";
+				String field = ife.getPath() != null && !ife.getPath().isEmpty() ? ife.getPath().get(0).getFieldName()
+						: "campo";
 				String enumClass = ife.getTargetType() != null ? ife.getTargetType().getSimpleName() : "";
+
+				String field1 = ife.getPath().get(0).getFieldName();
+				String targetType = ife.getTargetType().getSimpleName();
 
 				if ("TipoPessoa".equals(enumClass)) {
 					errorResponseDTO = new ErrorResponseDTO("400", "Valor inválido para '" + field + "'",
 							"Use apenas: FISICA ou JURIDICA", path, traceId);
+				} else if (targetType.equals("Boolean")) {
+					return new ResponseEntity<>(new ErrorResponseDTO("400", "Valor inválido para '" + field1 + "'",
+							"Use apenas true ou false", path, traceId), HttpStatus.BAD_REQUEST);
 				} else {
 					errorResponseDTO = new ErrorResponseDTO("400", "Valor inválido para o campo '" + field + "'",
 							"Tipo de dado incompatível", path, traceId);
@@ -132,38 +137,31 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 		// ERRO DE PARÂMETRO INVÁLIDO
 		// -------------------------
 		if (ex instanceof IllegalArgumentException) {
-
-			errorResponseDTO = new ErrorResponseDTO("400", "Parâmetro inválido", ex.getMessage(), path, traceId);
-
 			ex.printStackTrace();
-			enviarEmailErro(ex);
-			return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+			// enviarEmailErro(ex);
+			return new ResponseEntity<>(
+					new ErrorResponseDTO("400", "Parâmetro inválido", ex.getMessage(), path, traceId),
+					HttpStatus.BAD_REQUEST);
 		}
 
 		// -------------------------
 		// ERRO DE MÉTODO HTTP NÃO SUPORTADO
 		// -------------------------
 		if (ex instanceof HttpRequestMethodNotSupportedException) {
-
-			errorResponseDTO = new ErrorResponseDTO("405", "Método HTTP não suportado",
-					"Use o método correto para este endpoint", path, traceId);
-
 			ex.printStackTrace();
 			// enviarEmailErro(ex);
-			return new ResponseEntity<>(errorResponseDTO, HttpStatus.METHOD_NOT_ALLOWED);
+			return new ResponseEntity<>(new ErrorResponseDTO("405", "Método HTTP não suportado",
+					"Use o método correto para este endpoint", path, traceId), HttpStatus.METHOD_NOT_ALLOWED);
 		}
 
 		// -------------------------
 		// ERRO DE PERMISSÃO NEGADA
 		// -------------------------
 		if (ex instanceof AccessDeniedException) {
-
-			errorResponseDTO = new ErrorResponseDTO("403", "Acesso negado",
-					"Você não possui permissão para acessar este recurso", path, traceId);
-
 			ex.printStackTrace();
 			// enviarEmailErro(ex);
-			return new ResponseEntity<>(errorResponseDTO, HttpStatus.FORBIDDEN);
+			return new ResponseEntity<>(new ErrorResponseDTO("403", "Acesso negado",
+					"Você não possui permissão para acessar este recurso", path, traceId), HttpStatus.FORBIDDEN);
 		}
 
 		// -------------------------
@@ -201,12 +199,10 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 			detalhes = ex.getMessage();
 		}
 
-		ErrorResponseDTO error = new ErrorResponseDTO("500", "Erro de integridade no banco de dados", detalhes,
-				extractPath(request), generateTraceId());
-
 		ex.printStackTrace();
-		enviarEmailErro(ex);
+		// enviarEmailErro(ex);
 
-		return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<>(new ErrorResponseDTO("500", "Erro de integridade no banco de dados", detalhes,
+				extractPath(request), generateTraceId()), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

@@ -35,7 +35,7 @@ public class Produto implements Serializable {
 	@Column(nullable = false)
 	private TipoUnidadeMedida tipoUnidadeMedida;
 
-	@Column(nullable = false)
+	@Column(nullable = false, unique = true)
 	private String nome;
 
 	@Column(nullable = false)
@@ -62,9 +62,11 @@ public class Produto implements Serializable {
 	@Column(nullable = false)
 	private BigDecimal qtdEstoque = BigDecimal.ZERO;
 
+	@Column(nullable = false)
 	private BigDecimal qtdEstoqueMinimo = BigDecimal.ZERO;
 
-	private Boolean alertaEstoque = Boolean.FALSE;
+	@Column(nullable = false)
+	private Boolean alertaEstoque;
 
 	private String linkYoutube;
 

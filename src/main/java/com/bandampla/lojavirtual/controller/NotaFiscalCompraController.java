@@ -38,16 +38,19 @@ public class NotaFiscalCompraController {
 	@Autowired
 	private NotaFiscalCompraService notaFiscalCompraService;
 
+	@Autowired
+	private HttpServletRequest request;
+
 	@PostMapping
 	@Operation(summary = "Cadastrar Nota Fiscal de Compra", description = "Cria uma nova Nota Fiscal de Compra vinculada à empresa do usuário logado.")
 	public ResponseEntity<ResponseDefaultDTO<NotaFiscalCompraDTO>> cadastrar(
-			@Valid @RequestBody NotaFiscalCompraDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado, HttpServletRequest request)
+			@Valid @RequestBody NotaFiscalCompraDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
-
 		String traceId = UUID.randomUUID().toString();
-		
-		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.CREATED.toString(),
-				"Nota Fiscal de Compra criada com sucesso", notaFiscalCompraService.cadastrar(dto, usuarioLogado), request.getRequestURI(), traceId));
+
+		return ResponseEntity
+				.ok(new ResponseDefaultDTO<>(HttpStatus.CREATED.toString(), "Nota Fiscal de Compra criada com sucesso",
+						notaFiscalCompraService.cadastrar(dto, usuarioLogado), request.getRequestURI(), traceId));
 	}
 
 	@PutMapping("/{id}")
@@ -55,69 +58,80 @@ public class NotaFiscalCompraController {
 	public ResponseEntity<ResponseDefaultDTO<NotaFiscalCompraDTO>> atualizar(@PathVariable Long id,
 			@Valid @RequestBody NotaFiscalCompraDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
-		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.CREATED.toString(),"Nota Fiscal de Compra atualizada com sucesso",
-				notaFiscalCompraService.atualizar(id, dto, usuarioLogado)));
+		String traceId = UUID.randomUUID().toString();
+		return ResponseEntity.ok(
+				new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Nota Fiscal de Compra atualizada com sucesso",
+						notaFiscalCompraService.atualizar(id, dto, usuarioLogado), request.getRequestURI(), traceId));
 	}
 
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Deletar Nota Fiscal de Compra", description = "Remove uma Nota Fiscal de Compra da empresa do usuário logado.")
 	public ResponseEntity<ResponseDefaultDTO<Void>> deletar(@PathVariable Long id,
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
+		String traceId = UUID.randomUUID().toString();
 		notaFiscalCompraService.deletar(id, usuarioLogado);
-		return ResponseEntity.ok(new ResponseDefaultDTO<>("Nota Fiscal de Compra deletada com sucesso", null));
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.NO_CONTENT.toString(),
+				"Nota Fiscal de Compra deletada com sucesso", null, request.getRequestURI(), traceId));
 	}
 
 	@GetMapping("/buscar")
 	@Operation(summary = "Buscar por descrição", description = "Retorna Nota Fiscal de Compra filtradas pela descrição e empresa.")
-	public ResponseEntity<List<NotaFiscalCompraDTO>> buscarPorDescricao(@RequestParam String numeroNota,
-			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
-		return ResponseEntity.ok(notaFiscalCompraService.buscarPorDescricao(numeroNota, usuarioLogado));
+	public ResponseEntity<ResponseDefaultDTO<List<NotaFiscalCompraDTO>>> buscarPorDescricao(
+			@RequestParam String numeroNota, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
+		String traceId = UUID.randomUUID().toString();
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Buscar por descrição",
+				notaFiscalCompraService.buscarPorDescricao(numeroNota, usuarioLogado), request.getRequestURI(),
+				traceId));
 	}
 
 	@GetMapping
 	@Operation(summary = "Listar todas as Nota Fiscal de Compra", description = "Lista todas as Nota Fiscal de Compra da empresa do usuário.")
-	public ResponseEntity<List<NotaFiscalCompraDTO>> buscarTodos(
+	public ResponseEntity<ResponseDefaultDTO<List<NotaFiscalCompraDTO>>> buscarTodos(
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
-		return ResponseEntity.ok(notaFiscalCompraService.buscarTodosPorEmpresa(usuarioLogado));
+		String traceId = UUID.randomUUID().toString();
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(),
+				"Listar todas as Nota Fiscal de Compra", notaFiscalCompraService.buscarTodosPorEmpresa(usuarioLogado),
+				request.getRequestURI(), traceId));
 	}
 
 	@GetMapping("/busca-avancada")
 	@Operation(summary = "Busca avançada", description = "Busca Nota Fiscal de Compra com filtros e paginação.")
-	public ResponseEntity<Page<NotaFiscalCompraDTO>> buscarAvancado(@RequestParam(required = false) String numeroNota,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
+	public ResponseEntity<ResponseDefaultDTO<Page<NotaFiscalCompraDTO>>> buscarAvancado(
+			@RequestParam(required = false) String numeroNota, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size,
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
-		return ResponseEntity.ok(notaFiscalCompraService.buscarAvancado(numeroNota, page, size, usuarioLogado));
+		String traceId = UUID.randomUUID().toString();
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Busca avançada",
+				notaFiscalCompraService.buscarAvancado(numeroNota, page, size, usuarioLogado), request.getRequestURI(),
+				traceId));
 	}
 
 	@GetMapping("/paginado")
 	@Operation(summary = "Listar paginado", description = "Lista Nota Fiscal de Compra com paginação e ordenação.")
-	public ResponseEntity<Page<NotaFiscalCompraDTO>> buscarPaginado(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, @RequestParam(defaultValue = "id") String sort,
-			@RequestParam(defaultValue = "ASC") String direction,
+	public ResponseEntity<ResponseDefaultDTO<Page<NotaFiscalCompraDTO>>> buscarPaginado(
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
+			@RequestParam(defaultValue = "id") String sort, @RequestParam(defaultValue = "ASC") String direction,
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
-		return ResponseEntity.ok(notaFiscalCompraService.buscarPaginado(page, size, sort, direction, usuarioLogado));
+		String traceId = UUID.randomUUID().toString();
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Listar paginado",
+				notaFiscalCompraService.buscarPaginado(page, size, sort, direction, usuarioLogado),
+				request.getRequestURI(), traceId));
 	}
 
 	@GetMapping("/produto/{produtoId}")
 	@Operation(summary = "Listar Notas Fiscais por Produto", description = "Retorna todas as notas fiscais de compra que possuem itens com o produto informado.")
 	public ResponseEntity<ResponseDefaultDTO<List<NotaFiscalCompraDTO>>> buscarPorProduto(@PathVariable Long produtoId,
-			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado, HttpServletRequest request)
-			throws ExceptionCustom {
-
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		String traceId = UUID.randomUUID().toString();
-
-		List<NotaFiscalCompraDTO> notas = notaFiscalCompraService.buscarPorProduto(produtoId, usuarioLogado);
-
-		ResponseDefaultDTO<List<NotaFiscalCompraDTO>> response = new ResponseDefaultDTO<>("200",
-				"Notas fiscais encontradas para o produto " + produtoId, notas, request.getRequestURI(), traceId);
 
 		/*
 		 * MDC.put("traceId", traceId);
 		 * log.info("Consulta de NF por produto {} realizada pela empresa {}",
 		 * produtoId, usuarioLogado.getEmpresaId()); MDC.clear();
 		 */
-
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(),
+				"Notas fiscais encontradas para o produto " + produtoId,
+				notaFiscalCompraService.buscarPorProduto(produtoId, usuarioLogado), request.getRequestURI(), traceId));
 	}
 
 }
