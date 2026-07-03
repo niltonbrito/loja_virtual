@@ -2,19 +2,24 @@ package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -84,6 +89,9 @@ public class Produto implements Serializable {
 	@JoinColumn(name = "marca_produto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "marca_produto_fk"))
 	private MarcaProduto marcaProduto;
 
+	@OneToMany(mappedBy = "produto", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<ImagemProduto> imagens  = new ArrayList<ImagemProduto>();
+	
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
@@ -231,6 +239,14 @@ public class Produto implements Serializable {
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
+	}
+
+	public List<ImagemProduto> getImagens() {
+		return imagens;
+	}
+
+	public void setImagens(List<ImagemProduto> imagens) {
+		this.imagens = imagens;
 	}
 
 	@Override

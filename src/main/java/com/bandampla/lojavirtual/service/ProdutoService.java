@@ -1,8 +1,12 @@
 package com.bandampla.lojavirtual.service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.mail.MessagingException;
+
+import org.aspectj.util.FuzzyBoolean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,9 +41,12 @@ public class ProdutoService {
 	private final ProdutoFornecedorRepository produtoFornecedorRepository;
 	private final ProdutoMapper produtoMapper;
 
+	private final SendMailService sendMailService;
+
 	public ProdutoService(ProdutoRepository produtoRepository, PessoaJuridicaRepository pessoaJuridicaRepository,
 			CategoriaProdutoRepository categoriaProdutoRepository, ProdutoMapper produtoMapper,
-			MarcaProdutoRepository marcaProdutoRepository, ProdutoFornecedorRepository produtoFornecedorRepository) {
+			MarcaProdutoRepository marcaProdutoRepository, ProdutoFornecedorRepository produtoFornecedorRepository,
+			SendMailService sendMailService) {
 
 		this.produtoRepository = produtoRepository;
 		this.pessoaJuridicaRepository = pessoaJuridicaRepository;
@@ -47,12 +54,14 @@ public class ProdutoService {
 		this.marcaProdutoRepository = marcaProdutoRepository;
 		this.produtoFornecedorRepository = produtoFornecedorRepository;
 		this.produtoMapper = produtoMapper;
+		this.sendMailService = sendMailService;
 	}
 
 	/*
 	 * =================== CADASTRAR PRODUTO ===================
 	 */
-	public ProdutoDTO cadastrar(ProdutoDTO dto, UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
+	public ProdutoDTO cadastrar(ProdutoDTO dto, UsuarioLogadoPrincipal usuarioLogado)
+			throws ExceptionCustom, UnsupportedEncodingException, MessagingException {
 
 		/* 1. Validar duplicidade do nome */
 		if (dto.getId() == null) {
@@ -102,6 +111,10 @@ public class ProdutoService {
 					+ dto.getCodigoProdutoFornecedor() + "' para este fornecedor.");
 		}
 
+		if (dto.getImagens() == null || dto.getImagens().isEmpty() || dto.getImagens().size() == 0) {
+			throw new ExceptionCustom("O produto deve possuir pelo menos uma imagem");
+		}
+
 		/* 7. Salvar Produto */
 		Produto model = produtoMapper.toModel(dto);
 		model.setEmpresa(empresa);
@@ -109,6 +122,17 @@ public class ProdutoService {
 		model.setMarcaProduto(marcaProduto);
 
 		Produto produtoSalvo = produtoRepository.save(model);
+		if (estoqueCritico(produtoSalvo)) {
+			StringBuilder html = new StringBuilder();
+			html.append("<h2>").append("Produto: " + produtoSalvo.getNome())
+					.append(" com estoque baixo:" + produtoSalvo.getQtdEstoque());
+			html.append("<p> Id Produto: ").append(produtoSalvo.getId()).append("</p>");
+
+			if (produtoSalvo.getEmpresa().getEmail() != null) {
+				sendMailService.enviarEmailHtml("Produto '" + produtoSalvo.getNome() + "' com alerta de Estoque Baixo",
+						html.toString(), produtoSalvo.getEmpresa().getEmail());
+			}
+		}
 
 		/* 8. Criar vínculo ProdutoFornecedor */
 		ProdutoFornecedor produtoFornecedor = new ProdutoFornecedor();
@@ -125,6 +149,10 @@ public class ProdutoService {
 		dtoRetorno.setCodigoProdutoFornecedor(produtoFornecedor.getCodigoProdutoFornecedor());
 
 		return dtoRetorno;
+	}
+
+	private boolean estoqueCritico(Produto produto) {
+		return produto.getQtdEstoque().compareTo(produto.getQtdEstoqueMinimo()) <= 0;
 	}
 
 	/*

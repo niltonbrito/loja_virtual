@@ -1,6 +1,7 @@
 package com.bandampla.lojavirtual.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 
 import javax.validation.constraints.NotBlank;
@@ -12,6 +13,7 @@ import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.Length;
 
 import com.bandampla.lojavirtual.enums.TipoUnidadeMedida;
+import com.bandampla.lojavirtual.model.ImagemProduto;
 
 public class ProdutoDTO {
 
@@ -82,6 +84,8 @@ public class ProdutoDTO {
 
 	@NotBlank(message = "O código do produto do fornecedor deve ser informado.")
 	private String codigoProdutoFornecedor;
+
+	private List<ImagemProduto> imagens;
 
 	@Override
 	public boolean equals(Object obj) {
@@ -276,5 +280,13 @@ public class ProdutoDTO {
 
 	public void setCodigoProdutoFornecedor(String codigoProdutoFornecedor) {
 		this.codigoProdutoFornecedor = codigoProdutoFornecedor;
+	}
+
+	public List<ImagemProduto> getImagens() {
+		return imagens;
+	}
+
+	public void setImagens(List<ImagemProduto> imagens) {
+		this.imagens = imagens;
 	}
 }
