@@ -1,7 +1,11 @@
 package com.bandampla.lojavirtual.controller;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
+import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,24 +23,41 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bandampla.lojavirtual.dto.ImagemProdutoDTO;
 import com.bandampla.lojavirtual.dto.ProdutoDTO;
 import com.bandampla.lojavirtual.dto.response.ResponseDefaultDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
 import com.bandampla.lojavirtual.service.ProdutoService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/produto")
+@Tag(name = "Produto", description = "Operações de gestão de produto da empresa")
 public class ProdutoController {
 
 	@Autowired
 	private ProdutoService produtoService;
 
+	@Autowired
+	private HttpServletRequest request;
+
+	@Operation(summary = "Cadastrar Produto", description = "Cria um produto vinculada à empresa do usuário logado.")
 	@PostMapping
 	public ResponseEntity<ResponseDefaultDTO<ProdutoDTO>> cadastrar(@Valid @RequestBody ProdutoDTO dto,
-			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
-		return ResponseEntity.status(HttpStatus.CREATED).body(
-				new ResponseDefaultDTO<>("Produto criada com sucesso", produtoService.cadastrar(dto, usuarioLogado)));
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
+			throws ExceptionCustom, MessagingException, IOException {
+
+		String traceId = UUID.randomUUID().toString();
+
+		ProdutoDTO retorno = produtoService.cadastrar(dto, usuarioLogado);
+
+		ResponseDefaultDTO<ProdutoDTO> response = new ResponseDefaultDTO<>(HttpStatus.CREATED.toString(),
+				"Produto criada com sucesso", retorno, request.getRequestURI(), traceId);
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	@PutMapping("/{id}")
@@ -87,4 +108,21 @@ public class ProdutoController {
 			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
 		return ResponseEntity.ok(produtoService.buscarPaginado(page, size, sort, direction, usuarioLogado));
 	}
+
+	@Operation(summary = "Atualizar Imagens do Produto", description = "Atualiza as imagens de um produto.")
+	@PutMapping("/{id}/imagens")
+	public ResponseEntity<ResponseDefaultDTO<Void>> atualizarImagens(@PathVariable Long id,
+			@Valid @RequestBody List<ImagemProdutoDTO> imagens,
+			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
+
+		String traceId = UUID.randomUUID().toString();
+
+		produtoService.atualizarImagens(id, imagens, usuarioLogado);
+
+		ResponseDefaultDTO<Void> response = new ResponseDefaultDTO<>(HttpStatus.OK.toString(),
+				"Imagens atualizadas com sucesso", null, request.getRequestURI(), traceId);
+
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
 }

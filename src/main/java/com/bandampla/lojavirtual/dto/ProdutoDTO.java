@@ -13,7 +13,9 @@ import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.Length;
 
 import com.bandampla.lojavirtual.enums.TipoUnidadeMedida;
-import com.bandampla.lojavirtual.model.ImagemProduto;
+import com.bandampla.lojavirtual.validation.NotEmptyList;
+import com.bandampla.lojavirtual.validation.ValidBoolean;
+import com.bandampla.lojavirtual.validation.ValidYoutubeUrl;
 
 public class ProdutoDTO {
 
@@ -27,6 +29,7 @@ public class ProdutoDTO {
 	private String nome;
 
 	@NotNull(message = "O campo Ativo é obrigatório e deve ser true ou false.")
+	@ValidBoolean(message = "O campo Ativo é obrigatório e deve ser true ou false.")
 	private Boolean ativo;
 
 	@Length(max = 2000)
@@ -35,34 +38,35 @@ public class ProdutoDTO {
 
 	@NotNull(message = "Informe o peso do produto")
 	@Positive(message = "O peso deve ser maior que zero.")
-	private Double peso;
+	private BigDecimal peso;
 
 	@NotNull(message = "Informe a largura do produto")
 	@Positive(message = "O largura deve ser maior que zero.")
-	private Double largura;
+	private BigDecimal largura;
 
 	@NotNull(message = "Informe a altura do produto")
 	@Positive(message = "O altura deve ser maior que zero.")
-	private Double altura;
+	private BigDecimal altura;
 
 	@NotNull(message = "Informe a profundidade do produto")
 	@Positive(message = "O profundidade deve ser maior que zero.")
-	private Double profundidade;
+	private BigDecimal profundidade;
 
 	@NotNull(message = "Informe o valor de venda do produto")
 	@Positive(message = "O valor de venda deve ser maior que zero.")
 	private BigDecimal valorVenda;
 
 	@Positive(message = "A quantidade de deve ser maior que zero.")
-	private Integer qtdEstoque;
+	private BigDecimal qtdEstoque;
 
 	@NotNull(message = "Informe o valor de estoque minimo do produto")
 	@Positive(message = "O estoque minimo de deve ser maior que zero.")
-	private Integer qtdEstoqueMinimo;
+	private BigDecimal qtdEstoqueMinimo;
 
 	@NotNull(message = "O campo Alerta Estoque é obrigatório e deve ser true ou false.")
 	private Boolean alertaEstoque;
 
+	@ValidYoutubeUrl(message = "Informe uma URL válida do YouTube.")
 	private String linkYoutube;
 
 	@PositiveOrZero(message = "A quantidade de cliques deve ser maior que zero.")
@@ -85,42 +89,9 @@ public class ProdutoDTO {
 	@NotBlank(message = "O código do produto do fornecedor deve ser informado.")
 	private String codigoProdutoFornecedor;
 
-	private List<ImagemProduto> imagens;
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null || getClass() != obj.getClass())
-			return false;
-
-		ProdutoDTO other = (ProdutoDTO) obj;
-
-		boolean precoIgual = (this.valorVenda == null && other.valorVenda == null) || (this.valorVenda != null
-				&& other.valorVenda != null && this.valorVenda.compareTo(other.valorVenda) == 0);
-
-		return Objects.equals(id, other.id) && Objects.equals(tipoUnidadeMedida, other.tipoUnidadeMedida)
-				&& Objects.equals(nome, other.nome) && Objects.equals(ativo, other.ativo)
-				&& Objects.equals(descricao, other.descricao) && Objects.equals(peso, other.peso)
-				&& Objects.equals(largura, other.largura) && Objects.equals(altura, other.altura)
-				&& Objects.equals(profundidade, other.profundidade) && precoIgual
-				&& Objects.equals(qtdEstoque, other.qtdEstoque)
-				&& Objects.equals(qtdEstoqueMinimo, other.qtdEstoqueMinimo)
-				&& Objects.equals(alertaEstoque, other.alertaEstoque) && Objects.equals(linkYoutube, other.linkYoutube)
-				&& Objects.equals(qtdClickProduto, other.qtdClickProduto) && Objects.equals(empresaId, other.empresaId)
-				&& Objects.equals(categoriaId, other.categoriaId) && Objects.equals(marcaId, other.marcaId)
-				&& Objects.equals(fornecedorId, other.fornecedorId)
-				&& Objects.equals(codigoProdutoFornecedor, other.codigoProdutoFornecedor);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, tipoUnidadeMedida, nome, ativo, descricao, peso, largura, altura, profundidade,
-				valorVenda, qtdEstoque, qtdEstoqueMinimo, alertaEstoque, linkYoutube, qtdClickProduto, empresaId,
-				categoriaId, marcaId, fornecedorId, codigoProdutoFornecedor);
-	}
-
-	// Getters e Setters
+	@NotEmptyList(message = "Informe entre 3 e 6 imagens.")
+	@Size(min = 1, max = 6, message = "Informe entre 3 e 6 imagens.")
+	private List<ImagemProdutoDTO> imagens;
 
 	public Long getId() {
 		return id;
@@ -162,35 +133,35 @@ public class ProdutoDTO {
 		this.descricao = descricao;
 	}
 
-	public Double getPeso() {
+	public BigDecimal getPeso() {
 		return peso;
 	}
 
-	public void setPeso(Double peso) {
+	public void setPeso(BigDecimal peso) {
 		this.peso = peso;
 	}
 
-	public Double getLargura() {
+	public BigDecimal getLargura() {
 		return largura;
 	}
 
-	public void setLargura(Double largura) {
+	public void setLargura(BigDecimal largura) {
 		this.largura = largura;
 	}
 
-	public Double getAltura() {
+	public BigDecimal getAltura() {
 		return altura;
 	}
 
-	public void setAltura(Double altura) {
+	public void setAltura(BigDecimal altura) {
 		this.altura = altura;
 	}
 
-	public Double getProfundidade() {
+	public BigDecimal getProfundidade() {
 		return profundidade;
 	}
 
-	public void setProfundidade(Double profundidade) {
+	public void setProfundidade(BigDecimal profundidade) {
 		this.profundidade = profundidade;
 	}
 
@@ -202,19 +173,19 @@ public class ProdutoDTO {
 		this.valorVenda = valorVenda;
 	}
 
-	public Integer getQtdEstoque() {
+	public BigDecimal getQtdEstoque() {
 		return qtdEstoque;
 	}
 
-	public void setQtdEstoque(Integer qtdEstoque) {
+	public void setQtdEstoque(BigDecimal qtdEstoque) {
 		this.qtdEstoque = qtdEstoque;
 	}
 
-	public Integer getQtdEstoqueMinimo() {
+	public BigDecimal getQtdEstoqueMinimo() {
 		return qtdEstoqueMinimo;
 	}
 
-	public void setQtdEstoqueMinimo(Integer qtdEstoqueMinimo) {
+	public void setQtdEstoqueMinimo(BigDecimal qtdEstoqueMinimo) {
 		this.qtdEstoqueMinimo = qtdEstoqueMinimo;
 	}
 
@@ -282,11 +253,28 @@ public class ProdutoDTO {
 		this.codigoProdutoFornecedor = codigoProdutoFornecedor;
 	}
 
-	public List<ImagemProduto> getImagens() {
+	public List<ImagemProdutoDTO> getImagens() {
 		return imagens;
 	}
 
-	public void setImagens(List<ImagemProduto> imagens) {
+	public void setImagens(List<ImagemProdutoDTO> imagens) {
 		this.imagens = imagens;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ProdutoDTO other = (ProdutoDTO) obj;
+		return Objects.equals(id, other.id);
 	}
 }

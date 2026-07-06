@@ -1,12 +1,19 @@
 package com.bandampla.lojavirtual.service;
 
-import java.io.UnsupportedEncodingException;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
 import javax.mail.MessagingException;
+import javax.transaction.Transactional;
+import javax.xml.bind.DatatypeConverter;
 
-import org.aspectj.util.FuzzyBoolean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,10 +21,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.bandampla.lojavirtual.dto.ImagemProdutoDTO;
 import com.bandampla.lojavirtual.dto.ProdutoDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.mapper.ProdutoMapper;
 import com.bandampla.lojavirtual.model.CategoriaProduto;
+import com.bandampla.lojavirtual.model.ImagemProduto;
 import com.bandampla.lojavirtual.model.MarcaProduto;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.model.Produto;
@@ -30,6 +39,7 @@ import com.bandampla.lojavirtual.repository.ProdutoRepository;
 import com.bandampla.lojavirtual.repository.specification.ProdutoFornecedorSpec;
 import com.bandampla.lojavirtual.repository.specification.ProdutoSpec;
 import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
+import com.bandampla.lojavirtual.util.ImageUtil;
 
 @Service
 public class ProdutoService {
@@ -60,9 +70,12 @@ public class ProdutoService {
 	/*
 	 * =================== CADASTRAR PRODUTO ===================
 	 */
+	@Transactional
 	public ProdutoDTO cadastrar(ProdutoDTO dto, UsuarioLogadoPrincipal usuarioLogado)
-			throws ExceptionCustom, UnsupportedEncodingException, MessagingException {
+			throws ExceptionCustom, MessagingException, IOException {
 
+		// validações de duplicidade, empresa, categoria, marca, fornecedor (como você
+		// já tinha)
 		/* 1. Validar duplicidade do nome */
 		if (dto.getId() == null) {
 			Specification<Produto> specDuplicado = Specification.where(ProdutoSpec.nomeExato(dto.getNome()))
@@ -111,28 +124,73 @@ public class ProdutoService {
 					+ dto.getCodigoProdutoFornecedor() + "' para este fornecedor.");
 		}
 
-		if (dto.getImagens() == null || dto.getImagens().isEmpty() || dto.getImagens().size() == 0) {
-			throw new ExceptionCustom("O produto deve possuir pelo menos uma imagem");
-		}
-
 		/* 7. Salvar Produto */
 		Produto model = produtoMapper.toModel(dto);
 		model.setEmpresa(empresa);
 		model.setCategoriaProduto(categoriaProduto);
 		model.setMarcaProduto(marcaProduto);
+		model.setImagens(new ArrayList<>());
 
+
+		/* 7.1 Salvar Produto (sem imagens primeiro) */
 		Produto produtoSalvo = produtoRepository.save(model);
-		if (estoqueCritico(produtoSalvo)) {
-			StringBuilder html = new StringBuilder();
-			html.append("<h2>").append("Produto: " + produtoSalvo.getNome())
-					.append(" com estoque baixo:" + produtoSalvo.getQtdEstoque());
-			html.append("<p> Id Produto: ").append(produtoSalvo.getId()).append("</p>");
 
-			if (produtoSalvo.getEmpresa().getEmail() != null) {
-				sendMailService.enviarEmailHtml("Produto '" + produtoSalvo.getNome() + "' com alerta de Estoque Baixo",
-						html.toString(), produtoSalvo.getEmpresa().getEmail());
-			}
+
+		/* 7.2 Processar imagens */
+		if (dto.getImagens() != null && !dto.getImagens().isEmpty()) {
+
+		    List<ImagemProduto> imagens = new ArrayList<>();
+
+		    for (ImagemProdutoDTO imgDto : dto.getImagens()) {
+
+		        String imageBase64 = imgDto.getImagemOriginal();
+
+		        if (imageBase64.contains("data:image")) {
+		            imageBase64 = imageBase64.split(",")[1];
+		        }
+
+		        byte[] imageBytes = DatatypeConverter.parseBase64Binary(imageBase64);
+		        BufferedImage original = ImageIO.read(new ByteArrayInputStream(imageBytes));
+
+		        if (original == null) {
+		            throw new ExceptionCustom("Imagem inválida.");
+		        }
+
+		        int largura = 800;
+		        int altura = 600;
+
+		        BufferedImage miniatura = new BufferedImage(largura, altura, BufferedImage.TYPE_INT_ARGB);
+		        Graphics2D g = miniatura.createGraphics();
+		        g.drawImage(original, 0, 0, largura, altura, null);
+		        g.dispose();
+
+		        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		        ImageIO.write(miniatura, "png", baos);
+
+		        String miniImageBase64 = "data:image/png;base64,"
+		                + DatatypeConverter.printBase64Binary(baos.toByteArray());
+
+		        ImagemProduto imagem = new ImagemProduto();
+		        imagem.setProduto(produtoSalvo);
+		        imagem.setEmpresa(empresa);
+		        imagem.setImagemOriginal("data:image/jpeg;base64," + imageBase64); // CORREÇÃO
+		        imagem.setImagemMiniatura(miniImageBase64); // AGORA NÃO FICA NULL
+
+		        imagens.add(imagem);
+
+		        original.flush();
+		        miniatura.flush();
+		        baos.close();
+		    }
+
+		    // CORREÇÃO CRÍTICA
+		    for (ImagemProduto imagem : imagens) {
+		        produtoSalvo.getImagens().add(imagem); // lista gerenciada
+		    }
+
+		    produtoRepository.save(produtoSalvo);
 		}
+
 
 		/* 8. Criar vínculo ProdutoFornecedor */
 		ProdutoFornecedor produtoFornecedor = new ProdutoFornecedor();
@@ -142,17 +200,29 @@ public class ProdutoService {
 		produtoFornecedor.setCodigoProdutoFornecedor(dto.getCodigoProdutoFornecedor());
 
 		produtoFornecedorRepository.save(produtoFornecedor);
-
+		
 		/* 9. Montar DTO de retorno */
 		ProdutoDTO dtoRetorno = produtoMapper.toDTO(produtoSalvo);
 		dtoRetorno.setFornecedorId(fornecedor.getId());
 		dtoRetorno.setCodigoProdutoFornecedor(produtoFornecedor.getCodigoProdutoFornecedor());
 
-		return dtoRetorno;
-	}
+		/* 9.1 Preencher imagens manualmente */
+		List<ImagemProdutoDTO> imagensDTO = produtoSalvo.getImagens()
+		    .stream()
+		    .map(img -> {
+		        ImagemProdutoDTO dtoImg = new ImagemProdutoDTO();
+		        dtoImg.setId(img.getId());
+		        dtoImg.setImagemOriginal(img.getImagemOriginal());
+		        dtoImg.setImagemMiniatura(img.getImagemMiniatura());
+		        dtoImg.setProdutoId(produtoSalvo.getId());
+		        dtoImg.setEmpresaId(empresa.getId());
+		        return dtoImg;
+		    })
+		    .collect(Collectors.toList());
 
-	private boolean estoqueCritico(Produto produto) {
-		return produto.getQtdEstoque().compareTo(produto.getQtdEstoqueMinimo()) <= 0;
+		dtoRetorno.setImagens(imagensDTO);
+
+		return dtoRetorno;
 	}
 
 	/*
@@ -313,4 +383,37 @@ public class ProdutoService {
 
 		return produtoRepository.findAll(spec, pageable).map(produtoMapper::toDTO);
 	}
+
+	@Transactional
+	public void atualizarImagens(Long id, List<ImagemProdutoDTO> imagens, UsuarioLogadoPrincipal usuarioLogado)
+			throws ExceptionCustom {
+
+		Produto produto = produtoRepository.findById(id)
+				.orElseThrow(() -> new ExceptionCustom("Produto não encontrado"));
+
+		if (!produto.getEmpresa().getId().equals(usuarioLogado.getEmpresaId())) {
+			throw new ExceptionCustom("Você não tem permissão para alterar este produto.");
+		}
+
+		produto.getImagens().clear();
+
+		if (imagens != null && !imagens.isEmpty()) {
+			produto.setImagens(imagens.stream().map(imgDto -> {
+				try {
+					String mini = ImageUtil.gerarMiniatura(imgDto.getImagemOriginal());
+					com.bandampla.lojavirtual.model.ImagemProduto img = new com.bandampla.lojavirtual.model.ImagemProduto();
+					img.setProduto(produto);
+					img.setEmpresa(produto.getEmpresa());
+					img.setImagemOriginal(imgDto.getImagemOriginal());
+					img.setImagemMiniatura(mini);
+					return img;
+				} catch (Exception e) {
+					throw new RuntimeException("Erro ao processar imagem", e);
+				}
+			}).collect(Collectors.toList()));
+		}
+
+		produtoRepository.save(produto);
+	}
+
 }

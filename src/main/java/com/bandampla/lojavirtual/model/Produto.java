@@ -50,16 +50,16 @@ public class Produto implements Serializable {
 	private String descricao;
 
 	@Column(nullable = false)
-	private Double peso;
+	private BigDecimal peso;
 
 	@Column(nullable = false)
-	private Double largura;
+	private BigDecimal largura;
 
 	@Column(nullable = false)
-	private Double altura;
+	private BigDecimal altura;
 
 	@Column(nullable = false)
-	private Double profundidade;
+	private BigDecimal profundidade;
 
 	@Column(nullable = false)
 	private BigDecimal valorVenda = BigDecimal.ZERO;
@@ -77,7 +77,7 @@ public class Produto implements Serializable {
 
 	private Integer qtdClickProduto = 0;
 
-	@ManyToOne
+	@ManyToOne(targetEntity = PessoaJuridica.class)
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
 
@@ -140,35 +140,35 @@ public class Produto implements Serializable {
 		this.descricao = descricao;
 	}
 
-	public Double getPeso() {
+	public BigDecimal getPeso() {
 		return peso;
 	}
 
-	public void setPeso(Double peso) {
+	public void setPeso(BigDecimal peso) {
 		this.peso = peso;
 	}
 
-	public Double getLargura() {
+	public BigDecimal getLargura() {
 		return largura;
 	}
 
-	public void setLargura(Double largura) {
+	public void setLargura(BigDecimal largura) {
 		this.largura = largura;
 	}
 
-	public Double getAltura() {
+	public BigDecimal getAltura() {
 		return altura;
 	}
 
-	public void setAltura(Double altura) {
+	public void setAltura(BigDecimal altura) {
 		this.altura = altura;
 	}
 
-	public Double getProfundidade() {
+	public BigDecimal getProfundidade() {
 		return profundidade;
 	}
 
-	public void setProfundidade(Double profundidade) {
+	public void setProfundidade(BigDecimal profundidade) {
 		this.profundidade = profundidade;
 	}
 

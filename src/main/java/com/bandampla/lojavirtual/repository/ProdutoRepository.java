@@ -9,4 +9,5 @@ import com.bandampla.lojavirtual.model.Produto;
 @Repository
 public interface ProdutoRepository extends JpaRepository<Produto, Long>, JpaSpecificationExecutor<Produto> {
 
+    boolean existsByNomeAndEmpresaId(String nome, Long empresaId);
 }
