@@ -131,10 +131,8 @@ public class ProdutoService {
 		model.setMarcaProduto(marcaProduto);
 		model.setImagens(new ArrayList<>());
 
-
 		/* 7.1 Salvar Produto (sem imagens primeiro) */
 		Produto produtoSalvo = produtoRepository.save(model);
-
 
 		/* 7.2 Processar imagens */
 		if (dto.getImagens() != null && !dto.getImagens().isEmpty()) {
