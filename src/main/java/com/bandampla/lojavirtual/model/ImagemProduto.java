@@ -2,7 +2,6 @@ package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
 import java.util.Objects;
-
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -11,10 +10,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-
+import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -23,15 +23,20 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class ImagemProduto implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_imagem_produto")
 	private Long id;
 
-	@Column(columnDefinition = "text", nullable = false)
-	private String imagemOriginal;
+	@Lob
+	@Type(type = "org.hibernate.type.BinaryType") // Força o uso do BYTEA no Postgres
+	@Column(name = "imagem_original", nullable = false)
+	private byte[] imagemOriginal;
 
-	@Column(columnDefinition = "text", nullable = false)
-	private String imagemMiniatura;
+	@Lob
+	@Type(type = "org.hibernate.type.BinaryType") // Força o uso do BYTEA no Postgres
+	@Column(name = "imagem_miniatura", nullable = false)
+	private byte[] imagemMiniatura;
 
 	@JsonIgnore
 	@ManyToOne
@@ -59,19 +64,19 @@ public class ImagemProduto implements Serializable {
 		this.id = id;
 	}
 
-	public String getImagemOriginal() {
+	public byte[] getImagemOriginal() {
 		return imagemOriginal;
 	}
 
-	public void setImagemOriginal(String imagemOriginal) {
+	public void setImagemOriginal(byte[] imagemOriginal) {
 		this.imagemOriginal = imagemOriginal;
 	}
 
-	public String getImagemMiniatura() {
+	public byte[] getImagemMiniatura() {
 		return imagemMiniatura;
 	}
 
-	public void setImagemMiniatura(String imagemMiniatura) {
+	public void setImagemMiniatura(byte[] imagemMiniatura) {
 		this.imagemMiniatura = imagemMiniatura;
 	}
 

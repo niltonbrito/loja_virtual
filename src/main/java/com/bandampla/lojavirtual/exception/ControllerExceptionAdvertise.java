@@ -1,5 +1,6 @@
 package com.bandampla.lojavirtual.exception;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.UUID;
@@ -32,9 +33,9 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 	@Autowired
 	private SendMailService sendMailService;
 
-	// =========================
+	// ==========================================
 	// UTILITÁRIOS
-	// =========================
+	// ==========================================
 	private String generateTraceId() {
 		return UUID.randomUUID().toString();
 	}
@@ -57,9 +58,9 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 		}
 	}
 
-	// =========================
+	// ==========================================
 	// EXCEPTION DE REGRA DE NEGÓCIO
-	// =========================
+	// ==========================================
 	@ExceptionHandler(ExceptionCustom.class)
 	protected ResponseEntity<Object> handleExceptionCustom(ExceptionCustom ex, WebRequest request) {
 		ex.printStackTrace();
@@ -69,9 +70,56 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 				ex.getMessage(), extractPath(request), generateTraceId()), HttpStatus.BAD_REQUEST);
 	}
 
-	// =========================
+	// ==========================================
+	// 🔥 NOVOS TRATAMENTOS: ERROS DE IMAGEM E BASE64 CORROMPIDO
+	// ==========================================
+
+	/**
+	 * Captura erros de decodificação do Base64 (String malformada enviada pelo
+	 * JSON).
+	 */
+	@ExceptionHandler(IllegalArgumentException.class)
+	protected ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
+		ex.printStackTrace();
+
+		String traceId = generateTraceId();
+		String path = extractPath(request);
+		
+		String mensagemAmigavel = "Os dados enviados contêm um formato de codificação inválido ou corrompido (Base64 incorreto).";
+		if (ex.getMessage() != null && ex.getMessage().contains("A string da imagem")) {
+			mensagemAmigavel = ex.getMessage();
+		}else {
+			return new ResponseEntity<>(
+					new ErrorResponseDTO("400", "Parâmetro inválido", ex.getMessage(), path, traceId),
+					HttpStatus.BAD_REQUEST);
+		}
+		ErrorResponseDTO error = new ErrorResponseDTO(HttpStatus.BAD_REQUEST.toString(), "Estrutura Base64 Inválida",
+				mensagemAmigavel, extractPath(request), generateTraceId());
+		// enviarEmailErro(ex);
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+	}
+
+	/**
+	 * Captura erros físicos de leitura do ImageIO (Arquivos que não são imagens ou
+	 * estão corrompidos).
+	 */
+	@ExceptionHandler(IOException.class)
+	protected ResponseEntity<Object> handleIOException(IOException ex, WebRequest request) {
+		ex.printStackTrace();
+
+		String mensagemAmigavel = "Falha ao processar o arquivo enviado. Certifique-se de que a imagem está em um formato suportado (JPEG/PNG) e não está corrompida.";
+		if (ex.getMessage() != null && ex.getMessage().contains("Formato de imagem inválido")) {
+			mensagemAmigavel = ex.getMessage();
+		}
+
+		ErrorResponseDTO error = new ErrorResponseDTO(HttpStatus.BAD_REQUEST.toString(), "Arquivo de Imagem Inválido",
+				mensagemAmigavel, extractPath(request), generateTraceId());
+		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+	}
+
+	// ==========================================
 	// ERROS DE JSON / ENUM / CORPO MAL FORMADO
-	// =========================
+	// ==========================================
 	@Override
 	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
@@ -80,9 +128,9 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 		String path = extractPath(request);
 		ErrorResponseDTO errorResponseDTO;
 
-		// -------------------------
+		// --------------------------------------
 		// ERRO DE VALIDAÇÃO (Bean Validation)
-		// -------------------------
+		// --------------------------------------
 		if (ex instanceof MethodArgumentNotValidException) {
 
 			StringBuilder sb = new StringBuilder();
@@ -96,9 +144,9 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 			return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
 		}
 
-		// -------------------------
+		// --------------------------------------
 		// ERRO DE JSON MAL FORMADO
-		// -------------------------
+		// --------------------------------------
 		if (ex instanceof HttpMessageNotReadableException) {
 
 			Throwable rootCause = ExceptionUtils.getRootCause(ex);
@@ -133,20 +181,9 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 			return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
 		}
 
-		// -------------------------
-		// ERRO DE PARÂMETRO INVÁLIDO
-		// -------------------------
-		if (ex instanceof IllegalArgumentException) {
-			ex.printStackTrace();
-			// enviarEmailErro(ex);
-			return new ResponseEntity<>(
-					new ErrorResponseDTO("400", "Parâmetro inválido", ex.getMessage(), path, traceId),
-					HttpStatus.BAD_REQUEST);
-		}
-
-		// -------------------------
+		// --------------------------------------
 		// ERRO DE MÉTODO HTTP NÃO SUPORTADO
-		// -------------------------
+		// --------------------------------------
 		if (ex instanceof HttpRequestMethodNotSupportedException) {
 			ex.printStackTrace();
 			// enviarEmailErro(ex);
@@ -154,9 +191,9 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 					"Use o método correto para este endpoint", path, traceId), HttpStatus.METHOD_NOT_ALLOWED);
 		}
 
-		// -------------------------
+		// --------------------------------------
 		// ERRO DE PERMISSÃO NEGADA
-		// -------------------------
+		// --------------------------------------
 		if (ex instanceof AccessDeniedException) {
 			ex.printStackTrace();
 			// enviarEmailErro(ex);
@@ -164,9 +201,9 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 					"Você não possui permissão para acessar este recurso", path, traceId), HttpStatus.FORBIDDEN);
 		}
 
-		// -------------------------
+		// --------------------------------------
 		// ERRO GENÉRICO
-		// -------------------------
+		// --------------------------------------
 		errorResponseDTO = new ErrorResponseDTO(String.valueOf(status.value()), status.getReasonPhrase(),
 				ex.getMessage(), path, traceId);
 
@@ -176,9 +213,9 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 		return new ResponseEntity<>(errorResponseDTO, status);
 	}
 
-	// =========================
+	// ==========================================
 	// ERROS DE BANCO (FK, INTEGRIDADE, SQL)
-	// =========================
+	// ==========================================
 	@ExceptionHandler({ DataIntegrityViolationException.class, ConstraintViolationException.class, SQLException.class })
 	protected ResponseEntity<Object> handleExceptionDataIntegry(Exception ex, WebRequest request) {
 

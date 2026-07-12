@@ -1,51 +1,87 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.util;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-
+import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.xml.bind.DatatypeConverter;
 
-/**
- * @author: Nilton Brito
- * @Email: <nilton.brito@outlook.com>
- * @Data: 4 de jul. de 2026
- */
+import com.bandampla.lojavirtual.exception.ExceptionCustom;
 
 public class ImageUtil {
 
-	public static String gerarMiniatura(String base64Original) throws Exception {
+	/**
+	 * Processa uma string Base64, limpa seus dados e gera os bytes originais e da
+	 * miniatura.
+	 */
+	public static ResultadoImagem processarImagem(String base64Original) throws IOException {
+		if (base64Original == null || base64Original.trim().isEmpty()) {
+			throw new ExceptionCustom("A string da imagem não pode estar vazia.");
+		}
 
 		String base64 = base64Original;
 
-		if (base64.startsWith("data:image")) {
-			base64 = base64.split(",")[1];
+		// 1. Isolar o cabeçalho data:image se ele existir
+		if (base64.contains(",")) {
+			String[] partes = base64.split(",");
+			if (partes.length > 1) {
+				base64 = partes[1];
+			}
 		}
 
-		byte[] imageBytes = DatatypeConverter.parseBase64Binary(base64);
+		// 2. Sanitizar quebras de linha ou espaços gerados no envio do JSON
+		base64 = base64.replaceAll("\\s+", "");
 
-		BufferedImage original = ImageIO.read(new ByteArrayInputStream(imageBytes));
+		// 3. Converter a string Base64 para os bytes originais da foto
+		byte[] bytesOriginal = DatatypeConverter.parseBase64Binary(base64);
 
-		if (original == null) {
-			throw new Exception("Imagem inválida.");
+		// 4. Ler como BufferedImage para manipulação gráfica
+		BufferedImage imagemOriginal = ImageIO.read(new ByteArrayInputStream(bytesOriginal));
+		if (imagemOriginal == null) {
+			throw new IOException("Formato de imagem inválido ou corrompido.");
 		}
 
+		// 5. Desenhar a miniatura (Thumbnail) em tamanho 800x600
 		int largura = 800;
 		int altura = 600;
-
-		BufferedImage miniatura = new BufferedImage(largura, altura, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g = miniatura.createGraphics();
-		g.drawImage(original, 0, 0, largura, altura, null);
+		BufferedImage miniaturaRedimensionada = new BufferedImage(largura, altura, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g = miniaturaRedimensionada.createGraphics();
+		g.drawImage(imagemOriginal, 0, 0, largura, altura, null);
 		g.dispose();
 
+		// 6. Extrair os bytes puros da miniatura gerada
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(miniatura, "png", baos);
+		ImageIO.write(miniaturaRedimensionada, "png", baos);
+		byte[] bytesMiniatura = baos.toByteArray();
 
-		return "data:image/png;base64," + DatatypeConverter.printBase64Binary(baos.toByteArray());
+		// 7. Liberar recursos de memória RAM (Java 11)
+		imagemOriginal.flush();
+		miniaturaRedimensionada.flush();
+		baos.close();
+
+		return new ResultadoImagem(bytesOriginal, bytesMiniatura);
+	}
+
+	/**
+	 * Estrutura de transferência para carregar os dois arrays de bytes juntos.
+	 */
+	public static class ResultadoImagem {
+		private final byte[] bytesOriginal;
+		private final byte[] bytesMiniatura;
+
+		public ResultadoImagem(byte[] bytesOriginal, byte[] bytesMiniatura) {
+			this.bytesOriginal = bytesOriginal;
+			this.bytesMiniatura = bytesMiniatura;
+		}
+
+		public byte[] getBytesOriginal() {
+			return bytesOriginal;
+		}
+
+		public byte[] getBytesMiniatura() {
+			return bytesMiniatura;
+		}
 	}
 }
