@@ -25,6 +25,7 @@ import com.bandampla.lojavirtual.repository.PessoaJuridicaRepository;
 import com.bandampla.lojavirtual.repository.ProdutoRepository;
 import com.bandampla.lojavirtual.repository.specification.AvaliacaoProdutoSpec;
 import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
+import com.bandampla.lojavirtual.util.WordFilterUtil;
 
 @Service
 public class AvaliacaoProdutoService {
@@ -34,15 +35,17 @@ public class AvaliacaoProdutoService {
 	private final PessoaJuridicaRepository pessoaJuridicaRepository;
 	private final PessoaFisicaRepository pessoaFisicaRepository;
 	private final AvaliacaoProdutoMapper avaliacaoProdutoMapper;
+	private final WordFilterUtil wordFilterUtil;
 
 	public AvaliacaoProdutoService(AvaliacaoProdutoRepository avaliacaoProdutoRepository,
 			ProdutoRepository produtoRepository, PessoaJuridicaRepository pessoaJuridicaRepository,
-			PessoaFisicaRepository pessoaFisicaRepository, AvaliacaoProdutoMapper avaliacaoProdutoMapper) {
+			PessoaFisicaRepository pessoaFisicaRepository, AvaliacaoProdutoMapper avaliacaoProdutoMapper,WordFilterUtil wordFilterUtil) {
 		this.avaliacaoProdutoRepository = avaliacaoProdutoRepository;
 		this.produtoRepository = produtoRepository;
 		this.pessoaJuridicaRepository = pessoaJuridicaRepository;
 		this.pessoaFisicaRepository = pessoaFisicaRepository;
 		this.avaliacaoProdutoMapper = avaliacaoProdutoMapper;
+		this.wordFilterUtil = wordFilterUtil;
 	}
 
 	@Transactional
@@ -71,12 +74,23 @@ public class AvaliacaoProdutoService {
 
 		PessoaFisica pessoa = pessoaFisicaRepository.findById(dto.getPessoaId())
 				.orElseThrow(() -> new ExceptionCustom("Pessoa avaliadora não encontrada"));
+		// Checagem de palavras ofensivas
+		if (wordFilterUtil.contemPalavraProibida(dto.getDescricao())) {
+			throw new ExceptionCustom(
+					"Sua avaliação contém termos ofensivos ou inadequados. Por favor, reescreva seu comentário.");
+		}
+		
+
 
 		AvaliacaoProduto model = avaliacaoProdutoMapper.toModel(dto);
 		model.setEmpresa(empresa);
 		model.setPessoa(pessoa);
 		model.setProduto(produto);
 
+		// Se preferir Censurar Automaticamente com ****, antes de salvar o model:
+		String descricaoLimpa = wordFilterUtil.mascararPalavrasProibidas(dto.getDescricao());
+		model.setDescricao(descricaoLimpa); // O banco de dados grava a versão censurada
+		
 		AvaliacaoProduto avaliacaoProdutoSalvo = avaliacaoProdutoRepository.save(model);
 		return avaliacaoProdutoMapper.toDTO(avaliacaoProdutoSalvo);
 	}
