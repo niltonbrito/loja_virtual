@@ -15,6 +15,14 @@ public class AvaliacaoProdutoSpec {
 		};
 	}
 
+	public static Specification<AvaliacaoProduto> pessoaIgual(Long pessoaID) {
+		return (root, query, cb) -> {
+			if (pessoaID == null)
+				return null;
+			return cb.equal(root.get("pessoa").get("id"), pessoaID);
+		};
+	}
+	
 	public static Specification<AvaliacaoProduto> produtoIgual(Long produtoId) {
 		return (root, query, cb) -> {
 			if (produtoId == null)

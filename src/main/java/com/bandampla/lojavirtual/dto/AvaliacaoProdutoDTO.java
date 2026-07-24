@@ -3,9 +3,10 @@
  */
 package com.bandampla.lojavirtual.dto;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
 
 /**
  * @author: Nilton Brito
@@ -20,7 +21,8 @@ public class AvaliacaoProdutoDTO {
 	private String descricao;
 
 	@NotNull(message = "O valor da nota de avaliação deve ser informado.")
-	@PositiveOrZero(message = "O valor da nota de avaliação deve ser maior ou igual zero.")
+	@Min(value = 0, message = "O valor mínimo da nota de avaliação é 0.")
+	@Max(value = 10, message = "O valor máximo da nota de avaliação é 10.")
 	private Integer nota;
 
 	private Long produtoId;
