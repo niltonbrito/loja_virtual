@@ -39,7 +39,8 @@ public class AvaliacaoProdutoService {
 
 	public AvaliacaoProdutoService(AvaliacaoProdutoRepository avaliacaoProdutoRepository,
 			ProdutoRepository produtoRepository, PessoaJuridicaRepository pessoaJuridicaRepository,
-			PessoaFisicaRepository pessoaFisicaRepository, AvaliacaoProdutoMapper avaliacaoProdutoMapper,WordFilterUtil wordFilterUtil) {
+			PessoaFisicaRepository pessoaFisicaRepository, AvaliacaoProdutoMapper avaliacaoProdutoMapper,
+			WordFilterUtil wordFilterUtil) {
 		this.avaliacaoProdutoRepository = avaliacaoProdutoRepository;
 		this.produtoRepository = produtoRepository;
 		this.pessoaJuridicaRepository = pessoaJuridicaRepository;
@@ -59,28 +60,27 @@ public class AvaliacaoProdutoService {
 			throw new ExceptionCustom("O produto informado não pertence à sua empresa.");
 		}
 
-		// 1. 🔥 IMPOSIÇÃO DA REGRA DE MERCADO: Impede duplicidade de avaliações (1 por
-		// pessoa por produto)
+		// 1. Filtro inteligente de palavras ofensivas camufladas vindas do banco via
+		// cache de memória
+		if (wordFilterUtil.contemPalavraProibida(dto.getDescricao())) {
+			throw new ExceptionCustom(
+					"Sua avaliação contém termos inadequados ou palavras de baixo calão e foi recusada, Por favor, reescreva seu comentário.");
+		}
+
+		// 2. Impede duplicidade de avaliações (1 por pessoa por produto)
 		Specification<AvaliacaoProduto> specJaAvaliado = Specification
 				.where(AvaliacaoProdutoSpec.produtoIgual(dto.getProdutoId()))
 				.and(AvaliacaoProdutoSpec.pessoaIgual(dto.getPessoaId()));
 
 		if (!avaliacaoProdutoRepository.findOne(specJaAvaliado).isEmpty()) {
 			throw new ExceptionCustom("Você já enviou uma avaliação para este produto e não pode avaliar novamente.");
-		}
+			}
 
 		PessoaJuridica empresa = pessoaJuridicaRepository.findById(usuarioLogado.getEmpresaId())
 				.orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
 
 		PessoaFisica pessoa = pessoaFisicaRepository.findById(dto.getPessoaId())
 				.orElseThrow(() -> new ExceptionCustom("Pessoa avaliadora não encontrada"));
-		// Checagem de palavras ofensivas
-		if (wordFilterUtil.contemPalavraProibida(dto.getDescricao())) {
-			throw new ExceptionCustom(
-					"Sua avaliação contém termos ofensivos ou inadequados. Por favor, reescreva seu comentário.");
-		}
-		
-
 
 		AvaliacaoProduto model = avaliacaoProdutoMapper.toModel(dto);
 		model.setEmpresa(empresa);
@@ -90,7 +90,7 @@ public class AvaliacaoProdutoService {
 		// Se preferir Censurar Automaticamente com ****, antes de salvar o model:
 		String descricaoLimpa = wordFilterUtil.mascararPalavrasProibidas(dto.getDescricao());
 		model.setDescricao(descricaoLimpa); // O banco de dados grava a versão censurada
-		
+
 		AvaliacaoProduto avaliacaoProdutoSalvo = avaliacaoProdutoRepository.save(model);
 		return avaliacaoProdutoMapper.toDTO(avaliacaoProdutoSalvo);
 	}

@@ -3,20 +3,18 @@
  */
 package com.bandampla.lojavirtual.util;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+
+import com.bandampla.lojavirtual.repository.PalavraProibidaRepository;
 
 /**
  * @author: Nilton Brito
@@ -24,43 +22,50 @@ import org.springframework.stereotype.Component;
  * @Data: 23 de jul. de 2026
  */
 
-@Component // 🔥 Transforma em um componente gerenciado pelo Spring
+@Component
 public class WordFilterUtil {
 
-	// Mantém a lista em cache na memória RAM para alta performance
-	private final List<String> palavrasBanidas = new ArrayList<>();
+	private final PalavraProibidaRepository palavraProibidaRepository;
+
+	public WordFilterUtil(PalavraProibidaRepository palavraProibidaRepository) {
+		this.palavraProibidaRepository = palavraProibidaRepository;
+	}
+
+	// Cache thread-safe em memória RAM para velocidade de microssonsegundos
+	private final List<String> palavrasBanidas = Collections.synchronizedList(new ArrayList<>());
 
 	/**
-	 * Método executado automaticamente pelo Spring LOGO APÓS a inicialização da
-	 * aplicação. Ele faz a leitura do arquivo .txt uma única vez.
+	 * Inicializa o cache carregando os dados do banco de dados uma única vez no
+	 * boot.
 	 */
 	@PostConstruct
-	public void carregarPalavrasBanidas() {
-		try {
-			// Carrega o arquivo de dentro da pasta src/main/resources com suporte a
-			// caracteres especiais (UTF-8)
-			ClassPathResource resource = new ClassPathResource("palavras_banidas.txt");
+	public void inicializarCache() {
+		recarregarCache();
+	}
 
-			try (BufferedReader reader = new BufferedReader(
-					new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
-				// Ignora linhas vazias ou comentários
-				this.palavrasBanidas.addAll(
-						reader.lines().map(String::trim).filter(linha -> !linha.isEmpty() && !linha.startsWith("#"))
-								.map(String::toLowerCase).collect(Collectors.toList()));
+	/**
+	 * Método público que sincroniza os dados da memória com os dados do banco.
+	 */
+	public void recarregarCache() {
+		try {
+			synchronized (palavrasBanidas) {
+				palavrasBanidas.clear();
+				List<String> termosDoBanco = palavraProibidaRepository.buscarTodosOsTermosLimpas();
+				if (termosDoBanco != null) {
+					palavrasBanidas.addAll(termosDoBanco);
+				}
 			}
-			System.out.println("====== [WordFilterUtil] " + palavrasBanidas.size()
-					+ " palavras banidas carregadas com sucesso! ======");
+			System.out.println("====== [Cache WordFilter] " + palavrasBanidas.size()
+					+ " termos proibidos sincronizados do banco! ======");
 		} catch (Exception e) {
-			// Fallback de segurança: Caso o arquivo suma ou dê erro, carrega uma lista
-			// padrão para a API não quebrar
-			System.err.println(
-					"====== [WordFilterUtil] ERRO ao carregar arquivo de palavras banidas. Usando fallback de segurança. ======");
-			this.palavrasBanidas.addAll(Arrays.asList("lixo", "porcaria", "fuder", "caralho", "merda"));
+			System.err.println("====== [Cache WordFilter] Erro crítico ao conectar no banco para carregar termos: "
+					+ e.getMessage());
 		}
 	}
 
 	/**
-	 * Abordagem 1: Bloqueia o cadastro se detectar xingamentos (mesmo burlados).
+	 * Verifica se o texto possui alguma palavra ofensiva camuflada ou direta e
+	 * bloqueia o cadastro se detectar xingamentos (mesmo burlados).
 	 */
 	public boolean contemPalavraProibida(String texto) {
 		if (texto == null || texto.trim().isEmpty()) {
@@ -69,7 +74,10 @@ public class WordFilterUtil {
 
 		String textoMinusculo = texto.toLowerCase();
 
-		for (String palavra : palavrasBanidas) {
+		// Clona a lista para evitar concorrência de leitura durante a varredura
+		List<String> termosAtuais = new ArrayList<>(palavrasBanidas);
+
+		for (String palavra : termosAtuais) {
 			String regex = construirRegexAntiBurla(palavra);
 			Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 			Matcher matcher = pattern.matcher(textoMinusculo);
@@ -82,7 +90,7 @@ public class WordFilterUtil {
 	}
 
 	/**
-	 * Abordagem 2: Aceita o texto, mas substitui os xingamentos por asteriscos.
+	 * Aceita o texto, mas substitui os xingamentos por asteriscos.
 	 */
 	public String mascararPalavrasProibidas(String texto) {
 		if (texto == null || texto.trim().isEmpty()) {
