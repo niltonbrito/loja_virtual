@@ -1,25 +1,20 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.controller;
 
 import java.util.List;
+import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bandampla.lojavirtual.controller.api.AcessoControllerAPI;
+import com.bandampla.lojavirtual.dto.AcessoDTO;
+import com.bandampla.lojavirtual.dto.response.ResponseDefaultDTO;
 import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
-import com.bandampla.lojavirtual.model.Acesso;
 import com.bandampla.lojavirtual.service.AcessoService;
 
 /**
@@ -29,45 +24,49 @@ import com.bandampla.lojavirtual.service.AcessoService;
  */
 
 //@CrossOrigin(value = "http://bandampla.com") //Somente requisições a partir desta origem http://bandampla.com podem utilizar este controler ou end-point
-@Controller
-@RestController(value = "acesso")
-public class AcessoController {
+@RestController
+@RequestMapping("/acesso")
+public class AcessoController implements AcessoControllerAPI {
 
-	@Autowired
-	private AcessoService acessoService;
+	private final AcessoService acessoService;
+	private final HttpServletRequest request;
 
-	@ResponseBody // Pode dar um retorno da API
-	@PostMapping(value = "/salvarAcesso") // Mapeandoa url para receber um JSON
-	public ResponseEntity<Acesso> cadastrar(@RequestBody Acesso acesso) throws ExceptionCustom {// Recebe o JSON e converte para objeto
-		
-		return new ResponseEntity<Acesso>(acessoService.cadastrar(acesso), HttpStatus.OK);
+	public AcessoController(AcessoService acessoService, HttpServletRequest request) {
+		this.acessoService = acessoService;
+		this.request = request;
 	}
 
-	@ResponseBody
-	@PostMapping(value = "/deletarAcesso")
-	public ResponseEntity<?> deletar(@RequestBody Acesso acesso) {
-		acessoService.deletar(acesso);
-		return new ResponseEntity<>("Acesso Removido", HttpStatus.OK);
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<AcessoDTO>> cadastrar(AcessoDTO dto) throws ExceptionCustom {
+		String traceId = UUID.randomUUID().toString();
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDefaultDTO<>(HttpStatus.CREATED.toString(),
+				"Acesso cadastrado com sucesso", acessoService.cadastrar(dto), request.getRequestURI(), traceId));
 	}
 
-	//@Secured(value = {"ROLE_ADMIN", "ROLE_GERENTE"}) //Somente usuario ou requisições com o Role permitido podem utilizar este controler ou end-point
-	@ResponseBody
-	@DeleteMapping(value = "/deletarAcessoPorId/{id}")
-	public ResponseEntity<?> deletarPorId(@PathVariable Long id) {
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<Void>> deletarPorId(Long id) {
+		String traceId = UUID.randomUUID().toString();
 		acessoService.deletePorId(id);
-		return new ResponseEntity<>("Acesso Removido", HttpStatus.OK);
+
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Acesso removido com sucesso", null,
+				request.getRequestURI(), traceId));
 	}
 
-	@ResponseBody
-	@GetMapping(value = "/buscarAcessoPorId/{id}")
-	public ResponseEntity<Acesso> buscarPorId(@PathVariable Long id) throws ExceptionCustom {		
-		return new ResponseEntity<Acesso>(acessoService.buscarPorId(id), HttpStatus.OK);
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<AcessoDTO>> buscarPorId(Long id) throws ExceptionCustom {
+		String traceId = UUID.randomUUID().toString();
+
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Acesso recuperado com sucesso",
+				acessoService.buscarPorId(id), request.getRequestURI(), traceId));
 	}
 
-	@ResponseBody
-	@GetMapping(value = "/buscarPorRole/{role}")
-	public ResponseEntity<List<Acesso>> buscarPorRole(@PathVariable("role") RoleUser role) {
-	    return new ResponseEntity<>(acessoService.buscarPorRole(role), HttpStatus.OK);
-	}
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<List<AcessoDTO>>> buscarPorRole(RoleUser role) {
+		String traceId = UUID.randomUUID().toString();
 
+		return ResponseEntity
+				.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Acessos listados por papel com sucesso",
+						acessoService.buscarPorRole(role), request.getRequestURI(), traceId));
+	}
 }

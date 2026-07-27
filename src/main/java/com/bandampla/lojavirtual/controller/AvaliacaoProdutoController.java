@@ -7,7 +7,6 @@ import java.util.UUID;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +24,13 @@ import com.bandampla.lojavirtual.service.AvaliacaoProdutoService;
 @RequestMapping("/avaliacao")
 public class AvaliacaoProdutoController implements AvaliacaoProdutoControllerAPI {
 
-	@Autowired
-	private AvaliacaoProdutoService avaliacaoProdutoService;
+	private final AvaliacaoProdutoService avaliacaoProdutoService;
+	private final HttpServletRequest request;
 
-	@Autowired
-	private HttpServletRequest request;
+	public AvaliacaoProdutoController(AvaliacaoProdutoService avaliacaoProdutoService, HttpServletRequest request) {
+		this.avaliacaoProdutoService = avaliacaoProdutoService;
+		this.request = request;
+	}
 
 	@Override
 	public ResponseEntity<ResponseDefaultDTO<AvaliacaoProdutoDTO>> cadastrar(AvaliacaoProdutoDTO dto,

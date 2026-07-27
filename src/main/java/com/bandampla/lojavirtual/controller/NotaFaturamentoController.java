@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,11 +22,13 @@ import com.bandampla.lojavirtual.service.NotaFaturamentoService;
 @RequestMapping("/faturamento")
 public class NotaFaturamentoController implements NotaFaturamentoControllerAPI {
 
-	@Autowired
-	private NotaFaturamentoService notaFaturamentoService;
+	private final NotaFaturamentoService notaFaturamentoService;
+	private final HttpServletRequest request;
 
-	@Autowired
-	private HttpServletRequest request;
+	public NotaFaturamentoController(NotaFaturamentoService notaFaturamentoService, HttpServletRequest request) {
+		this.notaFaturamentoService = notaFaturamentoService;
+		this.request = request;
+	}
 
 	@Override
 	public ResponseEntity<ResponseDefaultDTO<NotaFiscalVendaDTO>> emitirNotaFiscalVenda(Long vendaId,

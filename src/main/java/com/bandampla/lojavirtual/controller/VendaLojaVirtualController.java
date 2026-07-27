@@ -7,7 +7,6 @@ import java.util.UUID;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,30 +24,29 @@ import com.bandampla.lojavirtual.service.VendaLojaVirtualService;
 @RequestMapping("/vendalojavirtual")
 public class VendaLojaVirtualController implements VendaLojaVirtualControllerAPI {
 
-	@Autowired
-	private VendaLojaVirtualService vendaLojaVirtualService;
+	private final VendaLojaVirtualService vendaLojaVirtualService;
+	private final HttpServletRequest request;
 
-	@Autowired
-	private HttpServletRequest request;
+	public VendaLojaVirtualController(VendaLojaVirtualService vendaLojaVirtualService, HttpServletRequest request) {
+		this.vendaLojaVirtualService = vendaLojaVirtualService;
+		this.request = request;
+	}
 
 	@Override
 	public ResponseEntity<ResponseDefaultDTO<VendaLojaVirtualDTO>> cadastrar(VendaLojaVirtualDTO dto,
 			UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom, MessagingException, IOException {
 
-		String traceId = UUID.randomUUID().toString();
-		VendaLojaVirtualDTO retorno = vendaLojaVirtualService.cadastrar(dto, usuarioLogado);
+		var traceId = UUID.randomUUID().toString();
 
-		ResponseDefaultDTO<VendaLojaVirtualDTO> response = new ResponseDefaultDTO<>(HttpStatus.CREATED.toString(),
-				"Venda registrada com sucesso no sistema", retorno, request.getRequestURI(), traceId);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDefaultDTO<>(HttpStatus.CREATED.toString(),
+				"Venda registrada com sucesso no sistema", vendaLojaVirtualService.cadastrar(dto, usuarioLogado), request.getRequestURI(), traceId));
 	}
 
 	@Override
 	public ResponseEntity<ResponseDefaultDTO<Void>> deletar(Long id, UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 
-		String traceId = UUID.randomUUID().toString();
+		var traceId = UUID.randomUUID().toString();
 		vendaLojaVirtualService.deletar(id, usuarioLogado);
 
 		ResponseDefaultDTO<Void> response = new ResponseDefaultDTO<>(HttpStatus.OK.toString(),
@@ -61,7 +59,7 @@ public class VendaLojaVirtualController implements VendaLojaVirtualControllerAPI
 	public ResponseEntity<ResponseDefaultDTO<VendaLojaVirtualDTO>> buscarPorId(Long id,
 			UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 
-		String traceId = UUID.randomUUID().toString();
+		var traceId = UUID.randomUUID().toString();
 		VendaLojaVirtualDTO retorno = vendaLojaVirtualService.buscarPorId(id, usuarioLogado);
 
 		ResponseDefaultDTO<VendaLojaVirtualDTO> response = new ResponseDefaultDTO<>(HttpStatus.OK.toString(),

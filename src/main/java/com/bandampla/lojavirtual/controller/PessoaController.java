@@ -1,28 +1,23 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.controller;
 
 import java.util.List;
+import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bandampla.lojavirtual.controller.api.PessoaControllerAPI;
 import com.bandampla.lojavirtual.dto.CepDTO;
 import com.bandampla.lojavirtual.dto.CnpjDTO;
+import com.bandampla.lojavirtual.dto.PessoaFisicaDTO;
+import com.bandampla.lojavirtual.dto.PessoaJuridicaDTO;
+import com.bandampla.lojavirtual.dto.response.ResponseDefaultDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
-import com.bandampla.lojavirtual.model.PessoaFisica;
-import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.service.PessoaUserService;
 
 /**
@@ -35,64 +30,68 @@ import com.bandampla.lojavirtual.service.PessoaUserService;
 
 @RestController
 @RequestMapping("/person")
-public class PessoaController {
+public class PessoaController implements PessoaControllerAPI {
 
-	@Autowired
-	private PessoaUserService pessoaUserService;
+	private final PessoaUserService pessoaUserService;
+	private final HttpServletRequest request;
 
-	/*
-	 * ============================ PESSOA JURÍDICA ============================
-	 */
-	@ResponseBody // Pode dar um retorno da API
-	@PostMapping(value = "/pessoa/juridica") // Mapeandoa url para receber um JSON
-	public ResponseEntity<PessoaJuridica> salvarPessoaJuridica(@Valid @RequestBody PessoaJuridica pessoaJuridica)
-			throws ExceptionCustom {// Recebe o JSON e converte para objeto
-		return new ResponseEntity<PessoaJuridica>(pessoaUserService.salvarPessoaJuridica(pessoaJuridica),
-				HttpStatus.OK);
+	public PessoaController(PessoaUserService pessoaUserService, HttpServletRequest request) {
+		this.pessoaUserService = pessoaUserService;
+		this.request = request;
 	}
 
-	@ResponseBody // Pode dar um retorno da API
-	@GetMapping(value = "/consulta/pessoa/juridicas/{nome}") // Mapeandoa url para receber um JSON
-	public ResponseEntity<List<PessoaJuridica>> consultaPessoaJuridicaPorNome(@Valid @PathVariable String nome)
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<PessoaJuridicaDTO>> salvarPessoaJuridica(@Valid PessoaJuridicaDTO dto)
 			throws ExceptionCustom {
-		return new ResponseEntity<List<PessoaJuridica>>(
-				pessoaUserService.consultaPessoaJuridicaPorNome(nome.trim().toUpperCase()), HttpStatus.OK);
+		String traceId = UUID.randomUUID().toString();
+
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(new ResponseDefaultDTO<>(HttpStatus.CREATED.toString(), "Pessoa Jurídica cadastrada com sucesso",
+						pessoaUserService.salvarPessoaJuridica(dto), request.getRequestURI(), traceId));
 	}
 
-	@ResponseBody // Pode dar um retorno da API
-	@GetMapping(value = "/consulta/pessoa/juridica/{cnpj}") // Mapeandoa url para receber um JSON
-	public ResponseEntity<List<PessoaJuridica>> consultaPessoaJuridicaPorCnpj(@Valid @PathVariable String cnpj)
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<List<PessoaJuridicaDTO>>> consultaPessoaJuridicaPorNome(String nome)
 			throws ExceptionCustom {
-		return new ResponseEntity<List<PessoaJuridica>>(pessoaUserService.consultaPessoaJuridicaPorCnpj(cnpj.trim()),
-				HttpStatus.OK);
+		String traceId = UUID.randomUUID().toString();
+
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Consulta por nome realizada",
+				pessoaUserService.consultaPessoaJuridicaPorNome(nome.trim().toUpperCase()), request.getRequestURI(),
+				traceId));
 	}
 
-	/*
-	 * ============================ PESSOA FÍSICA ============================
-	 */
-	@ResponseBody // Pode dar um retorno da API
-	@PostMapping(value = "/pessoa/fisica") // Mapeandoa url para receber um JSON
-	public ResponseEntity<PessoaFisica> salvarPessoaFisica(@Valid @RequestBody PessoaFisica pessoaFisica)
-			throws ExceptionCustom {// Recebe o JSON e converte para objeto
-		return new ResponseEntity<PessoaFisica>(pessoaUserService.salvarPessoaFisica(pessoaFisica), HttpStatus.OK);
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<List<PessoaJuridicaDTO>>> consultaPessoaJuridicaPorCnpj(String cnpj)
+			throws ExceptionCustom {
+		String traceId = UUID.randomUUID().toString();
+
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Consulta por CNPJ realizada",
+				pessoaUserService.consultaPessoaJuridicaPorCnpj(cnpj.trim()), request.getRequestURI(), traceId));
 	}
 
-	/*
-	 * ============================ CEP ============================
-	 */
-	@ResponseBody // Pode dar um retorno da API
-	@GetMapping(value = "/consulta/cep/{cep}") // Mapeandoa url para receber um JSON
-	public ResponseEntity<CepDTO> consultaCep(@Valid @PathVariable String cep) throws ExceptionCustom {
-		return new ResponseEntity<CepDTO>(pessoaUserService.consultaCep(cep), HttpStatus.OK);
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<PessoaFisicaDTO>> salvarPessoaFisica(@Valid PessoaFisicaDTO dto)
+			throws ExceptionCustom {
+		String traceId = UUID.randomUUID().toString();
+
+		return ResponseEntity.status(HttpStatus.CREATED)
+				.body(new ResponseDefaultDTO<>(HttpStatus.CREATED.toString(), "Pessoa Física cadastrada com sucesso",
+						pessoaUserService.salvarPessoaFisica(dto), request.getRequestURI(), traceId));
 	}
 
-	/*
-	 * ============================ CNPJ ============================
-	 */
-	@ResponseBody // Pode dar um retorno da API
-	@GetMapping(value = "/consulta/cnpj/{cnpj}") // Mapeandoa url para receber um JSON
-	public ResponseEntity<CnpjDTO> consultaCnpj(@Valid @PathVariable String cnpj) throws ExceptionCustom {
-		return new ResponseEntity<CnpjDTO>(pessoaUserService.consultaCnpj(cnpj), HttpStatus.OK);
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<CepDTO>> consultaCep(String cep) throws ExceptionCustom {
+		String traceId = UUID.randomUUID().toString();
+
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "CEP consultado com sucesso",
+				pessoaUserService.consultaCep(cep), request.getRequestURI(), traceId));
 	}
 
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<CnpjDTO>> consultaCnpj(String cnpj) throws ExceptionCustom {
+		String traceId = UUID.randomUUID().toString();
+
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "CNPJ verificado com sucesso",
+				pessoaUserService.consultaCnpj(cnpj), request.getRequestURI(), traceId));
+	}
 }

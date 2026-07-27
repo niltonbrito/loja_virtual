@@ -32,7 +32,7 @@ public class VendaLojaVirtual implements Serializable {
 	private Long id;
 
 	@Column(name = "numero_pedido", nullable = false, unique = true)
-	private String numeroPedido; // 🔥 Oculta o ID sequencial do cliente final
+	private String numeroPedido;
 
 	@ManyToOne(targetEntity = PessoaFisica.class)
 	@JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))

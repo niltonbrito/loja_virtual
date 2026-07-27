@@ -8,7 +8,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +26,13 @@ import com.bandampla.lojavirtual.service.PalavraProibidaService;
 @RequestMapping("/palavra_proibida")
 public class PalavraProibidaController implements PalavraProibidaControllerAPI {
 
-	@Autowired
-	private PalavraProibidaService palavraProibidaService;
+	private final PalavraProibidaService palavraProibidaService;
+	private final HttpServletRequest request;
 
-	@Autowired
-	private HttpServletRequest request;
+	public PalavraProibidaController(PalavraProibidaService palavraProibidaService, HttpServletRequest request) {
+		this.palavraProibidaService = palavraProibidaService;
+		this.request = request;
+	}
 
 	@Override
 	public ResponseEntity<ResponseDefaultDTO<PalavraProibidaDTO>> cadastrar(PalavraProibidaDTO dto)
@@ -50,15 +51,14 @@ public class PalavraProibidaController implements PalavraProibidaControllerAPI {
 	public ResponseEntity<ResponseDefaultDTO<PalavraProibidaDTO>> atualizar(@PathVariable Long id,
 			@Valid @RequestBody PalavraProibidaDTO dto) throws ExceptionCustom {
 		String traceId = UUID.randomUUID().toString();
+		PalavraProibidaDTO retorno = palavraProibidaService.atualizar(id, dto);
 
-		return ResponseEntity
-				.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Palavra Proibida atualizada com sucesso",
-						palavraProibidaService.atualizar(id, dto), request.getRequestURI(), traceId));
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(),
+				"Palavra Proibida atualizada com sucesso", retorno, request.getRequestURI(), traceId));
 	}
 
 	@Override
 	public ResponseEntity<ResponseDefaultDTO<Void>> deletar(Long id) throws ExceptionCustom {
-
 		String traceId = UUID.randomUUID().toString();
 		palavraProibidaService.deletar(id);
 
@@ -69,23 +69,41 @@ public class PalavraProibidaController implements PalavraProibidaControllerAPI {
 	}
 
 	@Override
-	public ResponseEntity<List<PalavraProibidaDTO>> buscarPorDescricao(String termo) throws ExceptionCustom {
-		return ResponseEntity.ok(palavraProibidaService.buscarPorDescricao(termo));
+	public ResponseEntity<ResponseDefaultDTO<List<PalavraProibidaDTO>>> buscarPorDescricao(String termo)
+			throws ExceptionCustom {
+		String traceId = UUID.randomUUID().toString();
+		List<PalavraProibidaDTO> retorno = palavraProibidaService.buscarPorDescricao(termo);
+
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Termos proibidos recuperados",
+				retorno, request.getRequestURI(), traceId));
 	}
 
 	@Override
-	public ResponseEntity<List<PalavraProibidaDTO>> buscarTodos() throws ExceptionCustom {
-		return ResponseEntity.ok(palavraProibidaService.buscarTodos());
+	public ResponseEntity<ResponseDefaultDTO<List<PalavraProibidaDTO>>> buscarTodos() throws ExceptionCustom {
+		String traceId = UUID.randomUUID().toString();
+		List<PalavraProibidaDTO> retorno = palavraProibidaService.buscarTodos();
+
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(),
+				"Catálogo de palavras proibidas listado", retorno, request.getRequestURI(), traceId));
 	}
 
 	@Override
-	public ResponseEntity<Page<PalavraProibidaDTO>> buscarAvancado(String termo, int page, int size) {
-		return ResponseEntity.ok(palavraProibidaService.buscarAvancado(termo, page, size));
+	public ResponseEntity<ResponseDefaultDTO<Page<PalavraProibidaDTO>>> buscarAvancado(String termo, int page,
+			int size) {
+		String traceId = UUID.randomUUID().toString();
+		Page<PalavraProibidaDTO> retorno = palavraProibidaService.buscarAvancado(termo, page, size);
+
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(),
+				"Busca avançada global de termos concluída", retorno, request.getRequestURI(), traceId));
 	}
 
 	@Override
-	public ResponseEntity<Page<PalavraProibidaDTO>> buscarPaginado(int page, int size,String sort,
+	public ResponseEntity<ResponseDefaultDTO<Page<PalavraProibidaDTO>>> buscarPaginado(int page, int size, String sort,
 			String direction) {
-		return ResponseEntity.ok(palavraProibidaService.buscarPaginado(page, size, sort, direction));
+		String traceId = UUID.randomUUID().toString();
+		Page<PalavraProibidaDTO> retorno = palavraProibidaService.buscarPaginado(page, size, sort, direction);
+
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(),
+				"Listagem paginada global de termos concluída", retorno, request.getRequestURI(), traceId));
 	}
 }

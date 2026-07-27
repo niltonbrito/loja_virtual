@@ -7,7 +7,6 @@ import java.util.UUID;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,11 +25,13 @@ import com.bandampla.lojavirtual.service.ProdutoService;
 @RequestMapping("/produto")
 public class ProdutoController implements ProdutoControllerAPI {
 
-	@Autowired
-	private ProdutoService produtoService;
+	private final ProdutoService produtoService;
+	private final HttpServletRequest request;
 
-	@Autowired
-	private HttpServletRequest request;
+	public ProdutoController(ProdutoService produtoService, HttpServletRequest request) {
+		this.produtoService = produtoService;
+		this.request = request;
+	}
 
 	@Override
 	public ResponseEntity<ResponseDefaultDTO<ProdutoDTO>> cadastrar(ProdutoDTO dto,

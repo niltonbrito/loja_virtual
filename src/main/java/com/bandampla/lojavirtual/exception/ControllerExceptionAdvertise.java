@@ -8,6 +8,7 @@ import java.util.UUID;
 import javax.mail.MessagingException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hibernate.HibernateException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -84,11 +85,11 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 
 		String traceId = generateTraceId();
 		String path = extractPath(request);
-		
+
 		String mensagemAmigavel = "Os dados enviados contêm um formato de codificação inválido ou corrompido (Base64 incorreto).";
 		if (ex.getMessage() != null && ex.getMessage().contains("A string da imagem")) {
 			mensagemAmigavel = ex.getMessage();
-		}else {
+		} else {
 			return new ResponseEntity<>(
 					new ErrorResponseDTO("400", "Parâmetro inválido", ex.getMessage(), path, traceId),
 					HttpStatus.BAD_REQUEST);
@@ -216,7 +217,8 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 	// ==========================================
 	// ERROS DE BANCO (FK, INTEGRIDADE, SQL)
 	// ==========================================
-	@ExceptionHandler({ DataIntegrityViolationException.class, ConstraintViolationException.class, SQLException.class })
+	@ExceptionHandler({ DataIntegrityViolationException.class, ConstraintViolationException.class, SQLException.class,
+			HibernateException.class })
 	protected ResponseEntity<Object> handleExceptionDataIntegry(Exception ex, WebRequest request) {
 
 		String detalhes;
@@ -231,6 +233,9 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 		} else if (ex instanceof ConstraintViolationException) {
 			detalhes = ((ConstraintViolationException) ex).getCause() != null
 					? ((ConstraintViolationException) ex).getCause().getMessage()
+					: ex.getMessage();
+		} else if (ex instanceof HibernateException) {
+			detalhes = ((HibernateException) ex).getCause() != null ? ((HibernateException) ex).getCause().getMessage()
 					: ex.getMessage();
 		} else {
 			detalhes = ex.getMessage();

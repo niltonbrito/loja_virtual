@@ -23,39 +23,41 @@ import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "Palavra Proibida", description = "Operações de gestão de Palavras Proibidas da empresa")
+@Tag(name = "Palavra Proibida", description = "Operações de moderação e gestão do catálogo global de Palavras Proibidas do sistema")
 public interface PalavraProibidaControllerAPI {
 
-	@Operation(summary = "Cadastrar Palavra Proibida", description = "Cria um único cadastro para palavra proibida.")
+	@Operation(summary = "Cadastrar Palavra Proibida", description = "Cria um novo termo banido global que protegerá as avaliações de todas as empresas.")
 	@PostMapping
 	ResponseEntity<ResponseDefaultDTO<PalavraProibidaDTO>> cadastrar(@Valid @RequestBody PalavraProibidaDTO dto)
 			throws ExceptionCustom, MessagingException, IOException;
 
-	@Operation(summary = "Atualizar Palavra Proibida", description = "Atualiza os dados cadastrais de um produto e substitui sua galeria de imagens de forma física no banco de dados.")
+	@Operation(summary = "Atualizar Termo Banido", description = "Atualiza a string textual ou caracteres de uma palavra proibida existente.")
 	@PutMapping("/{id}")
 	ResponseEntity<ResponseDefaultDTO<PalavraProibidaDTO>> atualizar(@PathVariable Long id,
 			@Valid @RequestBody PalavraProibidaDTO dto) throws ExceptionCustom, IOException;
 
-	@Operation(summary = "Deletar Palavra Proibida", description = "Exclui fisicamente uma palavra proibida (Moderação do Administrador).")
+	@Operation(summary = "Deletar Palavra Proibida", description = "Exclui fisicamente um termo banido da tabela global (Moderação do Administrador Geral).")
 	@DeleteMapping("/{id}")
 	ResponseEntity<ResponseDefaultDTO<Void>> deletar(@PathVariable Long id) throws ExceptionCustom;
 
-	@Operation(summary = "Buscar palavras proibidas por Descrição", description = "Filtra e retorna as palavra proibida baseadas em trechos do comentário/descrição.")
+	@Operation(summary = "Buscar por Descrição/Termo", description = "Retorna os termos proibidos que contenham trechos da string digitada.")
 	@GetMapping("/buscar")
-	ResponseEntity<List<PalavraProibidaDTO>> buscarPorDescricao(@RequestParam String termo) throws ExceptionCustom;
+	ResponseEntity<ResponseDefaultDTO<List<PalavraProibidaDTO>>> buscarPorDescricao(@RequestParam String termo)
+			throws ExceptionCustom;
 
-	@Operation(summary = "Listar todas por Empresa", description = "Recupera todas as palavras proibidas de produtos associadas à empresa logada.")
+	@Operation(summary = "Listar todas as Palavras", description = "Recupera a lista completa e global de termos banidos do software.")
 	@GetMapping
-	ResponseEntity<List<PalavraProibidaDTO>> buscarTodos() throws ExceptionCustom;
+	ResponseEntity<ResponseDefaultDTO<List<PalavraProibidaDTO>>> buscarTodos() throws ExceptionCustom;
 
-	@Operation(summary = "Busca Avançada Paginada", description = "Realiza consultas complexas aplicando filtros dinâmicos de palavra proibida e descrição por página.")
+	@Operation(summary = "Busca Avançada Paginada", description = "Realiza consultas dinâmicas organizando as palavras banidas por página.")
 	@GetMapping("/busca-avancada")
-	ResponseEntity<Page<PalavraProibidaDTO>> buscarAvancado(@RequestParam(required = false) String termo,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size);
+	ResponseEntity<ResponseDefaultDTO<Page<PalavraProibidaDTO>>> buscarAvancado(
+			@RequestParam(required = false) String termo, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size);
 
-	@Operation(summary = "Listagem Paginada Dinâmica", description = "Retorna uma página de palavras proibidas permitindo ordenação customizada de colunas via query string.")
+	@Operation(summary = "Listagem Paginada Dinâmica", description = "Gera páginas de registros permitindo ordenação customizada de colunas via query string.")
 	@GetMapping("/paginado")
-	ResponseEntity<Page<PalavraProibidaDTO>> buscarPaginado(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(defaultValue = "10") int size, 
+	ResponseEntity<ResponseDefaultDTO<Page<PalavraProibidaDTO>>> buscarPaginado(
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
 			@RequestParam(defaultValue = "id") String sort, @RequestParam(defaultValue = "ASC") String direction);
 }

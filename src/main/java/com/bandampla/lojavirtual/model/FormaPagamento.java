@@ -1,6 +1,7 @@
 package com.bandampla.lojavirtual.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -22,7 +23,7 @@ import com.bandampla.lojavirtual.enums.TipoFormaPagamento;
 @Entity
 @Table(name = "forma_pagamento")
 @SequenceGenerator(name = "seq_forma_pagamento", sequenceName = "seq_forma_pagamento", allocationSize = 1, initialValue = 1)
-public class FormaPagamento implements Serializable {
+public class FormaPagamento extends EntidadeAuditavel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	@Id
@@ -32,14 +33,20 @@ public class FormaPagamento implements Serializable {
 	@Column(nullable = false)
 	private String descricao;
 
-	@Column(nullable= false)
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private TipoFormaPagamento tipoPagamento;
+
+	@Column(nullable = true)
+	private BigDecimal valorMinimoParcela;
+
+	@Column(nullable = true)
+	private Integer quantidadeMaximaParcelas;
 
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
-	
+
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
@@ -64,11 +71,27 @@ public class FormaPagamento implements Serializable {
 		this.descricao = descricao;
 	}
 
+	public BigDecimal getValorMinimoParcela() {
+		return valorMinimoParcela;
+	}
+
+	public void setValorMinimoParcela(BigDecimal valorMinimoParcela) {
+		this.valorMinimoParcela = valorMinimoParcela;
+	}
+
+	public Integer getQuantidadeMaximaParcelas() {
+		return quantidadeMaximaParcelas;
+	}
+
+	public void setQuantidadeMaximaParcelas(Integer quantidadeMaximaParcelas) {
+		this.quantidadeMaximaParcelas = quantidadeMaximaParcelas;
+	}
+
 	public TipoFormaPagamento getTipoPagamento() {
 		return tipoPagamento;
 	}
 
-	public void setTipoPagamento (TipoFormaPagamento tipoPagamento) {
+	public void setTipoPagamento(TipoFormaPagamento tipoPagamento) {
 		this.tipoPagamento = tipoPagamento;
 	}
 
@@ -88,5 +111,4 @@ public class FormaPagamento implements Serializable {
 		FormaPagamento other = (FormaPagamento) obj;
 		return Objects.equals(id, other.id);
 	}
-
 }

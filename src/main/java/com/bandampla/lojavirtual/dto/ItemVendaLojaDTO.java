@@ -15,8 +15,6 @@ public class ItemVendaLojaDTO {
 	@Positive(message = "O ID do produto deve ser um número positivo válido.")
 	private Long produtoId;
 
-	@NotNull(message = "O ID da venda correspondente deve ser informado.")
-	@Positive(message = "O ID da venda deve ser um número positivo válido.")
 	private Long vendaLojaVirtualId;
 
 	private Long empresaId;

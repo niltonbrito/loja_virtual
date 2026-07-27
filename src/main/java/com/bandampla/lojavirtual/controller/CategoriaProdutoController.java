@@ -6,112 +6,98 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bandampla.lojavirtual.controller.api.CategoriaProdutoControllerAPI;
 import com.bandampla.lojavirtual.dto.CategoriaProdutoDTO;
 import com.bandampla.lojavirtual.dto.response.ResponseDefaultDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
 import com.bandampla.lojavirtual.service.CategoriaProdutoService;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
 @RestController
 @RequestMapping("/categoria")
-@Tag(name = "Categoria de Produto", description = "Operações de gestão de Nota Fiscal de Compra da empresa")
-public class CategoriaProdutoController {
+public class CategoriaProdutoController implements CategoriaProdutoControllerAPI {
 
-	@Autowired
-	private CategoriaProdutoService categoriaProdutoService;
+	private final CategoriaProdutoService categoriaProdutoService;
+	private final HttpServletRequest request;
 
-	@Autowired
-	private HttpServletRequest request;
+	public CategoriaProdutoController(CategoriaProdutoService categoriaProdutoService, HttpServletRequest request) {
+		this.categoriaProdutoService = categoriaProdutoService;
+		this.request = request;
+	}
 
-	@PostMapping
-	@Operation(summary = "Cadastrar Categoria de Produto", description = "Cria uma nova Categoria de Produto vinculada à empresa do usuário logado.")
-	public ResponseEntity<ResponseDefaultDTO<CategoriaProdutoDTO>> cadastrar(
-			@Valid @RequestBody CategoriaProdutoDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
-			throws ExceptionCustom {
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<CategoriaProdutoDTO>> cadastrar(@Valid CategoriaProdutoDTO dto,
+			UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		String traceId = UUID.randomUUID().toString();
 		dto.setEmpresaId(usuarioLogado.getEmpresaId());
+
 		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.CREATED.toString(), "Categoria criada com sucesso",
 				categoriaProdutoService.cadastrar(dto), request.getRequestURI(), traceId));
 	}
 
-	@PutMapping("/{id}")
-	public ResponseEntity<ResponseDefaultDTO<CategoriaProdutoDTO>> atualizar(@PathVariable Long id,
-			@Valid @RequestBody CategoriaProdutoDTO dto, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
-			throws ExceptionCustom {
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<CategoriaProdutoDTO>> atualizar(Long id, @Valid CategoriaProdutoDTO dto,
+			UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		String traceId = UUID.randomUUID().toString();
-
 		dto.setEmpresaId(usuarioLogado.getEmpresaId());
+
 		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Categoria atualizada com sucesso",
 				categoriaProdutoService.atualizar(id, dto), request.getRequestURI(), traceId));
 	}
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<ResponseDefaultDTO<Void>> deletar(@PathVariable Long id,
-			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
-
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<Void>> deletar(Long id, UsuarioLogadoPrincipal usuarioLogado)
+			throws ExceptionCustom {
 		String traceId = UUID.randomUUID().toString();
 		categoriaProdutoService.deletar(id, usuarioLogado.getEmpresaId());
 
-		// Retorna HTTP 200 OK com o JSON estruturado para o front-end ler a string
 		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.NO_CONTENT.toString(),
 				"Categoria deletada com sucesso", null, request.getRequestURI(), traceId));
 	}
 
-	@GetMapping("/buscar")
-	public ResponseEntity<ResponseDefaultDTO<List<CategoriaProdutoDTO>>> buscarPorDescricao(
-			@RequestParam String descricao, @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado)
-			throws ExceptionCustom {
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<List<CategoriaProdutoDTO>>> buscarPorDescricao(String descricao,
+			UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		String traceId = UUID.randomUUID().toString();
+
 		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Buscar por descrição",
 				categoriaProdutoService.buscarPorDescricao(descricao, usuarioLogado.getEmpresaId()),
 				request.getRequestURI(), traceId));
 	}
 
-	@GetMapping
+	@Override
 	public ResponseEntity<ResponseDefaultDTO<List<CategoriaProdutoDTO>>> buscarTodosPorEmpresa(
-			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
+			UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		String traceId = UUID.randomUUID().toString();
+
 		return ResponseEntity
-				.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Listar todas as Categoria de Produto",
+				.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Listar todas as Categorias de Produto",
 						categoriaProdutoService.buscarTodosPorEmpresa(usuarioLogado.getEmpresaId()),
 						request.getRequestURI(), traceId));
 	}
 
-	@GetMapping("/busca-avancada")
-	public ResponseEntity<ResponseDefaultDTO<Page<CategoriaProdutoDTO>>> buscarAvancado(
-			@RequestParam(required = false) String descricao,
-			@RequestParam(required = false) @AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado,
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<Page<CategoriaProdutoDTO>>> buscarAvancado(String descricao,
+			UsuarioLogadoPrincipal usuarioLogado, int page, int size) {
 		String traceId = UUID.randomUUID().toString();
-		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Busca avançada",
-				categoriaProdutoService.buscarAvancado(descricao, usuarioLogado.getEmpresaId(), page, size),
-				request.getRequestURI(), traceId));
+
+		return ResponseEntity
+				.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Busca avançada de categorias concluída",
+						categoriaProdutoService.buscarAvancado(descricao, usuarioLogado.getEmpresaId(), page, size),
+						request.getRequestURI(), traceId));
 	}
 
-	@GetMapping("/paginado")
-	public ResponseEntity<ResponseDefaultDTO<Page<CategoriaProdutoDTO>>> buscarPaginado(
-			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
-			@RequestParam(defaultValue = "id") String sort, @RequestParam(defaultValue = "ASC") String direction,
-			@AuthenticationPrincipal UsuarioLogadoPrincipal usuarioLogado) {
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<Page<CategoriaProdutoDTO>>> buscarPaginado(int page, int size, String sort,
+			String direction, UsuarioLogadoPrincipal usuarioLogado) {
 		String traceId = UUID.randomUUID().toString();
+
 		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Listar paginado",
 				categoriaProdutoService.buscarPaginado(page, size, sort, direction, usuarioLogado.getEmpresaId()),
 				request.getRequestURI(), traceId));

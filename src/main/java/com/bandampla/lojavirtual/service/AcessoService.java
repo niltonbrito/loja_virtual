@@ -1,62 +1,72 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.bandampla.lojavirtual.dto.AcessoDTO;
 import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
+import com.bandampla.lojavirtual.mapper.AcessoMapper;
 import com.bandampla.lojavirtual.model.Acesso;
 import com.bandampla.lojavirtual.repository.AcessoRepository;
-
-/**
- * @author: Nilton Brito
- * @Email: <nilton.brito@outlook.com>
- * @Data: 27 de abr. de 2026
- */
 
 @Service
 public class AcessoService {
 
-	@Autowired
-	private AcessoRepository acessoRepository;
+	private final AcessoRepository acessoRepository;
+	private final AcessoMapper acessoMapper;
 
-	public Acesso cadastrar(Acesso acesso) throws ExceptionCustom {
-		
-		RoleUser roleUser = acesso.getRoleUser();
-		
-		if (acesso.getId() == null) {
+	public AcessoService(AcessoRepository acessoRepository, AcessoMapper acessoMapper) {
+		this.acessoRepository = acessoRepository;
+		this.acessoMapper = acessoMapper;
+	}
+
+	@Transactional(rollbackFor = Exception.class)
+	public AcessoDTO cadastrar(AcessoDTO dto) throws ExceptionCustom {
+		if (dto == null) {
+			throw new ExceptionCustom("Os dados de acesso não podem ser nulos.");
+		}
+
+		RoleUser roleUser = dto.getRoleUser();
+
+		if (dto.getId() == null) {
 			List<Acesso> acessos = acessoRepository.findByRoleUser(roleUser);
 			if (!acessos.isEmpty()) {
 				throw new ExceptionCustom("Já existe Acesso com a descrição: " + roleUser.getDescricao());
 			}
 		}
-		return acessoRepository.save(acesso);
+
+		Acesso model = acessoMapper.toModel(dto);
+		Acesso salvo = acessoRepository.save(model);
+		return acessoMapper.toDTO(salvo);
 	}
 
-	public void deletar(Acesso acesso) {
-		acessoRepository.deleteById(acesso.getId());
+	@Transactional(rollbackFor = Exception.class)
+	public void deletar(AcessoDTO dto) throws ExceptionCustom {
+		if (dto == null || dto.getId() == null) {
+			throw new ExceptionCustom("ID de acesso inválido para exclusão.");
+		}
+		acessoRepository.deleteById(dto.getId());
 	}
 
+	@Transactional(rollbackFor = Exception.class)
 	public void deletePorId(Long id) {
 		acessoRepository.deleteById(id);
 	}
 
-	public Acesso buscarPorId(Long id) throws ExceptionCustom {
-
+	public AcessoDTO buscarPorId(Long id) throws ExceptionCustom {
 		Acesso acesso = acessoRepository.findById(id).orElse(null);
 		if (acesso == null) {
 			throw new ExceptionCustom("Não encontrou Acesso com o código: " + id);
 		}
-		return acesso;
+		return acessoMapper.toDTO(acesso);
 	}
 
-	public List<Acesso> buscarPorRole(RoleUser roleUser) {
-	    return acessoRepository.findByRoleUser(roleUser);
+	public List<AcessoDTO> buscarPorRole(RoleUser roleUser) {
+		List<Acesso> lista = acessoRepository.findByRoleUser(roleUser);
+		return lista.stream().map(acessoMapper::toDTO).collect(Collectors.toList());
 	}
-
 }

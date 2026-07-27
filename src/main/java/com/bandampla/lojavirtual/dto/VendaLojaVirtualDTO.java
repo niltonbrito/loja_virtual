@@ -12,8 +12,6 @@ import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
-import com.bandampla.lojavirtual.enums.TipoFormaPagamento;
-
 public class VendaLojaVirtualDTO {
 
 	private Long id;
@@ -47,7 +45,7 @@ public class VendaLojaVirtualDTO {
 
 	@NotNull(message = "A forma de pagamento deve ser informada.")
 	@Positive(message = "ID da forma de pagamento inválido.")
-	private TipoFormaPagamento formaPagamentoId;
+	private Long formaPagamentoId;
 
 	@NotNull(message = "O cliente comprador deve ser informado.")
 	@Positive(message = "ID do comprador inválido.")
@@ -63,7 +61,6 @@ public class VendaLojaVirtualDTO {
 
 	private Long empresaId;
 
-	// 🔥 O CARRINHO INTEGRADO: Recebe todos os itens no mesmo JSON
 	@NotEmpty(message = "O carrinho de compras não pode estar vazio.")
 	@Valid
 	private List<ItemVendaLojaDTO> itens;
@@ -148,11 +145,11 @@ public class VendaLojaVirtualDTO {
 		this.cupomDescontoId = cupomDescontoId;
 	}
 
-	public TipoFormaPagamento getFormaPagamentoId() {
+	public Long getFormaPagamentoId() {
 		return formaPagamentoId;
 	}
 
-	public void setFormaPagamentoId(TipoFormaPagamento formaPagamentoId) {
+	public void setFormaPagamentoId(Long formaPagamentoId) {
 		this.formaPagamentoId = formaPagamentoId;
 	}
 

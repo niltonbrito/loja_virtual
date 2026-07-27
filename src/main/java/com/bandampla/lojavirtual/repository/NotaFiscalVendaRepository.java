@@ -9,6 +9,6 @@ import com.bandampla.lojavirtual.model.NotaFiscalVenda;
 @Repository
 public interface NotaFiscalVendaRepository extends JpaRepository<NotaFiscalVenda, Long> {
 
-	@Query("SELECT n FROM NotaFiscalVenda n WHERE n.vendaCompraLojaVirtual.id = :vendaId")
+	@Query("SELECT n FROM NotaFiscalVenda n WHERE n.vendaLojaVirtual.id = :vendaId")
 	NotaFiscalVenda buscarNotaPorVendaId(Long vendaId);
 }

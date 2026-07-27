@@ -25,19 +25,19 @@ import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
 public class NotaFaturamentoService {
 
 	private final NotaFiscalVendaRepository notaRepository;
-	private final StatusRastreioRepository rastreioRepository;
-	private final VendaLojaVirtualRepository vendaRepository;
+	private final StatusRastreioRepository statusRastreioRepository;
+	private final VendaLojaVirtualRepository vendaLojaVirtualRepository;
 	private final NotaFiscalVendaMapper notaMapper;
-	private final StatusRastreioMapper rastreioMapper;
+	private final StatusRastreioMapper statusRastreioMapper;
 
-	public NotaFaturamentoService(NotaFiscalVendaRepository notaRepository, StatusRastreioRepository rastreioRepository,
-			VendaLojaVirtualRepository vendaRepository, NotaFiscalVendaMapper notaMapper,
-			StatusRastreioMapper rMapper) {
+	public NotaFaturamentoService(NotaFiscalVendaRepository notaRepository, StatusRastreioRepository statusRastreioRepository,
+			VendaLojaVirtualRepository vendaLojaVirtualRepository, NotaFiscalVendaMapper notaMapper,
+			StatusRastreioMapper statusRastreioMapper) {
 		this.notaRepository = notaRepository;
-		this.rastreioRepository = rastreioRepository;
-		this.vendaRepository = vendaRepository;
+		this.statusRastreioRepository = statusRastreioRepository;
+		this.vendaLojaVirtualRepository = vendaLojaVirtualRepository;
 		this.notaMapper = notaMapper;
-		this.rastreioMapper = rMapper;
+		this.statusRastreioMapper = statusRastreioMapper;
 	}
 
 	/**
@@ -48,7 +48,7 @@ public class NotaFaturamentoService {
 	public NotaFiscalVendaDTO emitirNotaFiscalVenda(Long vendaId, UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 
-		VendaLojaVirtual venda = vendaRepository.findById(vendaId)
+		VendaLojaVirtual venda = vendaLojaVirtualRepository.findById(vendaId)
 				.orElseThrow(() -> new ExceptionCustom("Venda não encontrada para faturamento."));
 
 		if (!venda.getEmpresa().getId().equals(usuarioLogado.getEmpresaId())) {
@@ -71,7 +71,7 @@ public class NotaFaturamentoService {
 		nota.setValorIcms(venda.getValorTotal().multiply(BigDecimal.valueOf(0.18))); // Simula alíquota padrão 18%
 		nota.setXml("<xml><nfe>Autorizada SEFAZ " + nota.getNumeroNota() + "</nfe></xml>");
 		nota.setPdf("https://bandampla.com" + nota.getNumeroNota() + ".pdf");
-		nota.setVendaCompraLojaVirtual(venda);
+		nota.setVendaLojaVirtual(venda);
 		nota.setEmpresa(venda.getEmpresa());
 
 		NotaFiscalVenda notaSalva = notaRepository.save(nota);
@@ -79,7 +79,7 @@ public class NotaFaturamentoService {
 		// 🔥 O ACOPLAMENTO TARDIO: Vincula a nota gerada de volta na tabela pai da
 		// venda
 		venda.setNotaFiscalVenda(notaSalva);
-		vendaRepository.save(venda);
+		vendaLojaVirtualRepository.save(venda);
 
 		// Insere o primeiro marco da linha do tempo logística automaticamente
 		adicionarMarcoLogistico(venda, "Nota Fiscal emitida com sucesso. Pedido entrou na fila de separação.");
@@ -95,27 +95,27 @@ public class NotaFaturamentoService {
 	public StatusRastreioDTO registrarMovimentacaoEntrega(StatusRastreioDTO dto, UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 
-		VendaLojaVirtual venda = vendaRepository.findById(dto.getVendaLojaVirtualId())
+		VendaLojaVirtual venda = vendaLojaVirtualRepository.findById(dto.getVendaLojaVirtualId())
 				.orElseThrow(() -> new ExceptionCustom("Venda de destino inválida."));
 
 		if (!venda.getEmpresa().getId().equals(usuarioLogado.getEmpresaId())) {
 			throw new ExceptionCustom("Você não tem permissão para atualizar a logística desta empresa.");
 		}
 
-		StatusRastreio rastreio = rastreioMapper.toModel(dto);
+		StatusRastreio rastreio = statusRastreioMapper.toModel(dto);
 		rastreio.setVendaLojaVirtual(venda);
 		rastreio.setEmpresa(venda.getEmpresa());
 
-		StatusRastreio salvo = rastreioRepository.save(rastreio);
-		return rastreioMapper.toDTO(salvo);
+		StatusRastreio salvo = statusRastreioRepository.save(rastreio);
+		return statusRastreioMapper.toDTO(salvo);
 	}
 
 	/**
 	 * Consulta a linha do tempo completa do rastreamento do pedido.
 	 */
 	public List<StatusRastreioDTO> consultarLinhaDoTempoEntrega(Long vendaId) {
-		List<StatusRastreio> marcos = rastreioRepository.buscarRastreioPorVendaId(vendaId);
-		return marcos.stream().map(rastreioMapper::toDTO).collect(Collectors.toList());
+		List<StatusRastreio> marcos = statusRastreioRepository.buscarRastreioPorVendaId(vendaId);
+		return marcos.stream().map(statusRastreioMapper::toDTO).collect(Collectors.toList());
 	}
 
 	private void adicionarMarcoLogistico(VendaLojaVirtual venda, String textoStatus) {
@@ -124,6 +124,6 @@ public class NotaFaturamentoService {
 		marco.setEmpresa(venda.getEmpresa());
 		marco.setStatus(textoStatus);
 		marco.setCentroDistribuicao("CD Central BandAmpla");
-		rastreioRepository.save(marco);
+		statusRastreioRepository.save(marco);
 	}
 }

@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import com.bandampla.lojavirtual.dto.ItemVendaLojaDTO;
 import com.bandampla.lojavirtual.dto.VendaLojaVirtualDTO;
-import com.bandampla.lojavirtual.enums.TipoFormaPagamento;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.mapper.VendaLojaVirtualMapper;
 import com.bandampla.lojavirtual.model.Endereco;
@@ -41,7 +40,7 @@ import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
 @Service
 public class VendaLojaVirtualService {
 
-	private final VendaLojaVirtualRepository vendaRepository;
+	private final VendaLojaVirtualRepository vendaLojaVirtualRepository;
 	private final ItemVendaLojaRepository itemVendaLojaRepository;
 	private final ProdutoRepository produtoRepository;
 	private final PessoaJuridicaRepository pessoaJuridicaRepository;
@@ -51,12 +50,12 @@ public class VendaLojaVirtualService {
 	private final VendaLojaVirtualMapper vendaLojaVirtualMapper;
 	private final SendMailService sendMailService;
 
-	public VendaLojaVirtualService(VendaLojaVirtualRepository vendaRepository,
+	public VendaLojaVirtualService(VendaLojaVirtualRepository vendaLojaVirtualRepository,
 			ItemVendaLojaRepository itemVendaLojaRepository, ProdutoRepository produtoRepository,
 			PessoaJuridicaRepository pessoaJuridicaRepository, PessoaFisicaRepository pessoaFisicaRepository,
 			EnderecoRepository enderecoRepository, FormaPagamentoRepository formaPagamentoRepository,
 			VendaLojaVirtualMapper vendaLojaVirtualMapper, SendMailService sendMailService) {
-		this.vendaRepository = vendaRepository;
+		this.vendaLojaVirtualRepository = vendaLojaVirtualRepository;
 		this.itemVendaLojaRepository = itemVendaLojaRepository;
 		this.produtoRepository = produtoRepository;
 		this.pessoaJuridicaRepository = pessoaJuridicaRepository;
@@ -96,7 +95,7 @@ public class VendaLojaVirtualService {
 					() -> new ExceptionCustom("Produto ID " + itemDto.getProdutoId() + " não existe no catálogo."));
 
 			// Validação de Estoque Físico
-			Double qtdDesejada =  itemDto.getQuantidade();
+			Double qtdDesejada = itemDto.getQuantidade();
 			if (produto.getQtdEstoque().compareTo(BigDecimal.valueOf(qtdDesejada)) < 0) {
 				throw new ExceptionCustom("Estoque insuficiente para o produto: " + produto.getNome()
 						+ ". Estoque atual: " + produto.getQtdEstoque() + ", Solicitado: " + qtdDesejada);
@@ -125,7 +124,7 @@ public class VendaLojaVirtualService {
 
 		// 5. Persistir o Registro Principal (Gera o ID e dispara o @PrePersist com o
 		// numeroPedido)
-		VendaLojaVirtual vendaSalva = vendaRepository.save(model);
+		VendaLojaVirtual vendaSalva = vendaLojaVirtualRepository.save(model);
 
 		// 6. Vincular os Itens do Carrinho à Venda Salva e Persistir
 		for (ItemVendaLoja item : itensParaSalvar) {
@@ -135,7 +134,7 @@ public class VendaLojaVirtualService {
 
 		// 7. 🔥 SIMULAÇÃO DO GATEWAY DE PAGAMENTO (Fica pronto para acoplamento de API
 		// futura)
-		boolean pagamentoAprovado = simularGatewayPagamento(vendaSalva,dto);
+		boolean pagamentoAprovado = simularGatewayPagamento(vendaSalva, dto);
 		if (!pagamentoAprovado) {
 			throw new ExceptionCustom("A transação financeira foi recusada pelo operadora de pagamento.");
 		}
@@ -154,21 +153,21 @@ public class VendaLojaVirtualService {
 	 * 🔥 PONTO DE EXTENSÃO: Método isolado para receber o código de integração do
 	 * Gateway no futuro.
 	 */
-	private boolean simularGatewayPagamento(VendaLojaVirtual venda,VendaLojaVirtualDTO dto) {
+	private boolean simularGatewayPagamento(VendaLojaVirtual venda, VendaLojaVirtualDTO dto) {
 		// No futuro, aqui entrará a chamada HTTP para Asaas, Mercado Pago, etc.
 		// Exemplo: String response = asaasService.gerarCobranca(venda);
-	/*	FormaPagamento forma = formaPagamentoRepository.findById(venda.getFormaPagamento());
-
-		// O Java inspeciona o ENUM para saber qual API de Gateway chamar:
-		if (forma.getTipoPagamento() == TipoFormaPagamento.PIX) {
-		    // Dispara a chamada de API do Asaas/MercadoPago para gerar o QR Code do PIX
-		} 
-		else if (forma.getTipoPagamento() == TipoFormaPagamento.CARTAOCREDITO) {
-		    // Dispara a chamada de API enviando o token do cartão para captura de crédito
-		} 
-		else if (forma.getTipoPagamento() == TipoFormaPagamento.BOLETO) {
-		    // Dispara a geração de PDF de linha digitável do Boleto bancário
-		}*/
+		/*
+		 * FormaPagamento forma =
+		 * formaPagamentoRepository.findById(venda.getFormaPagamento());
+		 * 
+		 * // O Java inspeciona o ENUM para saber qual API de Gateway chamar: if
+		 * (forma.getTipoPagamento() == TipoFormaPagamento.PIX) { // Dispara a chamada
+		 * de API do Asaas/MercadoPago para gerar o QR Code do PIX } else if
+		 * (forma.getTipoPagamento() == TipoFormaPagamento.CARTAOCREDITO) { // Dispara a
+		 * chamada de API enviando o token do cartão para captura de crédito } else if
+		 * (forma.getTipoPagamento() == TipoFormaPagamento.BOLETO) { // Dispara a
+		 * geração de PDF de linha digitável do Boleto bancário }
+		 */
 		System.out.println(
 				"====== [GATEWAY SIMULADO] Processando pagamento do pedido: " + venda.getNumeroPedido() + " ======");
 		return true; // Simula resposta estável de sucesso com aprovação imediata
@@ -193,7 +192,7 @@ public class VendaLojaVirtualService {
 		if (id == null || id <= 0) {
 			throw new ExceptionCustom("ID de venda inválido.");
 		}
-		VendaLojaVirtual venda = vendaRepository.findById(id)
+		VendaLojaVirtual venda = vendaLojaVirtualRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Venda não encontrada para cancelamento."));
 
 		if (!venda.getEmpresa().getId().equals(usuarioLogado.getEmpresaId())) {
@@ -209,14 +208,14 @@ public class VendaLojaVirtualService {
 			itemVendaLojaRepository.delete(item);
 		}
 
-		vendaRepository.delete(venda);
+		vendaLojaVirtualRepository.delete(venda);
 	}
 
 	public VendaLojaVirtualDTO buscarPorId(Long id, UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		if (id == null || id <= 0) {
 			throw new ExceptionCustom("ID inválido.");
 		}
-		VendaLojaVirtual venda = vendaRepository.findById(id)
+		VendaLojaVirtual venda = vendaLojaVirtualRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Venda não encontrada."));
 
 		if (!venda.getEmpresa().getId().equals(usuarioLogado.getEmpresaId())) {
@@ -234,7 +233,7 @@ public class VendaLojaVirtualService {
 				.where(VendaLojaVirtualSpec.empresaIgual(usuarioLogado.getEmpresaId()))
 				.and(VendaLojaVirtualSpec.numeroPedidoContem(numeroPedido));
 
-		return vendaRepository.findAll(spec).stream().map(v -> {
+		return vendaLojaVirtualRepository.findAll(spec).stream().map(v -> {
 			VendaLojaVirtualDTO d = vendaLojaVirtualMapper.toDTO(v);
 			// 🔥 CORRIGIDO: Agora chama o método correto do carrinho
 			d.setItens(converterItensParaDTO(itemVendaLojaRepository.buscarPorVendaId(v.getId())));
@@ -245,7 +244,7 @@ public class VendaLojaVirtualService {
 	public List<VendaLojaVirtualDTO> buscarTodosPorEmpresa(UsuarioLogadoPrincipal usuarioLogado) {
 		Specification<VendaLojaVirtual> spec = Specification
 				.where(VendaLojaVirtualSpec.empresaIgual(usuarioLogado.getEmpresaId()));
-		return vendaRepository.findAll(spec).stream().map(v -> {
+		return vendaLojaVirtualRepository.findAll(spec).stream().map(v -> {
 			VendaLojaVirtualDTO d = vendaLojaVirtualMapper.toDTO(v);
 			// 🔥 CORRIGIDO: Agora chama o método correto do carrinho
 			d.setItens(converterItensParaDTO(itemVendaLojaRepository.buscarPorVendaId(v.getId())));
@@ -260,7 +259,7 @@ public class VendaLojaVirtualService {
 				.where(VendaLojaVirtualSpec.empresaIgual(usuarioLogado.getEmpresaId()))
 				.and(VendaLojaVirtualSpec.numeroPedidoContem(numeroPedido));
 
-		return vendaRepository.findAll(spec, pageable).map(v -> {
+		return vendaLojaVirtualRepository.findAll(spec, pageable).map(v -> {
 			VendaLojaVirtualDTO d = vendaLojaVirtualMapper.toDTO(v);
 			// 🔥 CORRIGIDO: Agora chama o método correto do carrinho
 			d.setItens(converterItensParaDTO(itemVendaLojaRepository.buscarPorVendaId(v.getId())));
@@ -274,7 +273,7 @@ public class VendaLojaVirtualService {
 		Specification<VendaLojaVirtual> spec = Specification
 				.where(VendaLojaVirtualSpec.empresaIgual(usuarioLogado.getEmpresaId()));
 
-		return vendaRepository.findAll(spec, pageable).map(v -> {
+		return vendaLojaVirtualRepository.findAll(spec, pageable).map(v -> {
 			VendaLojaVirtualDTO d = vendaLojaVirtualMapper.toDTO(v);
 			// 🔥 CORRIGIDO: Agora chama o método correto do carrinho
 			d.setItens(converterItensParaDTO(itemVendaLojaRepository.buscarPorVendaId(v.getId())));
