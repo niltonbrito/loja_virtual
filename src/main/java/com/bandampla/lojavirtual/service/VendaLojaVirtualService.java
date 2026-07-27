@@ -20,6 +20,7 @@ import com.bandampla.lojavirtual.dto.ItemVendaLojaDTO;
 import com.bandampla.lojavirtual.dto.VendaLojaVirtualDTO;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.mapper.VendaLojaVirtualMapper;
+import com.bandampla.lojavirtual.model.CupomDesconto;
 import com.bandampla.lojavirtual.model.Endereco;
 import com.bandampla.lojavirtual.model.FormaPagamento;
 import com.bandampla.lojavirtual.model.ItemVendaLoja;
@@ -27,6 +28,7 @@ import com.bandampla.lojavirtual.model.PessoaFisica;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.model.Produto;
 import com.bandampla.lojavirtual.model.VendaLojaVirtual;
+import com.bandampla.lojavirtual.repository.CupomDescontoRepository;
 import com.bandampla.lojavirtual.repository.EnderecoRepository;
 import com.bandampla.lojavirtual.repository.FormaPagamentoRepository;
 import com.bandampla.lojavirtual.repository.ItemVendaLojaRepository;
@@ -43,6 +45,7 @@ public class VendaLojaVirtualService {
 	private final VendaLojaVirtualRepository vendaLojaVirtualRepository;
 	private final ItemVendaLojaRepository itemVendaLojaRepository;
 	private final ProdutoRepository produtoRepository;
+	private final CupomDescontoRepository cupomDescontoRepository;
 	private final PessoaJuridicaRepository pessoaJuridicaRepository;
 	private final PessoaFisicaRepository pessoaFisicaRepository;
 	private final EnderecoRepository enderecoRepository;
@@ -52,12 +55,14 @@ public class VendaLojaVirtualService {
 
 	public VendaLojaVirtualService(VendaLojaVirtualRepository vendaLojaVirtualRepository,
 			ItemVendaLojaRepository itemVendaLojaRepository, ProdutoRepository produtoRepository,
-			PessoaJuridicaRepository pessoaJuridicaRepository, PessoaFisicaRepository pessoaFisicaRepository,
-			EnderecoRepository enderecoRepository, FormaPagamentoRepository formaPagamentoRepository,
-			VendaLojaVirtualMapper vendaLojaVirtualMapper, SendMailService sendMailService) {
+			CupomDescontoRepository cupomDescontoRepository, PessoaJuridicaRepository pessoaJuridicaRepository,
+			PessoaFisicaRepository pessoaFisicaRepository, EnderecoRepository enderecoRepository,
+			FormaPagamentoRepository formaPagamentoRepository, VendaLojaVirtualMapper vendaLojaVirtualMapper,
+			SendMailService sendMailService) {
 		this.vendaLojaVirtualRepository = vendaLojaVirtualRepository;
 		this.itemVendaLojaRepository = itemVendaLojaRepository;
 		this.produtoRepository = produtoRepository;
+		this.cupomDescontoRepository = cupomDescontoRepository;
 		this.pessoaJuridicaRepository = pessoaJuridicaRepository;
 		this.pessoaFisicaRepository = pessoaFisicaRepository;
 		this.enderecoRepository = enderecoRepository;
@@ -76,13 +81,22 @@ public class VendaLojaVirtualService {
 
 		PessoaFisica comprador = pessoaFisicaRepository.findById(dto.getPessoaId())
 				.orElseThrow(() -> new ExceptionCustom("Comprador não encontrado."));
-
+		
 		// 2. Validar o Endereço de Entrega e Cobrança
 		Endereco entrega = enderecoRepository.findById(dto.getEnderecoEntregaId())
-				.orElseThrow(() -> new ExceptionCustom("Endereço de entrega inválido."));
+				.orElseThrow(() -> new ExceptionCustom("Endereço de entrega não localizado."));
 
 		Endereco cobranca = enderecoRepository.findById(dto.getEnderecoCobrancaId())
-				.orElseThrow(() -> new ExceptionCustom("Endereço de cobrança inválido."));
+				.orElseThrow(() -> new ExceptionCustom("Endereço de cobrança não localizado."));
+
+		// Valida se os endereços pertencem ao comprador
+		if (entrega.getPessoa() == null || !entrega.getPessoa().getId().equals(comprador.getId())) {
+			throw new ExceptionCustom("Segurança Violada: O endereço de entrega informado não pertence ao cliente logado.");
+		}
+
+		if (cobranca.getPessoa() == null || !cobranca.getPessoa().getId().equals(comprador.getId())) {
+			throw new ExceptionCustom("Segurança Violada: O endereço de cobrança informado não pertence ao cliente logado.");
+		}
 
 		FormaPagamento formaPagamento = formaPagamentoRepository.findById(dto.getFormaPagamentoId())
 				.orElseThrow(() -> new ExceptionCustom("Forma de pagamento não cadastrada."));
@@ -115,6 +129,18 @@ public class VendaLojaVirtualService {
 
 		// 4. Calcular Valores Finais e Mapear Registro Principal
 		VendaLojaVirtual model = vendaLojaVirtualMapper.toModel(dto);
+
+		// Impede o MapStruct de criar instâncias transientes
+		// vazias se o ID for nulo
+		if (dto.getCupomDescontoId() == null) {
+			model.setCupomDesconto(null); // Garante o null absoluto no banco de dados
+		} else {
+			// Caso o ID exista, opcionalmente você pode buscar o cupom no banco para
+			// validar se ele é real
+			CupomDesconto cupom = cupomDescontoRepository.findById(dto.getCupomDescontoId()).orElseThrow(
+					() -> new ExceptionCustom("Cupom de desconto com ID '" + dto.getCupomDescontoId() + "' não existe no catálogo."));
+			model.setCupomDesconto(cupom);
+		}
 		model.setEmpresa(empresa);
 		model.setPessoa(comprador);
 		model.setEnderecoEntrega(entrega);
@@ -181,7 +207,7 @@ public class VendaLojaVirtualService {
 					+ "<p>Em breve iniciaremos a emissão da Nota Fiscal.</p>";
 
 			sendMailService.enviarEmailHtml("Pedido Confirmado - " + venda.getNumeroPedido(), html,
-					"nilton.brito@outlook.com");
+					venda.getPessoa().getEmail());
 		} catch (Exception e) {
 			System.err.println("====== Falha não impeditiva ao despachar e-mail de confirmação: " + e.getMessage());
 		}
