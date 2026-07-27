@@ -32,13 +32,17 @@ public class StatusRastreio implements Serializable {
 	private String status;
 
 	@ManyToOne
-	@JoinColumn(name = "venda_compra_loja_virtual_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "venda_compra_loja_virtual_fk"))
-	private VendaCompraLojaVirtual vendaCompraLojaVirtual;
+	@JoinColumn(name = "venda_compra_virtual_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "venda_loja_virtual_fk"))
+	private VendaLojaVirtual vendaLojaVirtual;
+
+	@ManyToOne
+	@JoinColumn(name = "compra_loja_virtual_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "compra_loja_virtual_fk"))
+	private CompraLojaVirtual compraLojaVirtual; // Reaproveitamento nativo mapeado para a futura tabela B2B de compras
 
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
-	
+
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
@@ -95,12 +99,20 @@ public class StatusRastreio implements Serializable {
 		this.status = status;
 	}
 
-	public VendaCompraLojaVirtual getVendaCompraLojaVirtual() {
-		return vendaCompraLojaVirtual;
+	public VendaLojaVirtual getVendaLojaVirtual() {
+		return vendaLojaVirtual;
 	}
 
-	public void setVendaCompraLojaVirtual(VendaCompraLojaVirtual vendaCompraLojaVirtual) {
-		this.vendaCompraLojaVirtual = vendaCompraLojaVirtual;
+	public void setVendaLojaVirtual(VendaLojaVirtual vendaLojaVirtual) {
+		this.vendaLojaVirtual = vendaLojaVirtual;
+	}
+
+	public CompraLojaVirtual getCompraLojaVirtual() {
+		return compraLojaVirtual;
+	}
+
+	public void setCompraLojaVirtual(CompraLojaVirtual compraLojaVirtual) {
+		this.compraLojaVirtual = compraLojaVirtual;
 	}
 
 	@Override

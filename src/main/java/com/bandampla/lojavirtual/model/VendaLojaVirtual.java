@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
@@ -15,19 +16,23 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "venda_compra_loja_virtual")
-@SequenceGenerator(name = "seq_venda_compra_loja_virtual", sequenceName = "seq_venda_compra_loja_virtual", allocationSize = 1, initialValue = 1)
-public class VendaCompraLojaVirtual implements Serializable {
+@Table(name = "venda_loja_virtual")
+@SequenceGenerator(name = "seq_venda_loja_virtual", sequenceName = "seq_venda_loja_virtual", allocationSize = 1, initialValue = 1)
+public class VendaLojaVirtual implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_venda_compra_loja_virtual")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_venda_loja_virtual")
 	private Long id;
+
+	@Column(name = "numero_pedido", nullable = false, unique = true)
+	private String numeroPedido; // 🔥 Oculta o ID sequencial do cliente final
 
 	@ManyToOne(targetEntity = PessoaFisica.class)
 	@JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
@@ -51,8 +56,8 @@ public class VendaCompraLojaVirtual implements Serializable {
 	private FormaPagamento formaPagamento;
 
 	@OneToOne
-	@JoinColumn(name = "nota_fiscal_venda_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "nota_fiscal_venda_fk"))
-	private NotaFiscalVenda notaFiscalVenda;
+	@JoinColumn(name = "nota_fiscal_venda_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "nota_fiscal_venda_fk"))
+	private NotaFiscalVenda notaFiscalVenda; // 🔥 Flexibilizado para nullable = true para o checkout inicial funcionar
 
 	@ManyToOne
 	@JoinColumn(name = "cupom_desconto_id", foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "cupom_desconto_fk"))
@@ -74,12 +79,16 @@ public class VendaCompraLojaVirtual implements Serializable {
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
 
-	public PessoaJuridica getEmpresa() {
-		return empresa;
-	}
-
-	public void setEmpresa(PessoaJuridica empresa) {
-		this.empresa = empresa;
+	@PrePersist
+	protected void onCreate() {
+		// 🔥 Autogeração do número amigável do pedido no momento do insert
+		if (this.numeroPedido == null) {
+			String uuid = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+			this.numeroPedido = "BAND-" + uuid.substring(0, 8);
+		}
+		if (this.dataVenda == null) {
+			this.dataVenda = LocalDate.now();
+		}
 	}
 
 	public Long getId() {
@@ -88,6 +97,14 @@ public class VendaCompraLojaVirtual implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getNumeroPedido() {
+		return numeroPedido;
+	}
+
+	public void setNumeroPedido(String numeroPedido) {
+		this.numeroPedido = numeroPedido;
 	}
 
 	public PessoaFisica getPessoa() {
@@ -186,6 +203,14 @@ public class VendaCompraLojaVirtual implements Serializable {
 		this.dataEntrega = dataEntrega;
 	}
 
+	public PessoaJuridica getEmpresa() {
+		return empresa;
+	}
+
+	public void setEmpresa(PessoaJuridica empresa) {
+		this.empresa = empresa;
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(id);
@@ -199,7 +224,7 @@ public class VendaCompraLojaVirtual implements Serializable {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		VendaCompraLojaVirtual other = (VendaCompraLojaVirtual) obj;
+		VendaLojaVirtual other = (VendaLojaVirtual) obj;
 		return Objects.equals(id, other.id);
 	}
 }

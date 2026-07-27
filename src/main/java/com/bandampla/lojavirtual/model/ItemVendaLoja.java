@@ -27,15 +27,15 @@ public class ItemVendaLoja implements Serializable {
 	private Long id;
 
 	@Column(nullable= false)
-	private Double quantidade;
+	private Double quantidade; // Permite frações se o seu negócio exigir (ex: peso, metros)
 
 	@ManyToOne
 	@JoinColumn(name = "produto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "produto_fk"))
 	private Produto produto;
 
 	@ManyToOne
-	@JoinColumn(name = "venda_compra_loja_virtual_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "venda_compra_loja_virtual_fk"))
-	private VendaCompraLojaVirtual vendaCompraLojaVirtual;
+	@JoinColumn(name = "venda_loja_virtual_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "venda_loja_virtual_fk"))
+	private VendaLojaVirtual vendaLojaVirtual;
 
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
@@ -73,12 +73,12 @@ public class ItemVendaLoja implements Serializable {
 		this.produto = produto;
 	}
 
-	public VendaCompraLojaVirtual getVendaCompraLojaVirtual() {
-		return vendaCompraLojaVirtual;
+	public VendaLojaVirtual getVendaLojaVirtual() {
+		return vendaLojaVirtual;
 	}
 
-	public void setVendaCompraLojaVirtual(VendaCompraLojaVirtual vendaCompraLojaVirtual) {
-		this.vendaCompraLojaVirtual = vendaCompraLojaVirtual;
+	public void setVendaLojaVirtual(VendaLojaVirtual vendaLojaVirtual) {
+		this.vendaLojaVirtual = vendaLojaVirtual;
 	}
 
 	@Override

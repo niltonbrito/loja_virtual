@@ -4,10 +4,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import com.bandampla.lojavirtual.model.Produto;
+import com.bandampla.lojavirtual.model.VendaLojaVirtual;
 
 @Repository
-public interface VendaCompraLojaVirtualRepository extends JpaRepository<Produto, Long>, JpaSpecificationExecutor<Produto> {
+public interface VendaLojaVirtualRepository
+		extends JpaRepository<VendaLojaVirtual, Long>, JpaSpecificationExecutor<VendaLojaVirtual> {
 
-    boolean existsByNomeAndEmpresaId(String nome, Long empresaId);
 }

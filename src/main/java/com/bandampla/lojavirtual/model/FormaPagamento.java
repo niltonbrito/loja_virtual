@@ -64,11 +64,11 @@ public class FormaPagamento implements Serializable {
 		this.descricao = descricao;
 	}
 
-	public TipoFormaPagamento getStatus() {
+	public TipoFormaPagamento getTipoPagamento() {
 		return tipoPagamento;
 	}
 
-	public void setStatus(TipoFormaPagamento tipoPagamento) {
+	public void setTipoPagamento (TipoFormaPagamento tipoPagamento) {
 		this.tipoPagamento = tipoPagamento;
 	}
 
