@@ -94,11 +94,13 @@ public class VendaLojaVirtualService {
 
 		// Valida se os endereços pertencem ao comprador
 		if (entrega.getPessoa() == null || !entrega.getPessoa().getId().equals(comprador.getId())) {
-			throw new ExceptionCustom("Segurança Violada: O endereço de entrega informado não pertence ao cliente logado.");
+			throw new ExceptionCustom(
+					"Segurança Violada: O endereço de entrega informado não pertence ao cliente logado.");
 		}
 
 		if (cobranca.getPessoa() == null || !cobranca.getPessoa().getId().equals(comprador.getId())) {
-			throw new ExceptionCustom("Segurança Violada: O endereço de cobrança informado não pertence ao cliente logado.");
+			throw new ExceptionCustom(
+					"Segurança Violada: O endereço de cobrança informado não pertence ao cliente logado.");
 		}
 
 		FormaPagamento formaPagamento = formaPagamentoRepository.findById(dto.getFormaPagamentoId())
@@ -112,9 +114,9 @@ public class VendaLojaVirtualService {
 					() -> new ExceptionCustom("Produto ID " + itemDto.getProdutoId() + " não existe no catálogo."));
 
 			if (!produto.getEmpresa().getId().equals(empresa.getId())) {
-				throw new ExceptionCustom("O produto '"+ produto.getDescricao()+"' não pertence a esta empresa");
+				throw new ExceptionCustom("O produto '" + produto.getDescricao() + "' não pertence a esta empresa");
 			}
-			
+
 			// Validação de Estoque Físico
 			Double qtdDesejada = itemDto.getQuantidade();
 			if (produto.getQtdEstoque().compareTo(BigDecimal.valueOf(qtdDesejada)) < 0) {
@@ -144,8 +146,9 @@ public class VendaLojaVirtualService {
 		} else {
 			// Caso o ID exista, opcionalmente você pode buscar o cupom no banco para
 			// validar se ele é real
-			CupomDesconto cupom = cupomDescontoRepository.findById(dto.getCupomDescontoId()).orElseThrow(
-					() -> new ExceptionCustom("Cupom de desconto com ID '" + dto.getCupomDescontoId() + "' não existe no catálogo."));
+			CupomDesconto cupom = cupomDescontoRepository.findById(dto.getCupomDescontoId())
+					.orElseThrow(() -> new ExceptionCustom(
+							"Cupom de desconto com ID '" + dto.getCupomDescontoId() + "' não existe no catálogo."));
 			model.setCupomDesconto(cupom);
 		}
 		model.setEmpresa(empresa);
@@ -165,17 +168,17 @@ public class VendaLojaVirtualService {
 			itemVendaLojaRepository.save(item);
 		}
 
-		// 7. 🔥 SIMULAÇÃO DO GATEWAY DE PAGAMENTO (Fica pronto para acoplamento de API
+		// 7. SIMULAÇÃO DO GATEWAY DE PAGAMENTO (Fica pronto para acoplamento de API
 		// futura)
 		boolean pagamentoAprovado = simularGatewayPagamento(vendaSalva, dto);
 		if (!pagamentoAprovado) {
 			throw new ExceptionCustom("A transação financeira foi recusada pelo operadora de pagamento.");
 		}
-if (!vendaSalva.getNumeroPedido().isEmpty()) {
-	// 8. Enviar E-mail de Confirmação para o Cliente
-	enviarEmailConfirmacaoPedido(vendaSalva);
-	
-}
+		if (!vendaSalva.getNumeroPedido().isEmpty()) {
+			// 8. Enviar E-mail de Confirmação para o Cliente
+			enviarEmailConfirmacaoPedido(vendaSalva);
+
+		}
 
 		// Construir Resposta DTO contendo a árvore populada
 		VendaLojaVirtualDTO dtoRetorno = vendaLojaVirtualMapper.toDTO(vendaSalva);
