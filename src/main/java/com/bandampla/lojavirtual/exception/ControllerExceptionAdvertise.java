@@ -28,6 +28,8 @@ import com.bandampla.lojavirtual.dto.response.ErrorResponseDTO;
 import com.bandampla.lojavirtual.service.SendMailService;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
+import io.jsonwebtoken.MalformedJwtException;
+
 @RestControllerAdvice
 public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler {
 
@@ -173,7 +175,10 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 					errorResponseDTO = new ErrorResponseDTO("400", "Valor inválido para o campo '" + field + "'",
 							"Tipo de dado incompatível", path, traceId);
 				}
-			} else {
+			} else if (rootCause instanceof MalformedJwtException)  {
+				errorResponseDTO = new ErrorResponseDTO("400", "Erro ao ler o JSON enviado",
+						"Verifique o corpo da requisição", path, traceId);
+			}else {
 				errorResponseDTO = new ErrorResponseDTO("400", "Erro ao ler o JSON enviado",
 						"Verifique o corpo da requisição", path, traceId);
 			}

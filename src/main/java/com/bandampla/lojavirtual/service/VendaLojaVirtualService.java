@@ -81,7 +81,10 @@ public class VendaLojaVirtualService {
 
 		PessoaFisica comprador = pessoaFisicaRepository.findById(dto.getPessoaId())
 				.orElseThrow(() -> new ExceptionCustom("Comprador não encontrado."));
-		
+		// Valida se o comprador pertencem a empresa
+		if (comprador.getEmpresa().getId() == null || !comprador.getEmpresa().getId().equals(empresa.getId())) {
+			throw new ExceptionCustom("Segurança Violada: O cliente informado não pertence a empresa logado.");
+		}
 		// 2. Validar o Endereço de Entrega e Cobrança
 		Endereco entrega = enderecoRepository.findById(dto.getEnderecoEntregaId())
 				.orElseThrow(() -> new ExceptionCustom("Endereço de entrega não localizado."));
@@ -108,6 +111,10 @@ public class VendaLojaVirtualService {
 			Produto produto = produtoRepository.findById(itemDto.getProdutoId()).orElseThrow(
 					() -> new ExceptionCustom("Produto ID " + itemDto.getProdutoId() + " não existe no catálogo."));
 
+			if (!produto.getEmpresa().getId().equals(empresa.getId())) {
+				throw new ExceptionCustom("O produto '"+ produto.getDescricao()+"' não pertence a esta empresa");
+			}
+			
 			// Validação de Estoque Físico
 			Double qtdDesejada = itemDto.getQuantidade();
 			if (produto.getQtdEstoque().compareTo(BigDecimal.valueOf(qtdDesejada)) < 0) {
@@ -164,9 +171,11 @@ public class VendaLojaVirtualService {
 		if (!pagamentoAprovado) {
 			throw new ExceptionCustom("A transação financeira foi recusada pelo operadora de pagamento.");
 		}
-
-		// 8. Enviar E-mail de Confirmação para o Cliente
-		enviarEmailConfirmacaoPedido(vendaSalva);
+if (!vendaSalva.getNumeroPedido().isEmpty()) {
+	// 8. Enviar E-mail de Confirmação para o Cliente
+	enviarEmailConfirmacaoPedido(vendaSalva);
+	
+}
 
 		// Construir Resposta DTO contendo a árvore populada
 		VendaLojaVirtualDTO dtoRetorno = vendaLojaVirtualMapper.toDTO(vendaSalva);

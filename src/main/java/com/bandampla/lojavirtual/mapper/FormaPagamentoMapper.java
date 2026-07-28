@@ -4,11 +4,12 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 
 import com.bandampla.lojavirtual.dto.FormaPagamentoDTO;
 import com.bandampla.lojavirtual.model.FormaPagamento;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface FormaPagamentoMapper {
 
 	@Mapping(source = "empresa.id", target = "empresaId")

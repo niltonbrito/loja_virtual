@@ -60,7 +60,7 @@ public class VendaLojaVirtual implements Serializable {
 	private NotaFiscalVenda notaFiscalVenda; // 🔥 Flexibilizado para nullable = true para o checkout inicial funcionar
 
 	@ManyToOne
-	@JoinColumn(name = "cupom_desconto_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "cupom_desconto_fk"))
+	@JoinColumn(name = "cupom_desconto_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "cupom_desconto_fk"))
 	private CupomDesconto cupomDesconto;
 
 	@Column(nullable = false)
