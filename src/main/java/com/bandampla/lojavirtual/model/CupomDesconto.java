@@ -20,7 +20,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "cupom_desconto")
 @SequenceGenerator(name = "seq_cupom_desconto", sequenceName = "seq_cupom_desconto", allocationSize = 1, initialValue = 1)
-public class CupomDesconto implements Serializable {
+public class CupomDesconto extends EntidadeAuditavel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
