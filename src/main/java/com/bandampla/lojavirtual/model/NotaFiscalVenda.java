@@ -20,7 +20,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "nota_fiscal_venda")
 @SequenceGenerator(name = "seq_nota_fiscal_venda", sequenceName = "seq_nota_fiscal_venda", allocationSize = 1, initialValue = 1)
-public class NotaFiscalVenda implements Serializable {
+public class NotaFiscalVenda extends EntidadeAuditavel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

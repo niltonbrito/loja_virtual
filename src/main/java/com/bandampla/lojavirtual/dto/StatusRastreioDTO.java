@@ -17,6 +17,9 @@ public class StatusRastreioDTO {
 	@NotNull(message = "O ID da venda correspondente é obrigatório.")
 	private Long vendaLojaVirtualId;
 
+	// Propriedade opcional para o futuro rastreamento B2B de entrada de insumos
+	private Long compraLojaVirtualId;
+	
 	private Long empresaId;
 
 	// Getters e Setters
@@ -74,6 +77,14 @@ public class StatusRastreioDTO {
 
 	public void setVendaLojaVirtualId(Long vendaLojaVirtualId) {
 		this.vendaLojaVirtualId = vendaLojaVirtualId;
+	}
+
+	public Long getCompraLojaVirtualId() {
+		return compraLojaVirtualId;
+	}
+
+	public void setCompraLojaVirtualId(Long compraLojaVirtualId) {
+		this.compraLojaVirtualId = compraLojaVirtualId;
 	}
 
 	public Long getEmpresaId() {

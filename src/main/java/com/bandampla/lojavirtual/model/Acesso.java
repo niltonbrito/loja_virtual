@@ -31,7 +31,6 @@ public class Acesso implements GrantedAuthority {
 	@Column(nullable = false)
 	private RoleUser roleUser;
 
-
 	@JsonIgnore
 	@Override
 	public String getAuthority() {

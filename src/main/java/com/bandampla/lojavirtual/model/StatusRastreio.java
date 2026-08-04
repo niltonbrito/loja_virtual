@@ -17,7 +17,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "status_rastreio")
 @SequenceGenerator(name = "seq_status_rastreio", sequenceName = "seq_status_rastreio", allocationSize = 1, initialValue = 1)
-public class StatusRastreio implements Serializable {
+public class StatusRastreio extends EntidadeAuditavel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

@@ -2,6 +2,7 @@ package com.bandampla.lojavirtual.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotBlank;
@@ -25,6 +26,13 @@ public class CupomDescontoDTO {
 	@NotNull(message = "Informe a data de validade do cupom de desconto.")
 	@FutureOrPresent(message = "A data do cupom de desconto deve ser hoje ou uma data futura.")
 	private LocalDate dataValidade;
+	
+	private Integer limiteUsoTotal;
+	private Integer quantidadeUsado;
+
+	private List<Long> categoriasIds;
+	private List<Long> marcasIds;
+	private List<Long> produtosIds;
 
 	private Long empresaId;
 
@@ -66,6 +74,46 @@ public class CupomDescontoDTO {
 
 	public void setDataValidade(LocalDate dataValidade) {
 		this.dataValidade = dataValidade;
+	}
+
+	public Integer getLimiteUsoTotal() {
+		return limiteUsoTotal;
+	}
+
+	public void setLimiteUsoTotal(Integer limiteUsoTotal) {
+		this.limiteUsoTotal = limiteUsoTotal;
+	}
+
+	public Integer getQuantidadeUsado() {
+		return quantidadeUsado;
+	}
+
+	public void setQuantidadeUsado(Integer quantidadeUsado) {
+		this.quantidadeUsado = quantidadeUsado;
+	}
+
+	public List<Long> getCategoriasIds() {
+		return categoriasIds;
+	}
+
+	public void setCategoriasIds(List<Long> categoriasIds) {
+		this.categoriasIds = categoriasIds;
+	}
+
+	public List<Long> getMarcasIds() {
+		return marcasIds;
+	}
+
+	public void setMarcasIds(List<Long> marcasIds) {
+		this.marcasIds = marcasIds;
+	}
+
+	public List<Long> getProdutosIds() {
+		return produtosIds;
+	}
+
+	public void setProdutosIds(List<Long> produtosIds) {
+		this.produtosIds = produtosIds;
 	}
 
 	public Long getEmpresaId() {

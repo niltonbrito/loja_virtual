@@ -2,19 +2,19 @@ package com.bandampla.lojavirtual.service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
-import javax.transaction.Transactional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.bandampla.lojavirtual.dto.ItemVendaLojaDTO;
 import com.bandampla.lojavirtual.dto.VendaLojaVirtualDTO;
@@ -27,6 +27,7 @@ import com.bandampla.lojavirtual.model.ItemVendaLoja;
 import com.bandampla.lojavirtual.model.PessoaFisica;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
 import com.bandampla.lojavirtual.model.Produto;
+import com.bandampla.lojavirtual.model.StatusRastreio;
 import com.bandampla.lojavirtual.model.VendaLojaVirtual;
 import com.bandampla.lojavirtual.repository.CupomDescontoRepository;
 import com.bandampla.lojavirtual.repository.EnderecoRepository;
@@ -35,6 +36,7 @@ import com.bandampla.lojavirtual.repository.ItemVendaLojaRepository;
 import com.bandampla.lojavirtual.repository.PessoaFisicaRepository;
 import com.bandampla.lojavirtual.repository.PessoaJuridicaRepository;
 import com.bandampla.lojavirtual.repository.ProdutoRepository;
+import com.bandampla.lojavirtual.repository.StatusRastreioRepository;
 import com.bandampla.lojavirtual.repository.VendaLojaVirtualRepository;
 import com.bandampla.lojavirtual.repository.specification.VendaLojaVirtualSpec;
 import com.bandampla.lojavirtual.security.UsuarioLogadoPrincipal;
@@ -50,15 +52,19 @@ public class VendaLojaVirtualService {
 	private final PessoaFisicaRepository pessoaFisicaRepository;
 	private final EnderecoRepository enderecoRepository;
 	private final FormaPagamentoRepository formaPagamentoRepository;
+	private final StatusRastreioRepository statusRastreioRepository; // 🔥 Injetado para automatizar o primeiro status
+																		// do frete logístico
 	private final VendaLojaVirtualMapper vendaLojaVirtualMapper;
 	private final SendMailService sendMailService;
 
+	// 🔥 Fórmula Dourada: Injeção por construtor puro, final e imutável de todas as
+	// dependências
 	public VendaLojaVirtualService(VendaLojaVirtualRepository vendaLojaVirtualRepository,
 			ItemVendaLojaRepository itemVendaLojaRepository, ProdutoRepository produtoRepository,
 			CupomDescontoRepository cupomDescontoRepository, PessoaJuridicaRepository pessoaJuridicaRepository,
 			PessoaFisicaRepository pessoaFisicaRepository, EnderecoRepository enderecoRepository,
-			FormaPagamentoRepository formaPagamentoRepository, VendaLojaVirtualMapper vendaLojaVirtualMapper,
-			SendMailService sendMailService) {
+			FormaPagamentoRepository formaPagamentoRepository, StatusRastreioRepository statusRastreioRepository,
+			VendaLojaVirtualMapper vendaLojaVirtualMapper, SendMailService sendMailService) {
 		this.vendaLojaVirtualRepository = vendaLojaVirtualRepository;
 		this.itemVendaLojaRepository = itemVendaLojaRepository;
 		this.produtoRepository = produtoRepository;
@@ -67,11 +73,12 @@ public class VendaLojaVirtualService {
 		this.pessoaFisicaRepository = pessoaFisicaRepository;
 		this.enderecoRepository = enderecoRepository;
 		this.formaPagamentoRepository = formaPagamentoRepository;
+		this.statusRastreioRepository = statusRastreioRepository;
 		this.vendaLojaVirtualMapper = vendaLojaVirtualMapper;
 		this.sendMailService = sendMailService;
 	}
 
-	@Transactional(rollbackOn = Exception.class)
+	@Transactional(rollbackFor = Exception.class)
 	public VendaLojaVirtualDTO cadastrar(VendaLojaVirtualDTO dto, UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom, MessagingException, IOException {
 
@@ -81,10 +88,11 @@ public class VendaLojaVirtualService {
 
 		PessoaFisica comprador = pessoaFisicaRepository.findById(dto.getPessoaId())
 				.orElseThrow(() -> new ExceptionCustom("Comprador não encontrado."));
-		// Valida se o comprador pertencem a empresa
-		if (comprador.getEmpresa().getId() == null || !comprador.getEmpresa().getId().equals(empresa.getId())) {
-			throw new ExceptionCustom("Segurança Violada: O cliente informado não pertence a empresa logado.");
+
+		if (comprador.getEmpresa() == null || !comprador.getEmpresa().getId().equals(empresa.getId())) {
+			throw new ExceptionCustom("Segurança Violada: O cliente informado não pertence à sua empresa.");
 		}
+
 		// 2. Validar o Endereço de Entrega e Cobrança
 		Endereco entrega = enderecoRepository.findById(dto.getEnderecoEntregaId())
 				.orElseThrow(() -> new ExceptionCustom("Endereço de entrega não localizado."));
@@ -92,7 +100,6 @@ public class VendaLojaVirtualService {
 		Endereco cobranca = enderecoRepository.findById(dto.getEnderecoCobrancaId())
 				.orElseThrow(() -> new ExceptionCustom("Endereço de cobrança não localizado."));
 
-		// Valida se os endereços pertencem ao comprador
 		if (entrega.getPessoa() == null || !entrega.getPessoa().getId().equals(comprador.getId())) {
 			throw new ExceptionCustom(
 					"Segurança Violada: O endereço de entrega informado não pertence ao cliente logado.");
@@ -106,15 +113,55 @@ public class VendaLojaVirtualService {
 		FormaPagamento formaPagamento = formaPagamentoRepository.findById(dto.getFormaPagamentoId())
 				.orElseThrow(() -> new ExceptionCustom("Forma de pagamento não cadastrada."));
 
-		// 3. Validar Itens em Memória e Separar para Processamento
+		// 🔥 3. MOTOR DE VALIDAÇÃO DE CUPONS AVANÇADO (ENTERPRISE)
+		CupomDesconto cupomValido = null;
+		if (dto.getCupomDescontoId() != null) {
+			cupomValido = cupomDescontoRepository.findById(dto.getCupomDescontoId())
+					.orElseThrow(() -> new ExceptionCustom("Cupom de desconto informado não existe no catálogo."));
+
+			if (!cupomValido.getEmpresa().getId().equals(empresa.getId())) {
+				throw new ExceptionCustom("Acesso Negado: Este cupom promocional pertence a outra empresa.");
+			}
+
+			// Validação de Vigência temporal
+			if (cupomValido.getDataValidade().isBefore(LocalDate.now())) {
+				throw new ExceptionCustom(
+						"Campanha Encerrada: Este cupom de desconto expirou em " + cupomValido.getDataValidade());
+			}
+
+			// Validação de Saldo/Limite de Uso Global do cupom
+			if (cupomValido.getLimiteUsoTotal() != null && cupomValido.getQuantidadeUsado() != null) {
+				if (cupomValido.getQuantidadeUsado() >= cupomValido.getLimiteUsoTotal()) {
+					throw new ExceptionCustom(
+							"Cupom Esgotado: Este cupom atingiu a quantidade máxima de utilizações permitidas.");
+				}
+			}
+
+			// Validação de Limite por Cliente (Impede que o mesmo CPF compre usando o mesmo
+			// cupom em pedidos separados)
+			int totalVendasComCupomDesteCliente = vendaLojaVirtualRepository
+					.countVendasPorClienteECupom(comprador.getId(), cupomValido.getId());
+			if (totalVendasComCupomDesteCliente >= 1) {
+				throw new ExceptionCustom(
+						"Campanha Restrita: Seu usuário já utilizou este cupom de desconto em uma compra anterior.");
+			}
+		}
+
+		// 4. Validar Itens em Memória e Separar para Processamento
 		List<ItemVendaLoja> itensParaSalvar = new ArrayList<>();
+		boolean cupomPossuiRestricaoDeEscopo = cupomValido != null
+				&& ((cupomValido.getCategorias() != null && !cupomValido.getCategorias().isEmpty())
+						|| (cupomValido.getMarcas() != null && !cupomValido.getMarcas().isEmpty())
+						|| (cupomValido.getProdutos() != null && !cupomValido.getProdutos().isEmpty()));
+
+		boolean peloMenosUmItemValidoParaOCupom = false;
 
 		for (ItemVendaLojaDTO itemDto : dto.getItens()) {
 			Produto produto = produtoRepository.findById(itemDto.getProdutoId()).orElseThrow(
 					() -> new ExceptionCustom("Produto ID " + itemDto.getProdutoId() + " não existe no catálogo."));
 
 			if (!produto.getEmpresa().getId().equals(empresa.getId())) {
-				throw new ExceptionCustom("O produto '" + produto.getDescricao() + "' não pertence a esta empresa");
+				throw new ExceptionCustom("O produto '" + produto.getNome() + "' não pertence a esta empresa.");
 			}
 
 			// Validação de Estoque Físico
@@ -124,11 +171,27 @@ public class VendaLojaVirtualService {
 						+ ". Estoque atual: " + produto.getQtdEstoque() + ", Solicitado: " + qtdDesejada);
 			}
 
+			// 🔥 Validação Cruzada do Cupom: Verifica se o item atende às restrições de
+			// categoria/marca/produto
+			if (cupomPossuiRestricaoDeEscopo) {
+				boolean atendeCategoria = cupomValido.getCategorias() == null || cupomValido.getCategorias().isEmpty()
+						|| cupomValido.getCategorias().contains(produto.getCategoriaProduto());
+				boolean atendeMarca = cupomValido.getMarcas() == null || cupomValido.getMarcas().isEmpty()
+						|| cupomValido.getMarcas().contains(produto.getMarcaProduto());
+				boolean atendeProduto = cupomValido.getProdutos() == null || cupomValido.getProdutos().isEmpty()
+						|| cupomValido.getProdutos().contains(produto);
+
+				if (atendeCategoria && atendeMarca && atendeProduto) {
+					peloMenosUmItemValidoParaOCupom = true;
+				}
+			}
+
 			// Executa a baixa física imediata no estoque do produto
 			produto.setQtdEstoque(produto.getQtdEstoque().subtract(BigDecimal.valueOf(qtdDesejada)));
 			produtoRepository.save(produto);
 
-			// Monta a entidade associativa do item
+			// Monta a entidade associativa do item (Cast seguro de BigDecimal para Double
+			// do banco)
 			ItemVendaLoja itemVenda = new ItemVendaLoja();
 			itemVenda.setProduto(produto);
 			itemVenda.setQuantidade(qtdDesejada.doubleValue());
@@ -136,107 +199,99 @@ public class VendaLojaVirtualService {
 			itensParaSalvar.add(itemVenda);
 		}
 
-		// 4. Calcular Valores Finais e Mapear Registro Principal
-		VendaLojaVirtual model = vendaLojaVirtualMapper.toModel(dto);
-
-		// Impede o MapStruct de criar instâncias transientes
-		// vazias se o ID for nulo
-		if (dto.getCupomDescontoId() == null) {
-			model.setCupomDesconto(null); // Garante o null absoluto no banco de dados
-		} else {
-			// Caso o ID exista, opcionalmente você pode buscar o cupom no banco para
-			// validar se ele é real
-			CupomDesconto cupom = cupomDescontoRepository.findById(dto.getCupomDescontoId())
-					.orElseThrow(() -> new ExceptionCustom(
-							"Cupom de desconto com ID '" + dto.getCupomDescontoId() + "' não existe no catálogo."));
-			model.setCupomDesconto(cupom);
+		// Se o lojista definiu restrições de escopo no cupom e nenhum item do carrinho era elegível, barra o checkout
+		if (cupomValido != null && cupomPossuiRestricaoDeEscopo && !peloMenosUmItemValidoParaOCupom) {
+			throw new ExceptionCustom(
+					"Cupom Inválido: O cupom informado não é elegível para nenhum dos produtos do seu carrinho.");
 		}
+		// 5. Mapear e Configurar o Registro Principal da Venda
+		VendaLojaVirtual model = vendaLojaVirtualMapper.toModel(dto);
+		model.setCupomDesconto(cupomValido);
 		model.setEmpresa(empresa);
 		model.setPessoa(comprador);
 		model.setEnderecoEntrega(entrega);
 		model.setEnderecoCobranca(cobranca);
 		model.setFormaPagamento(formaPagamento);
-		model.setNotaFiscalVenda(null); // Nota inicia nula
-
-		// 5. Persistir o Registro Principal (Gera o ID e dispara o @PrePersist com o
-		// numeroPedido)
+		model.setNotaFiscalVenda(null);
+		
+		// 6. Persistir o Registro Principal (Aciona o @PrePersist com a autogeração do numeroPedido)
 		VendaLojaVirtual vendaSalva = vendaLojaVirtualRepository.save(model);
-
-		// 6. Vincular os Itens do Carrinho à Venda Salva e Persistir
+		
+		// 7. Vincular os Itens do Carrinho à Venda Salva e Persistir Chaves
 		for (ItemVendaLoja item : itensParaSalvar) {
 			item.setVendaLojaVirtual(vendaSalva);
 			itemVendaLojaRepository.save(item);
 		}
-
-		// 7. SIMULAÇÃO DO GATEWAY DE PAGAMENTO (Fica pronto para acoplamento de API
-		// futura)
+		
+		// 8. Se o cupom passou em todas as regras, computa o uso somando +1 no banco
+		if (cupomValido != null) {
+			cupomValido.setQuantidadeUsado(cupomValido.getQuantidadeUsado() + 1);
+			cupomDescontoRepository.save(cupomValido);
+		}
+		
+		// 🔥 9. AUTOMATIZAÇÃO DO FRETE: Gera o marco inicial cronológico na linha do tempo logística do cliente
+		StatusRastreio marcoInicial = new StatusRastreio();
+		marcoInicial.setVendaLojaVirtual(vendaSalva);
+		marcoInicial.setEmpresa(empresa);
+		marcoInicial.setCentroDistribuicao("CD Central BandAmpla");
+		marcoInicial.setCidade(entrega.getCidade());
+		marcoInicial.setEstado(entrega.getUf());
+		marcoInicial.setStatus("Pedido recebido no sistema. Frete reservado e aguardando confirmação do pagamento.");
+		statusRastreioRepository.save(marcoInicial);
+		
+		// 10. Simulação do Gateway de Pagamento
 		boolean pagamentoAprovado = simularGatewayPagamento(vendaSalva, dto);
 		if (!pagamentoAprovado) {
-			throw new ExceptionCustom("A transação financeira foi recusada pelo operadora de pagamento.");
+			throw new ExceptionCustom("A transação financeira foi recusada pela operadora de cartão/banco.");
 		}
-		if (!vendaSalva.getNumeroPedido().isEmpty()) {
-			// 8. Enviar E-mail de Confirmação para o Cliente
-			enviarEmailConfirmacaoPedido(vendaSalva);
-
-		}
-
-		// Construir Resposta DTO contendo a árvore populada
+		
+		// 🔥 Atualiza a linha do tempo logística do frete indicando aprovação financeira imediata
+		StatusRastreio marcoPagamento = new StatusRastreio();
+		marcoPagamento.setVendaLojaVirtual(vendaSalva);
+		marcoPagamento.setEmpresa(empresa);
+		marcoPagamento.setCentroDistribuicao("CD Central BandAmpla");
+		marcoPagamento.setCidade(entrega.getCidade());
+		marcoPagamento.setEstado(entrega.getUf());
+		marcoPagamento.setStatus("Pagamento confirmado com sucesso. O prazo estimado de " + vendaSalva.getDiasEntrega()
+				+ " dias para entrega foi iniciado.");
+		statusRastreioRepository.save(marcoPagamento);
+		enviarEmailConfirmacaoPedido(vendaSalva);
+		
+		// Construir Resposta DTO contendo a árvore populada unificada
 		VendaLojaVirtualDTO dtoRetorno = vendaLojaVirtualMapper.toDTO(vendaSalva);
 		dtoRetorno.setItens(converterItensParaDTO(itemVendaLojaRepository.buscarPorVendaId(vendaSalva.getId())));
-
 		return dtoRetorno;
 	}
 
-	/**
-	 * 🔥 PONTO DE EXTENSÃO: Método isolado para receber o código de integração do
-	 * Gateway no futuro.
-	 */
 	private boolean simularGatewayPagamento(VendaLojaVirtual venda, VendaLojaVirtualDTO dto) {
-		// No futuro, aqui entrará a chamada HTTP para Asaas, Mercado Pago, etc.
-		// Exemplo: String response = asaasService.gerarCobranca(venda);
-		/*
-		 * FormaPagamento forma =
-		 * formaPagamentoRepository.findById(venda.getFormaPagamento());
-		 * 
-		 * // O Java inspeciona o ENUM para saber qual API de Gateway chamar: if
-		 * (forma.getTipoPagamento() == TipoFormaPagamento.PIX) { // Dispara a chamada
-		 * de API do Asaas/MercadoPago para gerar o QR Code do PIX } else if
-		 * (forma.getTipoPagamento() == TipoFormaPagamento.CARTAOCREDITO) { // Dispara a
-		 * chamada de API enviando o token do cartão para captura de crédito } else if
-		 * (forma.getTipoPagamento() == TipoFormaPagamento.BOLETO) { // Dispara a
-		 * geração de PDF de linha digitável do Boleto bancário }
-		 */
 		System.out.println(
-				"====== [GATEWAY SIMULADO] Processando pagamento do pedido: " + venda.getNumeroPedido() + " ======");
-		return true; // Simula resposta estável de sucesso com aprovação imediata
+				"====== [GATEWAY SIMULADO] Processando faturamento do pedido: " + venda.getNumeroPedido() + " ======");
+		return true;
 	}
 
 	private void enviarEmailConfirmacaoPedido(VendaLojaVirtual venda) {
 		try {
-			String html = "<h2>Olá " + venda.getPessoa().getNome() + "!</h2>" + "<p>Seu pedido <b>"
-					+ venda.getNumeroPedido() + "</b> foi recebido e o pagamento aprovado.</p>"
-					+ "<p>Valor total faturado: R$ " + venda.getValorTotal() + "</p>"
-					+ "<p>Em breve iniciaremos a emissão da Nota Fiscal.</p>";
-
-			sendMailService.enviarEmailHtml("Pedido Confirmado - " + venda.getNumeroPedido(), html,
+			String html = "Olá " + venda.getPessoa().getNome() + "!" + "Seu pedido " + venda.getNumeroPedido()
+					+ " foi recebido e o frete já foi contratado com sucesso." + "Prazo estimado de entrega: "
+					+ venda.getDiasEntrega() + " dias úteis." + "Valor total pago: R$ " + venda.getValorTotal() + "";
+			sendMailService.enviarEmailHtml("Pedido Confirmado e Frete Contratado - " + venda.getNumeroPedido(), html,
 					venda.getPessoa().getEmail());
 		} catch (Exception e) {
-			System.err.println("====== Falha não impeditiva ao despachar e-mail de confirmação: " + e.getMessage());
+			System.err.println("====== Falha não impeditiva ao despachar e-mail: " + e.getMessage());
 		}
 	}
 
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public void deletar(Long id, UsuarioLogadoPrincipal usuarioLogado) throws ExceptionCustom {
 		if (id == null || id <= 0) {
 			throw new ExceptionCustom("ID de venda inválido.");
 		}
 		VendaLojaVirtual venda = vendaLojaVirtualRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Venda não encontrada para cancelamento."));
-
 		if (!venda.getEmpresa().getId().equals(usuarioLogado.getEmpresaId())) {
 			throw new ExceptionCustom("Você não possui permissão para alterar dados desta empresa.");
 		}
-
+		
 		// Estorna os itens removidos de volta para o estoque ao cancelar o pedido
 		List<ItemVendaLoja> itens = itemVendaLojaRepository.buscarPorVendaId(venda.getId());
 		for (ItemVendaLoja item : itens) {
@@ -246,6 +301,10 @@ public class VendaLojaVirtualService {
 			itemVendaLojaRepository.delete(item);
 		}
 
+		// Limpa o histórico físico de rastreio de frete associado antes de apagar a
+		// venda pai do banco
+		List<StatusRastreio> rastreios = statusRastreioRepository.buscarRastreioPorVendaId(venda.getId());
+		statusRastreioRepository.deleteAll(rastreios);
 		vendaLojaVirtualRepository.delete(venda);
 	}
 
@@ -255,13 +314,10 @@ public class VendaLojaVirtualService {
 		}
 		VendaLojaVirtual venda = vendaLojaVirtualRepository.findById(id)
 				.orElseThrow(() -> new ExceptionCustom("Venda não encontrada."));
-
 		if (!venda.getEmpresa().getId().equals(usuarioLogado.getEmpresaId())) {
 			throw new ExceptionCustom("Acesso negado para este faturamento.");
 		}
-
 		VendaLojaVirtualDTO dto = vendaLojaVirtualMapper.toDTO(venda);
-		// 🔥 CORRIGIDO: Agora chama o método correto do carrinho
 		dto.setItens(converterItensParaDTO(itemVendaLojaRepository.buscarPorVendaId(venda.getId())));
 		return dto;
 	}
@@ -273,7 +329,6 @@ public class VendaLojaVirtualService {
 
 		return vendaLojaVirtualRepository.findAll(spec).stream().map(v -> {
 			VendaLojaVirtualDTO d = vendaLojaVirtualMapper.toDTO(v);
-			// 🔥 CORRIGIDO: Agora chama o método correto do carrinho
 			d.setItens(converterItensParaDTO(itemVendaLojaRepository.buscarPorVendaId(v.getId())));
 			return d;
 		}).collect(Collectors.toList());
@@ -284,7 +339,6 @@ public class VendaLojaVirtualService {
 				.where(VendaLojaVirtualSpec.empresaIgual(usuarioLogado.getEmpresaId()));
 		return vendaLojaVirtualRepository.findAll(spec).stream().map(v -> {
 			VendaLojaVirtualDTO d = vendaLojaVirtualMapper.toDTO(v);
-			// 🔥 CORRIGIDO: Agora chama o método correto do carrinho
 			d.setItens(converterItensParaDTO(itemVendaLojaRepository.buscarPorVendaId(v.getId())));
 			return d;
 		}).collect(Collectors.toList());
@@ -296,10 +350,8 @@ public class VendaLojaVirtualService {
 		Specification<VendaLojaVirtual> spec = Specification
 				.where(VendaLojaVirtualSpec.empresaIgual(usuarioLogado.getEmpresaId()))
 				.and(VendaLojaVirtualSpec.numeroPedidoContem(numeroPedido));
-
 		return vendaLojaVirtualRepository.findAll(spec, pageable).map(v -> {
 			VendaLojaVirtualDTO d = vendaLojaVirtualMapper.toDTO(v);
-			// 🔥 CORRIGIDO: Agora chama o método correto do carrinho
 			d.setItens(converterItensParaDTO(itemVendaLojaRepository.buscarPorVendaId(v.getId())));
 			return d;
 		});
@@ -310,14 +362,14 @@ public class VendaLojaVirtualService {
 		Pageable pageable = PageRequest.of(page, size, Sort.Direction.fromString(direction), sort);
 		Specification<VendaLojaVirtual> spec = Specification
 				.where(VendaLojaVirtualSpec.empresaIgual(usuarioLogado.getEmpresaId()));
-
 		return vendaLojaVirtualRepository.findAll(spec, pageable).map(v -> {
 			VendaLojaVirtualDTO d = vendaLojaVirtualMapper.toDTO(v);
-			// 🔥 CORRIGIDO: Agora chama o método correto do carrinho
 			d.setItens(converterItensParaDTO(itemVendaLojaRepository.buscarPorVendaId(v.getId())));
 			return d;
 		});
 	}
+	// 🔥 Conversores auxiliares internos de tipos para tráfego seguro de
+	// BigDecimal em itens de carrinho DTO
 
 	private List<ItemVendaLojaDTO> converterItensParaDTO(List<ItemVendaLoja> itens) {
 		if (itens == null)

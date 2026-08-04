@@ -2,11 +2,12 @@ package com.bandampla.lojavirtual.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 import com.bandampla.lojavirtual.dto.NotaFiscalVendaDTO;
 import com.bandampla.lojavirtual.model.NotaFiscalVenda;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface NotaFiscalVendaMapper {
 
 	@Mapping(source = "empresa.id", target = "empresaId")
@@ -15,5 +16,7 @@ public interface NotaFiscalVendaMapper {
 
 	@Mapping(source = "empresaId", target = "empresa.id")
 	@Mapping(source = "vendaLojaVirtualId", target = "vendaLojaVirtual.id")
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
 	NotaFiscalVenda toModel(NotaFiscalVendaDTO dto);
 }

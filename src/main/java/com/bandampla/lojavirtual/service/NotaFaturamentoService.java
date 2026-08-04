@@ -30,9 +30,9 @@ public class NotaFaturamentoService {
 	private final NotaFiscalVendaMapper notaMapper;
 	private final StatusRastreioMapper statusRastreioMapper;
 
-	public NotaFaturamentoService(NotaFiscalVendaRepository notaRepository, StatusRastreioRepository statusRastreioRepository,
-			VendaLojaVirtualRepository vendaLojaVirtualRepository, NotaFiscalVendaMapper notaMapper,
-			StatusRastreioMapper statusRastreioMapper) {
+	public NotaFaturamentoService(NotaFiscalVendaRepository notaRepository,
+			StatusRastreioRepository statusRastreioRepository, VendaLojaVirtualRepository vendaLojaVirtualRepository,
+			NotaFiscalVendaMapper notaMapper, StatusRastreioMapper statusRastreioMapper) {
 		this.notaRepository = notaRepository;
 		this.statusRastreioRepository = statusRastreioRepository;
 		this.vendaLojaVirtualRepository = vendaLojaVirtualRepository;
