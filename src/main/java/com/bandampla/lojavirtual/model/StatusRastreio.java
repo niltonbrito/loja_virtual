@@ -32,11 +32,11 @@ public class StatusRastreio extends EntidadeAuditavel implements Serializable {
 	private String status;
 
 	@ManyToOne
-	@JoinColumn(name = "venda_compra_virtual_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "venda_loja_virtual_fk"))
+	@JoinColumn(name = "venda_loja_virtual_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "status_rastreio_venda_loja_virtual_fk"))
 	private VendaLojaVirtual vendaLojaVirtual;
 
 	@ManyToOne
-	@JoinColumn(name = "compra_loja_virtual_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "compra_loja_virtual_fk"))
+	@JoinColumn(name = "compra_loja_virtual_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "status_rastreio_compra_loja_virtual_fk"))
 	private CompraLojaVirtual compraLojaVirtual; // Reaproveitamento nativo mapeado para a futura tabela B2B de compras
 
 	@ManyToOne

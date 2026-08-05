@@ -1,7 +1,6 @@
 package com.bandampla.lojavirtual.exception;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.UUID;
 
@@ -10,6 +9,8 @@ import javax.mail.MessagingException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +34,7 @@ import io.jsonwebtoken.MalformedJwtException;
 @RestControllerAdvice
 public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler {
 
+	private static final Logger log = LoggerFactory.getLogger(ControllerExceptionAdvertise.class);
 	@Autowired
 	private SendMailService sendMailService;
 
@@ -56,7 +58,7 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 		try {
 			sendMailService.enviarEmailHtml("Erro detectado na plataforma Loja Virtual Bandampla!",
 					mensagemHtml.toString(), "nilton.brito@outlook.com");
-		} catch (UnsupportedEncodingException | MessagingException e) {
+		} catch (MessagingException e) {
 			e.printStackTrace();
 		}
 	}
@@ -168,6 +170,9 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 				if ("TipoPessoa".equals(enumClass)) {
 					errorResponseDTO = new ErrorResponseDTO("400", "Valor inválido para '" + field + "'",
 							"Use apenas: FISICA ou JURIDICA", path, traceId);
+				} else if ("RoleUser".equals(enumClass)) {
+					return new ResponseEntity<>(new ErrorResponseDTO("400", "Valor inválido para não pode ser vázio ou nulo '" + field1 + "'",
+							"Use apenas: ROLE_USER, ROLE_CLIENTE, ROLE_FINANCEIRO, ROLE_ESTOQUE, ROLE_GERENTE, ROLE_ADMIN, ROLE_SUPER_ADMIN;", path, traceId), HttpStatus.BAD_REQUEST);
 				} else if (targetType.equals("Boolean")) {
 					return new ResponseEntity<>(new ErrorResponseDTO("400", "Valor inválido para '" + field1 + "'",
 							"Use apenas true ou false", path, traceId), HttpStatus.BAD_REQUEST);
@@ -175,10 +180,10 @@ public class ControllerExceptionAdvertise extends ResponseEntityExceptionHandler
 					errorResponseDTO = new ErrorResponseDTO("400", "Valor inválido para o campo '" + field + "'",
 							"Tipo de dado incompatível", path, traceId);
 				}
-			} else if (rootCause instanceof MalformedJwtException)  {
+			} else if (rootCause instanceof MalformedJwtException) {
 				errorResponseDTO = new ErrorResponseDTO("400", "Erro ao ler o JSON enviado",
 						"Verifique o corpo da requisição", path, traceId);
-			}else {
+			} else {
 				errorResponseDTO = new ErrorResponseDTO("400", "Erro ao ler o JSON enviado",
 						"Verifique o corpo da requisição", path, traceId);
 			}

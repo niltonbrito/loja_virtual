@@ -5,6 +5,7 @@ package com.bandampla.lojavirtual.dto;
 
 import java.math.BigDecimal;
 
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
@@ -17,21 +18,21 @@ public class NotaItemProdutoDTO {
 
 	private Long id;
 
-    @NotNull(message = "Informe a quantidade do produto.")
-    @Positive(message = "A quantidade do produto deve ser maior que zero.")
-    private BigDecimal quantidade;
+	@NotNull(message = "Informe a quantidade do produto.")
+	@DecimalMin(value = "0.0001", message = "A quantidade do produto deve ser maior que zero.")
+	private BigDecimal quantidade;
 
-    @NotNull(message = "Informe o valor unitário do produto.")
-    @Positive(message = "O valor unitário do produto deve ser maior que zero.")
-    private BigDecimal valorUnitarioCusto;
+	@NotNull(message = "Informe o valor unitário do produto.")
+	@DecimalMin(value = "0.01", message = "O valor unitário do produto deve ser maior que zero.")
+	private BigDecimal valorUnitarioCusto;
 
-	@NotNull(message = "O numero da nota fiscal de compra deve ser informado.")
-	@Positive(message = "O ID da nota fiscal de compra deve ser maior que zero.")
+	// Preenchido pelo servidor quando o item é enviado dentro de
+	// NotaFiscalCompraDTO.
 	private Long notaFiscalCompraId;
 
-    @NotNull(message = "O Produto deve ser informado.")
-    @Positive(message = "O ID do Produto deve ser maior que zero.")
-    private Long produtoId;
+	@NotNull(message = "O Produto deve ser informado.")
+	@Positive(message = "O ID do Produto deve ser maior que zero.")
+	private Long produtoId;
 
 	public Long getId() {
 		return id;

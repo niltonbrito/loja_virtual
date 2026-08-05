@@ -4,11 +4,15 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
 import com.bandampla.lojavirtual.dto.ContaPagarDTO;
 import com.bandampla.lojavirtual.model.ContaPagar;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",
+unmappedTargetPolicy = ReportingPolicy.IGNORE,
+nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ContaPagarMapper {
 
     @Mapping(source = "empresa.id", target = "empresaId")

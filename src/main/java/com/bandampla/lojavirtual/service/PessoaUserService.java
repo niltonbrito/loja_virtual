@@ -199,33 +199,36 @@ public class PessoaUserService {
 	}
 
 	private void criarUsuario(Pessoa pessoa, PessoaJuridica empresa) {
-		Usuario usuario = usuarioRepository.finUserByPessoa(pessoa.getId(), pessoa.getEmail());
-		if (usuario != null) {
+		Optional<Usuario> usuarioExistente = usuarioRepository.findByPessoaOuLogin(pessoa.getId(), pessoa.getEmail());
+		// Se já existir usuário para a pessoa ou para o login, não cria novamente.
+		if (usuarioExistente.isPresent()) {
 			return;
 		}
+		@SuppressWarnings("unused")
 		String constraint = usuarioRepository.consultaConstraintAcesso();
 		if (constraint != null) {
 			jdbcTemplate.execute("begin; alter table usuario_acesso drop constraint " + constraint + "; commit;");
 		}
 
-		usuario = new Usuario();
+		Usuario usuario = new Usuario();
 		usuario.setLogin(pessoa.getEmail());
 
-		String senha = "" + Calendar.getInstance().getTimeInMillis();
-		usuario.setSenha(new BCryptPasswordEncoder().encode(senha));
+		String senhaTemporaria = String.valueOf(Calendar.getInstance().getTimeInMillis());
+		usuario.setSenha(new BCryptPasswordEncoder().encode(senhaTemporaria));
 		usuario.setCreateAt(LocalDate.now());
 		usuario.setPessoa(pessoa);
 		usuario.setEmpresa(empresa);
 
-		usuario = usuarioRepository.save(usuario);
+		Usuario usuarioSalvo = usuarioRepository.save(usuario);
 		String role = (pessoa instanceof PessoaJuridica) ? RoleUser.ROLE_ADMIN.name() : RoleUser.ROLE_USER.name();
-		usuarioRepository.insereAcessoUser(usuario.getId(), role);
+		usuarioRepository.insereAcessoUser(usuarioSalvo.getId(), role);
 
 		StringBuilder mensagemHtml = new StringBuilder();
 		mensagemHtml.append("<b>Olá: " + pessoa.getNome() + " </b>").append("<br/>");
 		mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
 		mensagemHtml.append("<b>Login: </b>" + pessoa.getEmail()).append("<br/>");
-		mensagemHtml.append("<b>Senha: </b>").append(senha).append("<br/><br/>");
+		mensagemHtml.append("<b>Senha temporária: </b>").append(senhaTemporaria).append("<br/>");
+		mensagemHtml.append("Altere sua senha após o primeiro acesso.").append("<br/><br/>");
 		mensagemHtml.append("Obrigado");
 
 		try {

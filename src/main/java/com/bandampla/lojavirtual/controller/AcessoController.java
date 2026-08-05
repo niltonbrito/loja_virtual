@@ -69,4 +69,12 @@ public class AcessoController implements AcessoControllerAPI {
 				.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Acessos listados por papel com sucesso",
 						acessoService.buscarPorRole(role), request.getRequestURI(), traceId));
 	}
+	
+	@Override
+	public ResponseEntity<ResponseDefaultDTO<List<AcessoDTO>>> buscarTodos() throws ExceptionCustom {
+		String traceId = UUID.randomUUID().toString();
+		List<AcessoDTO> retorno = acessoService.buscarTodos();
+		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(),
+				"Lista de ROLEs", retorno, request.getRequestURI(), traceId));
+	}
 }

@@ -1,102 +1,63 @@
 package com.bandampla.lojavirtual.security;
 
-import java.io.IOException;
 import java.util.Date;
-import java.util.Optional;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+
 import com.bandampla.lojavirtual.model.Usuario;
 import com.bandampla.lojavirtual.repository.UsuarioRepository;
+
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @Service
 public class JWTTokenAutenticacaoService {
 
-    private static final long EXPIRATION_TIME = 1296000000L;
-    private static final String SECRET = "8@nd@Mp1@2026";
-    private static final String TOKEN_PREFIX = "Bearer";
-    private static final String HEADER_STRING = "Authorization";
+	private static final String TOKEN_PREFIX = "Bearer";
+	private static final String HEADER_STRING = "Authorization";
 
-    private final UsuarioRepository usuarioRepository;
+	private final UsuarioRepository usuarioRepository;
+	private final String secret;
+	private final long expirationMillis;
 
-    public JWTTokenAutenticacaoService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
-    }
-
-    public void addAuthentication(HttpServletResponse response, String username) throws Exception {
-        Optional<Usuario> optUsuario = usuarioRepository.findByLogin(username);
-        Long empresaId = null;
-        if (optUsuario.isPresent() && optUsuario.get().getEmpresa() != null) {
-            empresaId = optUsuario.get().getEmpresa().getId();
-        }
-
-        String jwt = Jwts.builder()
-                .setSubject(username)
-                .claim("empresaId", empresaId)
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS512, SECRET)
-                .compact();
-
-        String token = TOKEN_PREFIX + " " + jwt;
-        response.addHeader(HEADER_STRING, token);
-        liberacaoCors(response);
-        response.getWriter().write("{\"Authorization\": \"" + token + "\"}");
-    }
-
-    public Authentication getAuthentication(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String tokenString = request.getHeader(HEADER_STRING);
-
-        if (tokenString != null && tokenString.startsWith("Bearer ")) {
-            String token = tokenString.replace(TOKEN_PREFIX, "").trim();
-            try {
-                String usuarioLogin = Jwts.parser()
-                        .setSigningKey(SECRET)
-                        .parseClaimsJws(token)
-                        .getBody()
-                        .getSubject();
-
-                if (usuarioLogin != null) {
-                    Optional<Usuario> optUsuario = usuarioRepository.findByLogin(usuarioLogin);
-                    if (optUsuario.isPresent()) {
-                        
-                        // 🔄 Transforma em Principal para o Controller ler os IDs
-                        UsuarioLogadoPrincipal principal = new UsuarioLogadoPrincipal(optUsuario.get());
-                        
-                        return new UsernamePasswordAuthenticationToken(
-                                principal, 
-                                null, 
-                                principal.getAuthorities());
-                    }
-                }
-            } catch (io.jsonwebtoken.SignatureException e) {
-				response.getWriter().write("Token está inválido: " + e.getMessage());
-				e.printStackTrace();
-			} catch (io.jsonwebtoken.ExpiredJwtException e) {
-				response.getWriter().write("Token está expirado, efetue o login novamente: " + e.getMessage());
-				e.printStackTrace();
-			} finally {
-				liberacaoCors(response);
-			}
-		}
-		return null;
+	public JWTTokenAutenticacaoService(UsuarioRepository usuarioRepository, @Value("${app.jwt.secret}") String secret,
+			@Value("${app.jwt.expiration-millis:1296000000}") long expirationMillis) {
+		this.usuarioRepository = usuarioRepository;
+		this.secret = secret;
+		this.expirationMillis = expirationMillis;
 	}
 
-	private void liberacaoCors(HttpServletResponse response) {
-		if (response.getHeader("Access-Control-Allow-Origin") == null) {
-			response.addHeader("Access-Control-Allow-Origin", "*");
+	public String createToken(String username) {
+		Usuario usuario = usuarioRepository.findByLogin(username)
+				.orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
+		Long empresaId = usuario.getEmpresa() == null ? null : usuario.getEmpresa().getId();
+		return Jwts.builder().setSubject(username).claim("empresaId", empresaId).setIssuedAt(new Date())
+				.setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
+				.signWith(SignatureAlgorithm.HS512, secret).compact();
+	}
+
+	public void addAuthentication(HttpServletResponse response, String username) {
+		response.setHeader(HEADER_STRING, TOKEN_PREFIX + createToken(username));
+	}
+
+	public Authentication getAuthentication(HttpServletRequest request) {
+		String header = request.getHeader(HEADER_STRING);
+		if (header == null || !header.startsWith(TOKEN_PREFIX)) {
+			return null;
 		}
-		if (response.getHeader("Access-Control-Allow-Header") == null) {
-			response.addHeader("Access-Control-Allow-Header", "*");
-		}
-		if (response.getHeader("Access-Control-Request-Headers") == null) {
-			response.addHeader("Access-Control-Request-Headers", "*");
-		}
-		if (response.getHeader("Access-Control-Allow-Methods") == null) {
-			response.addHeader("Access-Control-Allow-Methods", "*");
-		}
+		String token = header.substring(TOKEN_PREFIX.length()).trim();
+		Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+		String login = claims.getSubject();
+		Usuario usuario = usuarioRepository.findByLogin(login)
+				.orElseThrow(() -> new IllegalArgumentException("Usuário do token não encontrado."));
+		UsuarioLogadoPrincipal principal = new UsuarioLogadoPrincipal(usuario);
+		return new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
 	}
 }

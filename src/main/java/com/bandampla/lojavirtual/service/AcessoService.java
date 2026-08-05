@@ -26,9 +26,6 @@ public class AcessoService {
 
 	@Transactional(rollbackFor = Exception.class)
 	public AcessoDTO cadastrar(AcessoDTO dto) throws ExceptionCustom {
-		if (dto == null) {
-			throw new ExceptionCustom("Os dados de acesso não podem ser nulos.");
-		}
 
 		RoleUser roleUser = dto.getRoleUser();
 
@@ -68,5 +65,10 @@ public class AcessoService {
 	public List<AcessoDTO> buscarPorRole(RoleUser roleUser) {
 		List<Acesso> lista = acessoRepository.findByRoleUser(roleUser);
 		return lista.stream().map(acessoMapper::toDTO).collect(Collectors.toList());
+	}
+
+	public List<AcessoDTO> buscarTodos() {
+		return acessoRepository.findAll().stream()
+				.map(acesso -> acessoMapper.toDTO(acesso)).collect(Collectors.toList());
 	}
 }

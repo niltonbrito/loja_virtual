@@ -105,6 +105,14 @@ public class SolicitacaoCompra implements Serializable {
 		return setorSolicitante;
 	}
 
+	public Pessoa getSolicitante() {
+		return solicitante;
+	}
+
+	public void setSolicitante(Pessoa solicitante) {
+		this.solicitante = solicitante;
+	}
+
 	public void setSetorSolicitante(Setor setorSolicitante) {
 		this.setorSolicitante = setorSolicitante;
 	}
@@ -123,6 +131,17 @@ public class SolicitacaoCompra implements Serializable {
 
 	public void setItens(List<SolicitacaoCompraItem> itens) {
 		this.itens = itens;
+	}
+
+	public void adicionarItem(SolicitacaoCompraItem item) {
+		itens.add(item);
+		item.setSolicitacaoCompra(this);
+		item.setEmpresa(this.empresa);
+	}
+
+	public void removerItem(SolicitacaoCompraItem item) {
+		itens.remove(item);
+		item.setSolicitacaoCompra(null);
 	}
 
 	@Override

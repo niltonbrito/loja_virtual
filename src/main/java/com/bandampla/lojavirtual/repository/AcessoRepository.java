@@ -23,5 +23,4 @@ import com.bandampla.lojavirtual.model.Acesso;
 public interface AcessoRepository extends JpaRepository<Acesso, Long>{
 	
 	List<Acesso> findByRoleUser(RoleUser roleUser);
-
 }

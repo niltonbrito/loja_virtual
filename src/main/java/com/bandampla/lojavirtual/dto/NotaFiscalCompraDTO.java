@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.validation.Valid;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -23,13 +25,14 @@ public class NotaFiscalCompraDTO {
 	private String descricaoObservacao;
 
 	@NotNull(message = "Informe o valor total da Nota Fiscal.")
-	@Positive(message = "O valor total deve ser maior que zero.")
+    @DecimalMin(value = "0.01", message = "O valor total deve ser maior que zero.")
 	private BigDecimal valorTotal;
 
+    @DecimalMin(value = "0.00", message = "O desconto não pode ser negativo.")
 	private BigDecimal valorDesconto;
 
-	@NotNull(message = "Informe o valor do ICMS da Nota Fiscal.")
-	@Positive(message = "O valor do ICMS deve ser maior que zero.")
+    @NotNull(message = "Informe o valor do ICMS da Nota Fiscal.")
+    @DecimalMin(value = "0.00", message = "O valor do ICMS não pode ser negativo.")
 	private BigDecimal valorIcms;
 
     @NotNull(message = "Informe a data da compra.")
@@ -46,6 +49,7 @@ public class NotaFiscalCompraDTO {
     
 	private Long contaPagarId;
 
+    @Valid
     @NotNull(message = "Informe ao menos um item na nota fiscal.")
     private List<NotaItemProdutoDTO> itens;
     

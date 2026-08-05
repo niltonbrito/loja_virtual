@@ -2,6 +2,8 @@ package com.bandampla.lojavirtual.controller.api;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +24,7 @@ public interface AcessoControllerAPI {
 
 	@Operation(summary = "Cadastrar Acesso", description = "Cria um novo nível de permissão ou papel de segurança no banco de dados.")
 	@PostMapping
-	ResponseEntity<ResponseDefaultDTO<AcessoDTO>> cadastrar(@RequestBody AcessoDTO dto) throws ExceptionCustom;
+	ResponseEntity<ResponseDefaultDTO<AcessoDTO>> cadastrar(@Valid @RequestBody AcessoDTO dto) throws ExceptionCustom;
 
 	@Operation(summary = "Deletar Acesso por ID", description = "Remove cirurgicamente uma permissão de acesso a partir do seu ID numérico único.")
 	@DeleteMapping("/{id}")
@@ -35,4 +37,8 @@ public interface AcessoControllerAPI {
 	@Operation(summary = "Buscar por Role", description = "Filtra e retorna todas as permissões associadas a um determinado papel do Enum de segurança.")
 	@GetMapping("/role/{role}")
 	ResponseEntity<ResponseDefaultDTO<List<AcessoDTO>>> buscarPorRole(@PathVariable RoleUser role);
+	
+	@Operation(summary = "Listar todas as permissões do sistema", description = "Recupera a lista de permissões do sistema.")
+	@GetMapping
+	ResponseEntity<ResponseDefaultDTO<List<AcessoDTO>>> buscarTodos() throws ExceptionCustom;
 }

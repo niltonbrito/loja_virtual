@@ -3,16 +3,13 @@
  */
 package com.bandampla.lojavirtual.service;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import javax.mail.MessagingException;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.bandampla.lojavirtual.exception.ExceptionCustom;
 import com.bandampla.lojavirtual.model.Usuario;
 import com.bandampla.lojavirtual.repository.UsuarioRepository;
 
@@ -25,34 +22,33 @@ import com.bandampla.lojavirtual.repository.UsuarioRepository;
 @Service
 public class TarefasAutomatizadaService {
 
-	@Autowired
-	private UsuarioRepository usuarioRepository;
+	private static final Logger log = LoggerFactory.getLogger(TarefasAutomatizadaService.class);
+	private final UsuarioRepository usuarioRepository;
+	private final SendMailService sendMailService;
 
-	@Autowired
-	private SendMailService sendMailService;
+	public TarefasAutomatizadaService(UsuarioRepository usuarioRepository, SendMailService sendMailService) {
+		this.usuarioRepository = usuarioRepository;
+		this.sendMailService = sendMailService;
+	}
 
 	@Scheduled(initialDelay = 2000, fixedDelay = 86400000) /* Roda a cada 24horas */
 	// @Scheduled(cron = "0 0 11 * * *", zone = "America/Sao Paulo") /*Vai rodar
 	// todo dia as11 horas da manha horario de Sao Paulo*/
-	public void notificarUserTrocaSenha()
-			throws UnsupportedEncodingException, MessagingException, InterruptedException, ExceptionCustom {
+	public void notificarUsuariosComSenhaVencida() {
 
 		List<Usuario> usuarios = usuarioRepository.usuarioSenhaVencida();
-
 		for (Usuario usuario : usuarios) {
-			if (usuario.getUpdateAt() == null) {
-				throw new ExceptionCustom("O campo atualização Data Senha nao pode ser nulo ");
+			if (usuario.getUpdateAt() == null || usuario.getLogin() == null) {
+				log.warn("Usuário {} ignorado por ausência de updateAt/login", usuario.getId());
+				continue;
 			}
-			StringBuilder mensagemHtml = new StringBuilder();
-			mensagemHtml.append("Olá, ").append(usuario.getPessoa().getNome() + "!").append("<br/>");
-			mensagemHtml.append("Está na hora de trocar a sua senha, já passou 90 dias de validade.").append("<br/>");
-			mensagemHtml.append("Troque sua senha da loja virtual Bandampla").append("<br/><br/>");
-
-			sendMailService.enviarEmailHtml("Troca de senha!", mensagemHtml.toString(), usuario.getLogin());
-
-			Thread.sleep(3000);
+			String html = "Olá, " + usuario.getPessoa().getNome()
+					+ "!<br/>Sua senha possui mais de 90 dias. Atualize-a na Loja Virtual Bandampla.";
+			try {
+				sendMailService.enviarEmailHtml("Atualização de senha", html, usuario.getLogin());
+			} catch (Exception ex) {
+				log.error("Falha ao enfileirar e-mail para usuário {}", usuario.getId(), ex);
+			}
 		}
-
 	}
-
 }
