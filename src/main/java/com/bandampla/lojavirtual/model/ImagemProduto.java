@@ -1,7 +1,7 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
@@ -14,13 +14,15 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
 import org.hibernate.annotations.Type;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "imagem_produto")
 @SequenceGenerator(name = "seq_imagem_produto", sequenceName = "seq_imagem_produto", allocationSize = 1, initialValue = 1)
-public class ImagemProduto implements Serializable {
+public class ImagemProduto extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 

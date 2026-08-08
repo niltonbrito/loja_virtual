@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.bandampla.lojavirtual.model.PessoaFisica;
 
-
 /**
  * @author: Nilton Brito
  * @Email: <nilton.brito@outlook.com>
@@ -26,6 +25,8 @@ import com.bandampla.lojavirtual.model.PessoaFisica;
 public interface PessoaFisicaRepository extends JpaRepository<PessoaFisica, Long> {
 
 	Optional<PessoaFisica> findByCpf(String cpf);
+
+	boolean existsByCpf(String cpf);
 
 	@Query("select pf from PessoaFisica pf where upper(pf.nome) like upper(concat('%', :nome, '%'))")
 	List<PessoaFisica> findByNome(@Param("nome") String nome);

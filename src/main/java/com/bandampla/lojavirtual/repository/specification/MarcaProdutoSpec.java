@@ -17,20 +17,20 @@ public class MarcaProdutoSpec {
 	}
 
 	// Filtro por Descricao exato (IgnoreCase) para validação de duplicidade
-	public static Specification<MarcaProduto> descricaoExata(String nomeDescricao) {
+	public static Specification<MarcaProduto> descricaoExata(String descricao) {
 		return (root, query, cb) -> {
-			if (!StringUtils.hasText(nomeDescricao))
+			if (!StringUtils.hasText(descricao))
 				return null;
-			return cb.equal(cb.lower(root.get("nomeDescricao")), nomeDescricao.trim().toLowerCase());
+			return cb.equal(cb.lower(root.get("descricao")), descricao.trim().toLowerCase());
 		};
 	}
 
 	// Filtro por Descrição parcial (LIKE)
-	public static Specification<MarcaProduto> descricaoContem(String nomeDescricao) {
+	public static Specification<MarcaProduto> descricaoContem(String descricao) {
 		return (root, query, cb) -> {
-			if (!StringUtils.hasText(nomeDescricao))
+			if (!StringUtils.hasText(descricao))
 				return null;
-			return cb.like(cb.lower(root.get("nomeDescricao")), "%" + nomeDescricao.toLowerCase() + "%");
+			return cb.like(cb.lower(root.get("descricao")), "%" + descricao.toLowerCase() + "%");
 		};
 	}
 

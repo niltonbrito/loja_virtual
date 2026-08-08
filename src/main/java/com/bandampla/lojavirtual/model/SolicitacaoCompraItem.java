@@ -3,7 +3,6 @@
  */
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -26,7 +25,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "solicitacao_compra_item")
 @SequenceGenerator(name = "seq_solicitacao_compra_item", sequenceName = "seq_solicitacao_compra_item", allocationSize = 1, initialValue = 1)
-public class SolicitacaoCompraItem implements Serializable {
+public class SolicitacaoCompraItem extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 

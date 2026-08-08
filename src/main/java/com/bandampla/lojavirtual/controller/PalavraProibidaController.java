@@ -69,10 +69,10 @@ public class PalavraProibidaController implements PalavraProibidaControllerAPI {
 	}
 
 	@Override
-	public ResponseEntity<ResponseDefaultDTO<List<PalavraProibidaDTO>>> buscarPorDescricao(String termo)
+	public ResponseEntity<ResponseDefaultDTO<List<PalavraProibidaDTO>>> buscarPorDescricao(String descricao)
 			throws ExceptionCustom {
 		String traceId = UUID.randomUUID().toString();
-		List<PalavraProibidaDTO> retorno = palavraProibidaService.buscarPorDescricao(termo);
+		List<PalavraProibidaDTO> retorno = palavraProibidaService.buscarPorDescricao(descricao);
 
 		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(), "Termos proibidos recuperados",
 				retorno, request.getRequestURI(), traceId));
@@ -88,10 +88,10 @@ public class PalavraProibidaController implements PalavraProibidaControllerAPI {
 	}
 
 	@Override
-	public ResponseEntity<ResponseDefaultDTO<Page<PalavraProibidaDTO>>> buscarAvancado(String termo, int page,
+	public ResponseEntity<ResponseDefaultDTO<Page<PalavraProibidaDTO>>> buscarAvancado(String descricao, int page,
 			int size) {
 		String traceId = UUID.randomUUID().toString();
-		Page<PalavraProibidaDTO> retorno = palavraProibidaService.buscarAvancado(termo, page, size);
+		Page<PalavraProibidaDTO> retorno = palavraProibidaService.buscarAvancado(descricao, page, size);
 
 		return ResponseEntity.ok(new ResponseDefaultDTO<>(HttpStatus.OK.toString(),
 				"Busca avançada global de termos concluída", retorno, request.getRequestURI(), traceId));

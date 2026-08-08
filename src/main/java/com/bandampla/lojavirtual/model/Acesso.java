@@ -20,15 +20,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "acesso")
 @SequenceGenerator(name = "seq_acesso", sequenceName = "seq_acesso", allocationSize = 1, initialValue = 1)
-public class Acesso implements GrantedAuthority {
+public class Acesso extends EntidadeAuditavel implements GrantedAuthority {
 
 	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_acesso")
 	private Long id;
-	
-	@Enumerated(EnumType.STRING)
+
 	@Column(nullable = false)
+	private String descricao;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, unique = true)
 	private RoleUser roleUser;
 
 	@JsonIgnore
@@ -43,6 +46,14 @@ public class Acesso implements GrantedAuthority {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getDescricao() {
+		return descricao;
+	}
+
+	public void setDescricao(String descricao) {
+		this.descricao = descricao;
 	}
 
 	public RoleUser getRoleUser() {

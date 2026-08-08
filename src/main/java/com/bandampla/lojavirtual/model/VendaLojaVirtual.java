@@ -1,8 +1,8 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -23,7 +23,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "venda_loja_virtual")
 @SequenceGenerator(name = "seq_venda_loja_virtual", sequenceName = "seq_venda_loja_virtual", allocationSize = 1, initialValue = 1)
-public class VendaLojaVirtual implements Serializable {
+public class VendaLojaVirtual extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -70,7 +70,7 @@ public class VendaLojaVirtual implements Serializable {
 	private Integer diasEntrega;
 
 	@Column(nullable = false)
-	private LocalDate dataVenda;
+	private LocalDateTime dataVenda;
 
 	@Column(nullable = false)
 	private LocalDate dataEntrega;
@@ -87,7 +87,7 @@ public class VendaLojaVirtual implements Serializable {
 			this.numeroPedido = "BAND-" + uuid.substring(0, 8);
 		}
 		if (this.dataVenda == null) {
-			this.dataVenda = LocalDate.now();
+			this.dataVenda = LocalDateTime.now();
 		}
 	}
 
@@ -187,11 +187,11 @@ public class VendaLojaVirtual implements Serializable {
 		this.diasEntrega = diasEntrega;
 	}
 
-	public LocalDate getDataVenda() {
+	public LocalDateTime getDataVenda() {
 		return dataVenda;
 	}
 
-	public void setDataVenda(LocalDate dataVenda) {
+	public void setDataVenda(LocalDateTime dataVenda) {
 		this.dataVenda = dataVenda;
 	}
 

@@ -1,6 +1,7 @@
 package com.bandampla.lojavirtual.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class AcessoService {
 		RoleUser roleUser = dto.getRoleUser();
 
 		if (dto.getId() == null) {
-			List<Acesso> acessos = acessoRepository.findByRoleUser(roleUser);
+			Optional<Acesso> acessos = acessoRepository.findByRoleUser(roleUser);
 			if (!acessos.isEmpty()) {
 				throw new ExceptionCustom("Já existe Acesso com a descrição: " + roleUser.getDescricao());
 			}
@@ -63,12 +64,12 @@ public class AcessoService {
 	}
 
 	public List<AcessoDTO> buscarPorRole(RoleUser roleUser) {
-		List<Acesso> lista = acessoRepository.findByRoleUser(roleUser);
+		Optional<Acesso> lista = acessoRepository.findByRoleUser(roleUser);
 		return lista.stream().map(acessoMapper::toDTO).collect(Collectors.toList());
 	}
 
 	public List<AcessoDTO> buscarTodos() {
-		return acessoRepository.findAll().stream()
-				.map(acesso -> acessoMapper.toDTO(acesso)).collect(Collectors.toList());
+		return acessoRepository.findAll().stream().map(acesso -> acessoMapper.toDTO(acesso))
+				.collect(Collectors.toList());
 	}
 }

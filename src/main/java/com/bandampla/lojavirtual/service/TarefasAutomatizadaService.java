@@ -38,7 +38,7 @@ public class TarefasAutomatizadaService {
 
 		List<Usuario> usuarios = usuarioRepository.usuarioSenhaVencida();
 		for (Usuario usuario : usuarios) {
-			if (usuario.getUpdateAt() == null || usuario.getLogin() == null) {
+			if (usuario.getUpdatedAt() == null || usuario.getLogin() == null) {
 				log.warn("Usuário {} ignorado por ausência de updateAt/login", usuario.getId());
 				continue;
 			}

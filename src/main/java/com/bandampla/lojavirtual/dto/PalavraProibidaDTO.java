@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.dto;
 
 import javax.validation.constraints.NotBlank;
@@ -15,7 +12,7 @@ public class PalavraProibidaDTO {
 	private Long id;
 
 	@NotBlank(message = "O termo da palavra proibida deve ser informado.")
-	private String termo;
+	private String descricao;
 
 	public Long getId() {
 		return id;
@@ -25,11 +22,11 @@ public class PalavraProibidaDTO {
 		this.id = id;
 	}
 
-	public String getTermo() {
-		return termo.toLowerCase().trim();
+	public String getDescricao() {
+		return descricao.toLowerCase().trim();
 	}
 
-	public void setTermo(String termo) {
-		this.termo = termo.toLowerCase().trim();
+	public void setDescricao(String descricao) {
+		this.descricao = descricao.toLowerCase().trim();
 	}
 }

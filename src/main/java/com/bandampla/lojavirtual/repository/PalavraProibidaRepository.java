@@ -25,6 +25,6 @@ public interface PalavraProibidaRepository
 	/**
 	 * Busca apenas as strings textuais dos termos otimizando o consumo de memória RAM do cache.
 	 */
-	@Query("SELECT LOWER(p.termo) FROM PalavraProibida p")
+	@Query("SELECT LOWER(p.descricao) FROM PalavraProibida p")
 	List<String> buscarTodosOsTermosLimpas();
 }

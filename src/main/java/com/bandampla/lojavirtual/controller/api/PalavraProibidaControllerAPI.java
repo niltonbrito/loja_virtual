@@ -26,23 +26,23 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Palavra Proibida", description = "Operações de moderação e gestão do catálogo global de Palavras Proibidas do sistema")
 public interface PalavraProibidaControllerAPI {
 
-	@Operation(summary = "Cadastrar Palavra Proibida", description = "Cria um novo termo banido global que protegerá as avaliações de todas as empresas.")
+	@Operation(summary = "Cadastrar Palavra Proibida", description = "Cria um novo descrição banido global que protegerá as avaliações de todas as empresas.")
 	@PostMapping
 	ResponseEntity<ResponseDefaultDTO<PalavraProibidaDTO>> cadastrar(@Valid @RequestBody PalavraProibidaDTO dto)
 			throws ExceptionCustom, MessagingException, IOException;
 
-	@Operation(summary = "Atualizar Termo Banido", description = "Atualiza a string textual ou caracteres de uma palavra proibida existente.")
+	@Operation(summary = "Atualizar descrição Banido", description = "Atualiza a string textual ou caracteres de uma palavra proibida existente.")
 	@PutMapping("/{id}")
 	ResponseEntity<ResponseDefaultDTO<PalavraProibidaDTO>> atualizar(@PathVariable Long id,
 			@Valid @RequestBody PalavraProibidaDTO dto) throws ExceptionCustom, IOException;
 
-	@Operation(summary = "Deletar Palavra Proibida", description = "Exclui fisicamente um termo banido da tabela global (Moderação do Administrador Geral).")
+	@Operation(summary = "Deletar Palavra Proibida", description = "Exclui fisicamente um descrição banido da tabela global (Moderação do Administrador Geral).")
 	@DeleteMapping("/{id}")
 	ResponseEntity<ResponseDefaultDTO<Void>> deletar(@PathVariable Long id) throws ExceptionCustom;
 
 	@Operation(summary = "Buscar por Descrição/Termo", description = "Retorna os termos proibidos que contenham trechos da string digitada.")
 	@GetMapping("/buscar")
-	ResponseEntity<ResponseDefaultDTO<List<PalavraProibidaDTO>>> buscarPorDescricao(@RequestParam String termo)
+	ResponseEntity<ResponseDefaultDTO<List<PalavraProibidaDTO>>> buscarPorDescricao(@RequestParam @Valid String descricao)
 			throws ExceptionCustom;
 
 	@Operation(summary = "Listar todas as Palavras", description = "Recupera a lista completa e global de termos banidos do software.")
@@ -52,7 +52,7 @@ public interface PalavraProibidaControllerAPI {
 	@Operation(summary = "Busca Avançada Paginada", description = "Realiza consultas dinâmicas organizando as palavras banidas por página.")
 	@GetMapping("/busca-avancada")
 	ResponseEntity<ResponseDefaultDTO<Page<PalavraProibidaDTO>>> buscarAvancado(
-			@RequestParam(required = false) String termo, @RequestParam(defaultValue = "0") int page,
+			@RequestParam(required = false) String descricao, @RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "10") int size);
 
 	@Operation(summary = "Listagem Paginada Dinâmica", description = "Gera páginas de registros permitindo ordenação customizada de colunas via query string.")

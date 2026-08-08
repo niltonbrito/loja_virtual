@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.service;
 
 import java.util.List;
@@ -47,10 +44,10 @@ public class CategoriaProdutoService {
 		// Validação de nome duplicado por empresa
 		if (dto.getId() == null) {
 			Specification<CategoriaProduto> specCategoriaProdutoDuplicado = Specification
-					.where(CategoriaProdutoSpec.descricaoExata(dto.getNomeDescricao()))
+					.where(CategoriaProdutoSpec.descricaoExata(dto.getDescricao()))
 					.and(CategoriaProdutoSpec.empresaIgual(dto.getEmpresaId()));
 			if (categoriaProdutoRepository.exists(specCategoriaProdutoDuplicado) == true) {
-				throw new ExceptionCustom("Já existe Categoria com nome: '" + dto.getNomeDescricao()
+				throw new ExceptionCustom("Já existe Categoria com nome: '" + dto.getDescricao()
 						+ "' para a empresa de código: " + dto.getEmpresaId());
 			}
 		}
@@ -77,11 +74,11 @@ public class CategoriaProdutoService {
 				.orElseThrow(() -> new ExceptionCustom("Empresa não encontrada"));
 
 		Specification<CategoriaProduto> specCategoriaProdutoDuplicado = Specification
-				.where(CategoriaProdutoSpec.descricaoExata(dto.getNomeDescricao()))
+				.where(CategoriaProdutoSpec.descricaoExata(dto.getDescricao()))
 				.and(CategoriaProdutoSpec.empresaIgual(dto.getEmpresaId()));
 
 		if (categoriaProdutoRepository.exists(specCategoriaProdutoDuplicado) == true) {
-			throw new ExceptionCustom("Já existe Categoria com nome: '" + dto.getNomeDescricao()
+			throw new ExceptionCustom("Já existe Categoria com nome: '" + dto.getDescricao()
 					+ "' para a empresa de código: " + dto.getEmpresaId());
 		}
 

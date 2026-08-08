@@ -1,6 +1,5 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.ConstraintMode;
@@ -17,7 +16,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "status_rastreio")
 @SequenceGenerator(name = "seq_status_rastreio", sequenceName = "seq_status_rastreio", allocationSize = 1, initialValue = 1)
-public class StatusRastreio extends EntidadeAuditavel implements Serializable {
+public class StatusRastreio extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 

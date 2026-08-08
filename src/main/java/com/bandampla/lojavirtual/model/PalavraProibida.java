@@ -1,7 +1,5 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -9,45 +7,22 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "palavra_proibida")
-public class PalavraProibida implements Serializable {
+@SequenceGenerator(name = "seq_palavra_proibida", sequenceName = "seq_palavra_proibida", allocationSize = 1, initialValue = 1)
+public class PalavraProibida extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_palavra_proibida")
 	private Long id;
 
 	@Column(nullable = false, unique = true)
-	private String termo;
-
-	@Column(name = "created_at", nullable = false, updatable = false)
-	private LocalDateTime createdAt;
-
-	@Column(name = "updated_at", nullable = true)
-	private LocalDateTime updatedAt;
-
-	@PrePersist
-	protected void onCreate() {
-		this.createdAt = LocalDateTime.now();
-		this.updatedAt = LocalDateTime.now();
-		if (this.termo != null) {
-			this.termo = this.termo.trim().toLowerCase();
-		}
-	}
-
-	@PreUpdate
-	protected void onUpdate() {
-		this.updatedAt = LocalDateTime.now();
-		if (this.termo != null) {
-			this.termo = this.termo.trim().toLowerCase();
-		}
-	}
+	private String descricao;
 
 	public Long getId() {
 		return id;
@@ -57,28 +32,12 @@ public class PalavraProibida implements Serializable {
 		this.id = id;
 	}
 
-	public String getTermo() {
-		return termo;
+	public String getDescricao() {
+		return descricao;
 	}
 
-	public void setTermo(String termo) {
-		this.termo = termo;
-	}
-
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public LocalDateTime getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(LocalDateTime updatedAt) {
-		this.updatedAt = updatedAt;
+	public void setDescricao(String descricao) {
+		this.descricao = descricao;
 	}
 
 	@Override

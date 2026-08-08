@@ -3,7 +3,7 @@
  */
 package com.bandampla.lojavirtual.repository;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -13,14 +13,16 @@ import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.model.Acesso;
 
 /**
- * @author: Nilton Brito 
- * @Email:  <nilton.brito@outlook.com>
- * @Data:   27 de abr. de 2026
+ * @author: Nilton Brito
+ * @Email: <nilton.brito@outlook.com>
+ * @Data: 27 de abr. de 2026
  */
 
 @Repository
 @Transactional
-public interface AcessoRepository extends JpaRepository<Acesso, Long>{
-	
-	List<Acesso> findByRoleUser(RoleUser roleUser);
+public interface AcessoRepository extends JpaRepository<Acesso, Long> {
+
+	Optional<Acesso> findByRoleUser(RoleUser roleUser);
+
+	boolean existsByRoleUser(RoleUser roleUser);
 }

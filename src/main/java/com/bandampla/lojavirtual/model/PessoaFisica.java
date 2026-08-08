@@ -24,7 +24,7 @@ public class PessoaFisica extends Pessoa {
 	private LocalDate dataNascimento;
 
 	@ManyToOne
-	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+	@JoinColumn(name = "empresa_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fisica_empresa_fk"))
 	private PessoaJuridica empresa;
 
 	public String getCpf() {

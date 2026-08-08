@@ -6,6 +6,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -23,13 +24,22 @@ public class SendMailService {
 	}
 
 	@Async("applicationTaskExecutor")
-	public void enviarEmailHtml(String assunto, String mensagem, String emailDestino) throws MessagingException {
+	public void enviarEmailHtml(String destinatario, String assunto, String mensagem) throws MessagingException {
 		MimeMessage mime = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(mime, false, StandardCharsets.UTF_8.name());
 		helper.setFrom(remetente);
-		helper.setTo(emailDestino);
+		helper.setTo(destinatario);
 		helper.setSubject(assunto);
 		helper.setText(mensagem, true);
 		mailSender.send(mime);
+	}
+
+	public void enviarEmailTexto(String destinatario, String assunto, String mensagem) {
+		SimpleMailMessage email = new SimpleMailMessage();
+		email.setFrom(remetente);
+		email.setTo(destinatario);
+		email.setSubject(assunto);
+		email.setText(mensagem);
+		mailSender.send(email);
 	}
 }

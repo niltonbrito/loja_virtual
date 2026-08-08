@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.dto;
 
 import javax.validation.constraints.NotBlank;
@@ -15,7 +12,7 @@ public class CategoriaProdutoDTO {
 	private Long id;
 
 	@NotBlank(message = "A Categoria do produto deve ser informado.")
-	private String nomeDescricao;
+	private String descricao;
 
 	private Long empresaId;
 
@@ -27,12 +24,12 @@ public class CategoriaProdutoDTO {
 		this.id = id;
 	}
 
-	public String getNomeDescricao() {
-		return nomeDescricao;
+	public String getDescricao() {
+		return descricao;
 	}
 
-	public void setNomeDescricao(String nomeDescricao) {
-		this.nomeDescricao = nomeDescricao;
+	public void setDescricao(String descricao) {
+		this.descricao = descricao;
 	}
 
 	public Long getEmpresaId() {

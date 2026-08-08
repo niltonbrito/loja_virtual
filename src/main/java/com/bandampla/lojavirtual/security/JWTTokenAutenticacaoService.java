@@ -1,6 +1,8 @@
 package com.bandampla.lojavirtual.security;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.bandampla.lojavirtual.enums.TipoTokenJwt;
 import com.bandampla.lojavirtual.model.Usuario;
 import com.bandampla.lojavirtual.repository.UsuarioRepository;
 
@@ -35,11 +38,11 @@ public class JWTTokenAutenticacaoService {
 	}
 
 	public String createToken(String username) {
-		Usuario usuario = usuarioRepository.findByLogin(username)
+		Usuario usuario = usuarioRepository.findByLoginIgnoreCase(username)
 				.orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
 		Long empresaId = usuario.getEmpresa() == null ? null : usuario.getEmpresa().getId();
-		return Jwts.builder().setSubject(username).claim("empresaId", empresaId).setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
+		return Jwts.builder().setSubject(username).claim("empresaId", empresaId).claim("usuarioId", usuario.getId())
+				.setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
 				.signWith(SignatureAlgorithm.HS512, secret).compact();
 	}
 
@@ -55,9 +58,25 @@ public class JWTTokenAutenticacaoService {
 		String token = header.substring(TOKEN_PREFIX.length()).trim();
 		Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
 		String login = claims.getSubject();
-		Usuario usuario = usuarioRepository.findByLogin(login)
+		Usuario usuario = usuarioRepository.findByLoginIgnoreCase(login)
 				.orElseThrow(() -> new IllegalArgumentException("Usuário do token não encontrado."));
 		UsuarioLogadoPrincipal principal = new UsuarioLogadoPrincipal(usuario);
 		return new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
+	}
+
+	public String gerarTokenAcesso(Usuario usuario) {
+
+		Date agora = new Date();
+
+		Date expiracao = new Date(agora.getTime() + expirationMillis);
+
+		List<String> roles = usuario.getAcessos().stream().map(acesso -> acesso.getRoleUser().name())
+				.collect(Collectors.toList());
+
+		return Jwts.builder().setSubject(usuario.getLogin()).claim("tipoToken", TipoTokenJwt.ACCESS.name())
+				.claim("usuarioId", usuario.getId())
+				.claim("empresaId", usuario.getEmpresa() != null ? usuario.getEmpresa().getId() : null)
+				.claim("roles", roles).setIssuedAt(agora).setExpiration(expiracao)
+				.signWith(SignatureAlgorithm.HS512, secret).compact();
 	}
 }

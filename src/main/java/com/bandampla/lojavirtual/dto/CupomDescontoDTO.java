@@ -14,7 +14,7 @@ public class CupomDescontoDTO {
 	private Long id;
 
 	@NotBlank(message = "O codigo de descriçao do cupom de desconto deve ser informado.")
-	private String codigoDescricao;
+	private String codigo;
 
 	@NotNull(message = "Informe o valor real do desconto.")
 	@PositiveOrZero(message = "O valor real do desconto deve ser igual ou maior que zero.")
@@ -44,12 +44,12 @@ public class CupomDescontoDTO {
 		this.id = id;
 	}
 
-	public String getCodigoDescricao() {
-		return codigoDescricao;
+	public String getCodigo() {
+		return codigo;
 	}
 
-	public void setCodigoDescricao(String codigoDescricao) {
-		this.codigoDescricao = codigoDescricao;
+	public void setCodigo(String codigo) {
+		this.codigo = codigo;
 	}
 
 	public BigDecimal getValorRealDesconto() {

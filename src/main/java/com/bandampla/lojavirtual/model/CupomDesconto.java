@@ -1,6 +1,5 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -24,7 +23,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "cupom_desconto")
 @SequenceGenerator(name = "seq_cupom_desconto", sequenceName = "seq_cupom_desconto", allocationSize = 1, initialValue = 1)
-public class CupomDesconto extends EntidadeAuditavel implements Serializable {
+public class CupomDesconto extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -33,7 +32,7 @@ public class CupomDesconto extends EntidadeAuditavel implements Serializable {
 	private Long id;
 
 	@Column(nullable = false)
-	private String codigoDescricao;
+	private String codigo;
 
 	private BigDecimal valorRealDesconto;
 
@@ -43,7 +42,7 @@ public class CupomDesconto extends EntidadeAuditavel implements Serializable {
 	private LocalDate dataValidade;
 
 	private Integer limiteUsoTotal;
-	
+
 	// 🔥 Manda o Hibernate NUNCA atualizar essa coluna em comandos de UPDATE do SQL
 	@Column(name = "quantidade_usado", updatable = false)
 	private Integer quantidadeUsado;
@@ -62,7 +61,7 @@ public class CupomDesconto extends EntidadeAuditavel implements Serializable {
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "cupom_produto", joinColumns = @JoinColumn(name = "cupom_id"), inverseJoinColumns = @JoinColumn(name = "produto_id"))
 	private List<Produto> produtos;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
@@ -83,12 +82,12 @@ public class CupomDesconto extends EntidadeAuditavel implements Serializable {
 		this.id = id;
 	}
 
-	public String getCodigoDescricao() {
-		return codigoDescricao;
+	public String getCodigo() {
+		return codigo;
 	}
 
-	public void setCodigoDescricao(String codigoDescricao) {
-		this.codigoDescricao = codigoDescricao;
+	public void setCodigo(String codigo) {
+		this.codigo = codigo;
 	}
 
 	public BigDecimal getValorRealDesconto() {

@@ -12,15 +12,15 @@ import com.bandampla.lojavirtual.model.MarcaProduto;
 public interface MarcaProdutoMapper {
 
 	@Mapping(source = "empresa.id", target = "empresaId")
-	@Mapping(source = "nomeDescricao", target = "nomeDescricao", qualifiedByName = "limparTexto")
+	@Mapping(source = "descricao", target = "descricao", qualifiedByName = "limparTexto")
 	MarcaProdutoDTO toDTO(MarcaProduto model);
 
 	@Mapping(source = "empresaId", target = "empresa.id")
-	@Mapping(source = "nomeDescricao", target = "nomeDescricao", qualifiedByName = "limparTexto")
+	@Mapping(source = "descricao", target = "descricao", qualifiedByName = "limparTexto")
 	MarcaProduto toModel(MarcaProdutoDTO dto);
 
 	@Mapping(source = "empresaId", target = "empresa.id")
-	@Mapping(source = "nomeDescricao", target = "nomeDescricao", qualifiedByName = "limparTexto")
+	@Mapping(source = "descricao", target = "descricao", qualifiedByName = "limparTexto")
 	void atualizarCamposDoProduto(MarcaProdutoDTO dto, @MappingTarget MarcaProduto existente);
 
 	@Named("limparTexto")

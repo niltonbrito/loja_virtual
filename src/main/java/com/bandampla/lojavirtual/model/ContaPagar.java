@@ -1,6 +1,5 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -28,7 +27,7 @@ import com.bandampla.lojavirtual.enums.StatusContaPagar;
 @Entity
 @Table(name = "conta_pagar")
 @SequenceGenerator(name = "seq_conta_pagar", sequenceName = "seq_conta_pagar", allocationSize = 1, initialValue = 1)
-public class ContaPagar implements Serializable {
+public class ContaPagar extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 

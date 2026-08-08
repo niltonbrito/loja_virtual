@@ -36,11 +36,11 @@ public class MarcaProdutoService {
 	public MarcaProdutoDTO cadastrar(MarcaProdutoDTO dto) throws ExceptionCustom {
 		if (dto.getId() == null) {
 			Specification<MarcaProduto> specMarcaProdutoDuplicado = Specification
-					.where(MarcaProdutoSpec.descricaoExata(dto.getNomeDescricao()))
+					.where(MarcaProdutoSpec.descricaoExata(dto.getDescricao()))
 					.and(MarcaProdutoSpec.empresaIgual(dto.getEmpresaId()));
 			List<MarcaProduto> existentes = marcaProdutoRepository.findAll(specMarcaProdutoDuplicado);
 			if (!existentes.isEmpty()) {
-				throw new ExceptionCustom("Já existe Marca com nome: '" + dto.getNomeDescricao()
+				throw new ExceptionCustom("Já existe Marca com nome: '" + dto.getDescricao()
 						+ "' cadastrado para a empresa de código: " + dto.getEmpresaId());
 			}
 		}
@@ -67,13 +67,13 @@ public class MarcaProdutoService {
 		}
 
 		Specification<MarcaProduto> specMarcaProdutoDuplicado = Specification
-				.where(MarcaProdutoSpec.descricaoExata(dto.getNomeDescricao()))
+				.where(MarcaProdutoSpec.descricaoExata(dto.getDescricao()))
 				.and(MarcaProdutoSpec.empresaIgual(dto.getEmpresaId()));
 
 		List<MarcaProduto> duplicados = marcaProdutoRepository.findAll(specMarcaProdutoDuplicado);
 
 		if (!duplicados.isEmpty() && !duplicados.get(0).getId().equals(id)) {
-			throw new ExceptionCustom("Já existe Marca com nome: '" + dto.getNomeDescricao()
+			throw new ExceptionCustom("Já existe Marca com nome: '" + dto.getDescricao()
 					+ "' cadastrado para a empresa de código: " + dto.getEmpresaId());
 		}
 
@@ -114,10 +114,10 @@ public class MarcaProdutoService {
 				.map(marcaProduto -> marcaProdutoMapper.toDTO(marcaProduto)).collect(Collectors.toList());
 	}
 
-	public Page<MarcaProdutoDTO> buscarAvancado(String textoBusca, int page, int size, Long empresaId) {
+	public Page<MarcaProdutoDTO> buscarAvancado(String descricao, int page, int size, Long empresaId) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		Specification<MarcaProduto> specMarcaProduto = Specification.where(MarcaProdutoSpec.descricaoContem(textoBusca))
+		Specification<MarcaProduto> specMarcaProduto = Specification.where(MarcaProdutoSpec.descricaoContem(descricao))
 				.and(MarcaProdutoSpec.empresaIgual(empresaId));
 
 		return marcaProdutoRepository.findAll(specMarcaProduto, pageable)

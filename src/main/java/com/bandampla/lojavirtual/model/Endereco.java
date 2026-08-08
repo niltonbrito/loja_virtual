@@ -1,6 +1,5 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -23,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @Table(name = "endereco")
 @SequenceGenerator(name = "seq_endereco", sequenceName = "seq_endereco", allocationSize = 1, initialValue = 1)
-public class Endereco implements Serializable {
+public class Endereco extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -33,29 +32,29 @@ public class Endereco implements Serializable {
 
 	@Column(nullable = false)
 	private String rua;
-	
+
 	@Column(nullable = false)
 	private String cep;
-	
+
 	@Column(nullable = false)
 	private String numero;
-	
+
 	private String complemento;
-	
+
 	@Column(nullable = false)
 	private String bairro;
-	
+
 	@Column(nullable = false)
 	private String uf;
-	
+
 	@Column(nullable = false)
 	private String cidade;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private TipoEndereco tipoEndereco;
-	
-	@JsonIgnore /*Remove Recursividade na API*/
+
+	@JsonIgnore /* Remove Recursividade na API */
 	@ManyToOne
 	@JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
 	private Pessoa pessoa;

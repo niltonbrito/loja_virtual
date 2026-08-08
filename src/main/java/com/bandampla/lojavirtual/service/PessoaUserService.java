@@ -1,12 +1,8 @@
 package com.bandampla.lojavirtual.service;
 
-import java.time.LocalDate;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
@@ -16,7 +12,6 @@ import com.bandampla.lojavirtual.dto.CepDTO;
 import com.bandampla.lojavirtual.dto.CnpjDTO;
 import com.bandampla.lojavirtual.dto.PessoaFisicaDTO;
 import com.bandampla.lojavirtual.dto.PessoaJuridicaDTO;
-import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.enums.TipoCadastro;
 import com.bandampla.lojavirtual.enums.TipoPessoa;
 import com.bandampla.lojavirtual.exception.ExceptionCustom;
@@ -25,11 +20,9 @@ import com.bandampla.lojavirtual.model.Endereco;
 import com.bandampla.lojavirtual.model.Pessoa;
 import com.bandampla.lojavirtual.model.PessoaFisica;
 import com.bandampla.lojavirtual.model.PessoaJuridica;
-import com.bandampla.lojavirtual.model.Usuario;
 import com.bandampla.lojavirtual.repository.EnderecoRepository;
 import com.bandampla.lojavirtual.repository.PessoaFisicaRepository;
 import com.bandampla.lojavirtual.repository.PessoaJuridicaRepository;
-import com.bandampla.lojavirtual.repository.UsuarioRepository;
 import com.bandampla.lojavirtual.util.ValidaCEP;
 import com.bandampla.lojavirtual.util.ValidaCNPJ;
 import com.bandampla.lojavirtual.util.ValidaCPF;
@@ -41,22 +34,14 @@ public class PessoaUserService {
 	// (final)
 	private final PessoaFisicaRepository pessoaFisicaRepository;
 	private final PessoaJuridicaRepository pessoaJuridicaRepository;
-	private final UsuarioRepository usuarioRepository;
 	private final EnderecoRepository enderecoRepository;
-	private final JdbcTemplate jdbcTemplate;
-	private final SendMailService sendMailService;
 	private final PessoaMapper pessoaMapper;
 
 	public PessoaUserService(PessoaFisicaRepository pessoaFisicaRepository,
-			PessoaJuridicaRepository pessoaJuridicaRepository, UsuarioRepository usuarioRepository,
-			EnderecoRepository enderecoRepository, JdbcTemplate jdbcTemplate, SendMailService sendMailService,
-			PessoaMapper pessoaMapper) {
+			PessoaJuridicaRepository pessoaJuridicaRepository, EnderecoRepository enderecoRepository, PessoaMapper pessoaMapper) {
 		this.pessoaFisicaRepository = pessoaFisicaRepository;
 		this.pessoaJuridicaRepository = pessoaJuridicaRepository;
-		this.usuarioRepository = usuarioRepository;
 		this.enderecoRepository = enderecoRepository;
-		this.jdbcTemplate = jdbcTemplate;
-		this.sendMailService = sendMailService;
 		this.pessoaMapper = pessoaMapper;
 	}
 
@@ -107,7 +92,6 @@ public class PessoaUserService {
 		pessoaJuridica.setCnpj(ValidaCNPJ.cnpjSemMascara(pessoaJuridica.getCnpj().trim()));
 
 		PessoaJuridica salva = pessoaJuridicaRepository.save(pessoaJuridica);
-		criarUsuario(salva, salva);
 
 		return pessoaMapper.toDTO(salva);
 	}
@@ -150,7 +134,6 @@ public class PessoaUserService {
 		pessoaFisica.setCpf(ValidaCPF.cpfSemMascara(pessoaFisica.getCpf().trim()));
 
 		PessoaFisica salva = pessoaFisicaRepository.save(pessoaFisica);
-		criarUsuario(salva, empresa);
 
 		return pessoaMapper.toDTO(salva);
 	}
@@ -195,47 +178,6 @@ public class PessoaUserService {
 			} else {
 				end.setPessoa(pessoa);
 			}
-		}
-	}
-
-	private void criarUsuario(Pessoa pessoa, PessoaJuridica empresa) {
-		Optional<Usuario> usuarioExistente = usuarioRepository.findByPessoaOuLogin(pessoa.getId(), pessoa.getEmail());
-		// Se já existir usuário para a pessoa ou para o login, não cria novamente.
-		if (usuarioExistente.isPresent()) {
-			return;
-		}
-		@SuppressWarnings("unused")
-		String constraint = usuarioRepository.consultaConstraintAcesso();
-		if (constraint != null) {
-			jdbcTemplate.execute("begin; alter table usuario_acesso drop constraint " + constraint + "; commit;");
-		}
-
-		Usuario usuario = new Usuario();
-		usuario.setLogin(pessoa.getEmail());
-
-		String senhaTemporaria = String.valueOf(Calendar.getInstance().getTimeInMillis());
-		usuario.setSenha(new BCryptPasswordEncoder().encode(senhaTemporaria));
-		usuario.setCreateAt(LocalDate.now());
-		usuario.setPessoa(pessoa);
-		usuario.setEmpresa(empresa);
-
-		Usuario usuarioSalvo = usuarioRepository.save(usuario);
-		String role = (pessoa instanceof PessoaJuridica) ? RoleUser.ROLE_ADMIN.name() : RoleUser.ROLE_USER.name();
-		usuarioRepository.insereAcessoUser(usuarioSalvo.getId(), role);
-
-		StringBuilder mensagemHtml = new StringBuilder();
-		mensagemHtml.append("<b>Olá: " + pessoa.getNome() + " </b>").append("<br/>");
-		mensagemHtml.append("<b>Segue abaixo seus dados de acesso para a loja virtual</b>").append("<br/>");
-		mensagemHtml.append("<b>Login: </b>" + pessoa.getEmail()).append("<br/>");
-		mensagemHtml.append("<b>Senha temporária: </b>").append(senhaTemporaria).append("<br/>");
-		mensagemHtml.append("Altere sua senha após o primeiro acesso.").append("<br/><br/>");
-		mensagemHtml.append("Obrigado");
-
-		try {
-			sendMailService.enviarEmailHtml("Credencial Criada para acesso a plataforma Loja Virtual Bandampla!",
-					mensagemHtml.toString(), pessoa.getEmail());
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 

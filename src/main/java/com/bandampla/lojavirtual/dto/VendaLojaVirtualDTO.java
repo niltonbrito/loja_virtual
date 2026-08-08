@@ -2,6 +2,7 @@ package com.bandampla.lojavirtual.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -34,7 +35,7 @@ public class VendaLojaVirtualDTO {
 
 	@NotNull(message = "Informe a data da venda.")
 	@PastOrPresent(message = "A data da venda deve ser hoje ou uma data passada.")
-	private LocalDate dataVenda;
+	private LocalDateTime dataVenda;
 
 	@NotNull(message = "Informe a data estimada de entrega.")
 	@FutureOrPresent(message = "A data de entrega deve ser hoje ou uma data futura.")
@@ -113,11 +114,11 @@ public class VendaLojaVirtualDTO {
 		this.diasEntrega = diasEntrega;
 	}
 
-	public LocalDate getDataVenda() {
+	public LocalDateTime getDataVenda() {
 		return dataVenda;
 	}
 
-	public void setDataVenda(LocalDate dataVenda) {
+	public void setDataVenda(LocalDateTime dataVenda) {
 		this.dataVenda = dataVenda;
 	}
 

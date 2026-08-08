@@ -2,12 +2,12 @@ package com.bandampla.lojavirtual.enums;
 
 public enum RoleUser {
 
-	ROLE_USER("USER"), ROLE_CLIENTE("ROLE_CLIENTE"), ROLE_FINANCEIRO("FINANCEIRO"), ROLE_ESTOQUE("ESTOQUE"),
-	ROLE_GERENTE("GERENTE"), ROLE_ADMIN("ADMIN"), ROLE_SUPER_ADMIN("SUPER_ADMIN");
+	ROLE_USER("Usuário"), ROLE_CLIENTE("Cliente"), ROLE_FINANCEIRO("Financeiro"), ROLE_ESTOQUE("Estoque"),
+	ROLE_GERENTE("Gerente"), ROLE_ADMIN("Administrador"), ROLE_SUPER_ADMIN("Superadministrador");
 
-	private String descricao;
+	private final String descricao;
 
-	private RoleUser(String descricao) {
+	RoleUser(String descricao) {
 		this.descricao = descricao;
 	}
 
@@ -17,6 +17,6 @@ public enum RoleUser {
 
 	@Override
 	public String toString() {
-		return this.descricao;
+		return descricao;
 	}
 }

@@ -1,9 +1,8 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
@@ -17,18 +16,19 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
+import com.bandampla.lojavirtual.enums.RoleUser;
 import com.bandampla.lojavirtual.enums.StatusUsuario;
 
 @Entity
 @Table(name = "usuario")
 @SequenceGenerator(name = "seq_usuario", sequenceName = "seq_usuario", allocationSize = 1, initialValue = 1)
-public class Usuario implements Serializable {
+public class Usuario extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -36,35 +36,54 @@ public class Usuario implements Serializable {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_usuario")
 	private Long id;
 
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false, unique = true, length = 180)
 	private String login;
 
-	@Column(nullable = false)
+	@Column(nullable = false, length = 100)
 	private String senha;
 
-	@Column(nullable = true)
 	@Enumerated(EnumType.STRING)
-	private StatusUsuario statusUsuario;
+	@Column(nullable = false, length = 20)
+	private StatusUsuario status = StatusUsuario.ATIVO;
 
-	@Column(nullable = false)
-	private LocalDate createAt;
+	@Column(name = "troca_senha_obrigatoria", nullable = false)
+	private Boolean trocaSenhaObrigatoria = false;
 
-	private LocalDate updateAt;
-
-	@OneToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = "usuario_acesso",
-			uniqueConstraints = @UniqueConstraint(columnNames = { "usuario_id", "acesso_id" }, name = "unique_acesso_user"), 
-			joinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "id", table = "usuario", foreignKey = @ForeignKey(name = "usuario_fk")), 
-			inverseJoinColumns = @JoinColumn(name = "acesso_id", referencedColumnName = "id", table = "acesso", foreignKey = @ForeignKey(name = "acesso_fk")))
-	private List<Acesso> acessos;
-
+	/*
+	 * SUPER_ADMIN pode não possuir empresa. Usuários normais serão validados no
+	 * service.
+	 */
 	@ManyToOne
-	@JoinColumn(name = "pessoa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "pessoa_fk"))
-	private Pessoa pessoa; // Ajustado nome conforme o banco corporativo
-
-	@ManyToOne
-	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
+	@JoinColumn(name = "empresa_id", nullable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_usuario_empresa"))
 	private PessoaJuridica empresa;
+
+	@OneToOne
+	@JoinColumn(name = "pessoa_id", nullable = false, unique = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_usuario_pessoa"))
+	private Pessoa pessoa;
+
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name = "usuario_acesso", joinColumns = @JoinColumn(name = "usuario_id", foreignKey = @ForeignKey(name = "fk_usuario_acesso_usuario")), inverseJoinColumns = @JoinColumn(name = "acesso_id", foreignKey = @ForeignKey(name = "fk_usuario_acesso_acesso")))
+	private Set<Acesso> acessos = new HashSet<>();
+
+	public void adicionarAcesso(Acesso acesso) {
+		if (acesso == null) {
+			throw new IllegalArgumentException("O acesso não pode ser nulo.");
+		}
+
+		this.acessos.add(acesso);
+	}
+
+	public boolean possuiRole(RoleUser role) {
+		if (role == null || acessos == null) {
+			return false;
+		}
+
+		return acessos.stream().anyMatch(acesso -> role.equals(acesso.getRoleUser()));
+	}
+
+	public boolean isSuperAdmin() {
+		return possuiRole(RoleUser.ROLE_SUPER_ADMIN);
+	}
 
 	// Getters e Setters de banco padrão
 	public Long getId() {
@@ -91,36 +110,28 @@ public class Usuario implements Serializable {
 		this.senha = senha;
 	}
 
-	public StatusUsuario getStatusUsuario() {
-		return statusUsuario;
+	public StatusUsuario getStatus() {
+		return status;
 	}
 
-	public void setStatusUsuario(StatusUsuario statusUsuario) {
-		this.statusUsuario = statusUsuario;
+	public void setStatus(StatusUsuario status) {
+		this.status = status;
 	}
 
-	public LocalDate getCreateAt() {
-		return createAt;
+	public Boolean getTrocaSenhaObrigatoria() {
+		return trocaSenhaObrigatoria;
 	}
 
-	public void setCreateAt(LocalDate createAt) {
-		this.createAt = createAt;
+	public void setTrocaSenhaObrigatoria(Boolean trocaSenhaObrigatoria) {
+		this.trocaSenhaObrigatoria = trocaSenhaObrigatoria;
 	}
 
-	public LocalDate getUpdateAt() {
-		return updateAt;
-	}
-
-	public void setUpdateAt(LocalDate updateAt) {
-		this.updateAt = updateAt;
-	}
-
-	public List<Acesso> getAcessos() {
+	public Set<Acesso> getAcessos() {
 		return acessos;
 	}
 
-	public void setAcessos(List<Acesso> acessos) {
-		this.acessos = acessos;
+	public void setAcessos(Set<Acesso> acessos) {
+		this.acessos = acessos == null ? new HashSet<>() : acessos;
 	}
 
 	public PessoaJuridica getEmpresa() {

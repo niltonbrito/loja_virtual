@@ -18,14 +18,14 @@ public class CategoriaProdutoSpec {
 		return (root, query, cb) -> {
 			if (!StringUtils.hasText(descricao))
 				return null;
-			return cb.equal(cb.lower(root.get("nomeDescricao")), descricao.trim().toLowerCase());
+			return cb.equal(cb.lower(root.get("descricao")), descricao.trim().toLowerCase());
 		};
 	}
 	
     public static Specification<CategoriaProduto> descricaoContem(String descricao) {
         return (root, query, cb) ->
                 descricao == null ? null :
-                        cb.like(cb.lower(root.get("nomeDescricao")), "%" + descricao.toLowerCase() + "%");
+                        cb.like(cb.lower(root.get("descricao")), "%" + descricao.toLowerCase() + "%");
     }
 
     public static Specification<CategoriaProduto> empresaIgual(Long empresaId) {

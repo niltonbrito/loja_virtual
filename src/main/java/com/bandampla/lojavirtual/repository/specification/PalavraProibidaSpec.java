@@ -14,16 +14,16 @@ import com.bandampla.lojavirtual.model.PalavraProibida;
 public class PalavraProibidaSpec {
 
 	// Filtro por Descricao exato (IgnoreCase) para validação de duplicidade
-	public static Specification<PalavraProibida> termoExata(String descricao) {
+	public static Specification<PalavraProibida> descricaoExata(String descricao) {
 		return (root, query, cb) -> {
 			if (!StringUtils.hasText(descricao))
 				return null;
-			return cb.equal(cb.lower(root.get("termo")), descricao.trim().toLowerCase());
+			return cb.equal(cb.lower(root.get("descricao")), descricao.trim().toLowerCase());
 		};
 	}
 
-	public static Specification<PalavraProibida> termoContem(String descricao) {
+	public static Specification<PalavraProibida> descricaoContem(String descricao) {
 		return (root, query, cb) -> descricao == null ? null
-				: cb.like(cb.lower(root.get("termo")), "%" + descricao.trim().toLowerCase() + "%");
+				: cb.like(cb.lower(root.get("descricao")), "%" + descricao.trim().toLowerCase() + "%");
 	}
 }

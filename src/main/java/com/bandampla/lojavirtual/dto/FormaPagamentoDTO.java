@@ -1,7 +1,5 @@
 package com.bandampla.lojavirtual.dto;
 
-import java.math.BigDecimal;
-
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -16,7 +14,7 @@ public class FormaPagamentoDTO {
 	private String descricao;
 
 	@Positive(message = "O valor minimo de parcela deve ser maior que zero.")
-	private BigDecimal valorMinimoParcela;
+	private Integer valorMinimoParcela;
 
 	@Positive(message = "A quantidade maxima de parcela deve ser maior que zero.")
 	private Integer quantidadeMaximaParcelas;
@@ -42,11 +40,11 @@ public class FormaPagamentoDTO {
 		this.descricao = descricao;
 	}
 
-	public BigDecimal getValorMinimoParcela() {
+	public Integer getValorMinimoParcela() {
 		return valorMinimoParcela;
 	}
 
-	public void setValorMinimoParcela(BigDecimal valorMinimoParcela) {
+	public void setValorMinimoParcela(Integer valorMinimoParcela) {
 		this.valorMinimoParcela = valorMinimoParcela;
 	}
 

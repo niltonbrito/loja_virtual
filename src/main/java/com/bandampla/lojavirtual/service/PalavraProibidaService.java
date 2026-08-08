@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.service;
 
 import java.util.List;
@@ -42,10 +39,10 @@ public class PalavraProibidaService {
 
 		if (dto.getId() == null) {
 			Specification<PalavraProibida> specPalavraProibidaDuplicado = Specification
-					.where(PalavraProibidaSpec.termoExata(dto.getTermo()));
+					.where(PalavraProibidaSpec.descricaoExata(dto.getDescricao()));
 			if (palavraProibidaRepository.exists(specPalavraProibidaDuplicado) == true) {
 				throw new ExceptionCustom(
-						"Já existe Palavra proibida com o termo: '" + dto.getTermo() + "' cadastrada no sistema.");
+						"Já existe Palavra proibida com o termo: '" + dto.getDescricao() + "' cadastrada no sistema.");
 			}
 		}
 
@@ -64,10 +61,10 @@ public class PalavraProibidaService {
 				.orElseThrow(() -> new ExceptionCustom("Palavra proibida não encontrada com o código: " + id));
 
 		Specification<PalavraProibida> specPalavraProibidaDuplicado = Specification
-				.where(PalavraProibidaSpec.termoExata(dto.getTermo()));
+				.where(PalavraProibidaSpec.descricaoExata(dto.getDescricao()));
 		if (palavraProibidaRepository.exists(specPalavraProibidaDuplicado) == true) {
 			throw new ExceptionCustom(
-					"Já existe Palavra proibida com o termo: '" + dto.getTermo() + "' cadastrada no sistema.");
+					"Já existe Palavra proibida com o termo: '" + dto.getDescricao() + "' cadastrada no sistema.");
 		}
 
 		palavraProibidaMapper.atualizarTermoPalavraProibida(dto, palavraProibida);
@@ -92,18 +89,18 @@ public class PalavraProibidaService {
 				.map(palavraProibida -> palavraProibidaMapper.toDTO(palavraProibida)).collect(Collectors.toList());
 	}
 
-	public List<PalavraProibidaDTO> buscarPorDescricao(String termo) {
+	public List<PalavraProibidaDTO> buscarPorDescricao(String descricao) {
 		Specification<PalavraProibida> specPalavraProibida = Specification
-				.where(PalavraProibidaSpec.termoContem(termo));
+				.where(PalavraProibidaSpec.descricaoContem(descricao));
 
 		return palavraProibidaRepository.findAll(specPalavraProibida).stream()
 				.map(palavraProibida -> palavraProibidaMapper.toDTO(palavraProibida)).collect(Collectors.toList());
 	}
 
-	public Page<PalavraProibidaDTO> buscarAvancado(String termo, int page, int size) {
+	public Page<PalavraProibidaDTO> buscarAvancado(String descricao, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 		Specification<PalavraProibida> specPalavraProibida = Specification
-				.where(PalavraProibidaSpec.termoContem(termo));
+				.where(PalavraProibidaSpec.descricaoContem(descricao));
 
 		return palavraProibidaRepository.findAll(specPalavraProibida, pageable)
 				.map(palavraProibida -> palavraProibidaMapper.toDTO(palavraProibida));

@@ -56,11 +56,11 @@ public class CupomDescontoService {
 	public CupomDescontoDTO cadastrar(CupomDescontoDTO dto, UsuarioLogadoPrincipal usuarioLogado)
 			throws ExceptionCustom {
 		Specification<CupomDesconto> specDuplicidade = Specification
-				.where(CupomDescontoSpec.codigoDescricaoExata(dto.getCodigoDescricao()))
+				.where(CupomDescontoSpec.codigoExata(dto.getCodigo()))
 				.and(CupomDescontoSpec.empresaIgual(usuarioLogado.getEmpresaId()));
 
 		if (cupomDescontoRepository.exists(specDuplicidade)) {
-			throw new ExceptionCustom("Já existe Cupom de desconto com o código '" + dto.getCodigoDescricao()
+			throw new ExceptionCustom("Já existe Cupom de desconto com o código '" + dto.getCodigo()
 					+ "' cadastrado para esta empresa.");
 		}
 
@@ -95,12 +95,12 @@ public class CupomDescontoService {
 		}
 
 		Specification<CupomDesconto> specDuplicidade = Specification
-				.where(CupomDescontoSpec.codigoDescricaoExata(dto.getCodigoDescricao()))
+				.where(CupomDescontoSpec.codigoExata(dto.getCodigo()))
 				.and(CupomDescontoSpec.empresaIgual(usuarioLogado.getEmpresaId()))
 				.and(CupomDescontoSpec.idDiferente(id));
 
 		if (cupomDescontoRepository.exists(specDuplicidade)) {
-			throw new ExceptionCustom("Já existe outro Cupom de desconto com o código '" + dto.getCodigoDescricao()
+			throw new ExceptionCustom("Já existe outro Cupom de desconto com o código '" + dto.getCodigo()
 					+ "' cadastrado para esta empresa.");
 		}
 		
@@ -134,7 +134,7 @@ public class CupomDescontoService {
 						() -> new ExceptionCustom("Categoria ID " + catId + " inválida para amarração do escopo."));
 				if (!cat.getEmpresa().getId().equals(empresaId)) {
 					// 🔥 Ajustado para usar o campo real do seu modelo: getNomeDescricao()
-					throw new ExceptionCustom("Segurança Violada: A categoria '" + cat.getNomeDescricao()
+					throw new ExceptionCustom("Segurança Violada: A categoria '" + cat.getDescricao()
 							+ "' não pertence ao catálogo da sua empresa.");
 				}
 				categorias.add(cat);
@@ -152,7 +152,7 @@ public class CupomDescontoService {
 						() -> new ExceptionCustom("Marca ID " + marcaId + " inválida para amarração do escopo."));
 				if (!marca.getEmpresa().getId().equals(empresaId)) {
 					// 🔥 Ajustado para usar o campo real do seu modelo: getNomeDescricao()
-					throw new ExceptionCustom("Segurança Violada: A marca '" + marca.getNomeDescricao()
+					throw new ExceptionCustom("Segurança Violada: A marca '" + marca.getDescricao()
 							+ "' não pertence à sua empresa.");
 				}
 				marcas.add(marca);
@@ -205,10 +205,10 @@ public class CupomDescontoService {
 		return cupomDescontoRepository.findAll(spec, pageable).map(cupomDescontoMapper::toDTO);
 	}
 
-	public Page<CupomDescontoDTO> buscarAvancado(String descricao, int page, int size,
+	public Page<CupomDescontoDTO> buscarAvancado(String codigo, int page, int size,
 			UsuarioLogadoPrincipal usuarioLogado) {
 		Pageable pageable = PageRequest.of(page, size);
-		Specification<CupomDesconto> spec = Specification.where(CupomDescontoSpec.codigoDescricaoContem(descricao))
+		Specification<CupomDesconto> spec = Specification.where(CupomDescontoSpec.codigoContem(codigo))
 				.and(CupomDescontoSpec.empresaIgual(usuarioLogado.getEmpresaId()));
 		return cupomDescontoRepository.findAll(spec, pageable).map(cupomDescontoMapper::toDTO);
 	}
@@ -220,8 +220,8 @@ public class CupomDescontoService {
 				.collect(Collectors.toList());
 	}
 
-	public List<CupomDescontoDTO> buscarPorDescricao(String descricao, UsuarioLogadoPrincipal usuarioLogado) {
-		Specification<CupomDesconto> spec = Specification.where(CupomDescontoSpec.codigoDescricaoContem(descricao))
+	public List<CupomDescontoDTO> buscarPorDescricao(String codigo, UsuarioLogadoPrincipal usuarioLogado) {
+		Specification<CupomDesconto> spec = Specification.where(CupomDescontoSpec.codigoContem(codigo))
 				.and(CupomDescontoSpec.empresaIgual(usuarioLogado.getEmpresaId()));
 		return cupomDescontoRepository.findAll(spec).stream().map(cupomDescontoMapper::toDTO)
 				.collect(Collectors.toList());

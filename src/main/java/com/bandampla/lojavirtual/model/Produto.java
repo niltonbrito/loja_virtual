@@ -1,6 +1,5 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +27,7 @@ import com.bandampla.lojavirtual.enums.TipoUnidadeMedida;
 @Entity
 @Table(name = "produto")
 @SequenceGenerator(name = "seq_produto", sequenceName = "seq_produto", allocationSize = 1, initialValue = 1)
-public class Produto implements Serializable {
+public class Produto extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -90,8 +89,8 @@ public class Produto implements Serializable {
 	private MarcaProduto marcaProduto;
 
 	@OneToMany(mappedBy = "produto", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<ImagemProduto> imagens  = new ArrayList<ImagemProduto>();
-	
+	private List<ImagemProduto> imagens = new ArrayList<ImagemProduto>();
+
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}

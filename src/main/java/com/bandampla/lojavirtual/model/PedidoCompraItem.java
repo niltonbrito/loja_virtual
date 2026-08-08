@@ -1,9 +1,5 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -27,7 +23,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "pedido_compra_item")
 @SequenceGenerator(name = "seq_pedido_compra_item", sequenceName = "seq_pedido_compra_item", allocationSize = 1, initialValue = 1)
-public class PedidoCompraItem implements Serializable {
+public class PedidoCompraItem extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -44,7 +40,7 @@ public class PedidoCompraItem implements Serializable {
 	private Produto produto;
 
 	@Column(nullable = false)
-	private Double quantidade;
+	private BigDecimal quantidade;
 
 	@Column(nullable = false)
 	private BigDecimal valorUnitarioNegociado;
@@ -77,11 +73,11 @@ public class PedidoCompraItem implements Serializable {
 		this.produto = produto;
 	}
 
-	public Double getQuantidade() {
+	public BigDecimal getQuantidade() {
 		return quantidade;
 	}
 
-	public void setQuantidade(Double quantidade) {
+	public void setQuantidade(BigDecimal quantidade) {
 		this.quantidade = quantidade;
 	}
 

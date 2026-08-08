@@ -1,6 +1,5 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -18,7 +17,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "item_venda_loja")
 @SequenceGenerator(name = "seq_item_venda_loja", sequenceName = "seq_item_venda_loja", allocationSize = 1, initialValue = 1)
-public class ItemVendaLoja implements Serializable {
+public class ItemVendaLoja extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -26,7 +25,7 @@ public class ItemVendaLoja implements Serializable {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_item_venda_loja")
 	private Long id;
 
-	@Column(nullable= false)
+	@Column(nullable = false)
 	private Double quantidade; // Permite frações se o seu negócio exigir (ex: peso, metros)
 
 	@ManyToOne
@@ -40,7 +39,7 @@ public class ItemVendaLoja implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
-	
+
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}

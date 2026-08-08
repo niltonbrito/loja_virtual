@@ -1,6 +1,5 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -18,7 +17,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "categoria_produto")
 @SequenceGenerator(name = "seq_categoria_produto", sequenceName = "seq_categoria_produto", allocationSize = 1, initialValue = 1)
-public class CategoriaProduto implements Serializable {
+public class CategoriaProduto extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -27,12 +26,12 @@ public class CategoriaProduto implements Serializable {
 	private Long id;
 
 	@Column(nullable = false)
-	private String nomeDescricao;
+	private String descricao;
 
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
-	
+
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}
@@ -49,12 +48,12 @@ public class CategoriaProduto implements Serializable {
 		this.id = id;
 	}
 
-	public String getNomeDescricao() {
-		return nomeDescricao;
+	public String getDescricao() {
+		return descricao;
 	}
 
-	public void setNomeDescricao(String nomeDescricao) {
-		this.nomeDescricao = nomeDescricao;
+	public void setDescricao(String descricao) {
+		this.descricao = descricao;
 	}
 
 	@Override

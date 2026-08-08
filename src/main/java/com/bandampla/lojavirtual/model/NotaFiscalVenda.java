@@ -1,6 +1,5 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -20,7 +19,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "nota_fiscal_venda")
 @SequenceGenerator(name = "seq_nota_fiscal_venda", sequenceName = "seq_nota_fiscal_venda", allocationSize = 1, initialValue = 1)
-public class NotaFiscalVenda extends EntidadeAuditavel implements Serializable {
+public class NotaFiscalVenda extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -28,24 +27,24 @@ public class NotaFiscalVenda extends EntidadeAuditavel implements Serializable {
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_nota_fiscal_venda")
 	private Long id;
 
-	@Column(nullable= false)
+	@Column(nullable = false)
 	private String numeroNota;
-	
-	@Column(nullable= false)
+
+	@Column(nullable = false)
 	private String serieNota;
-	
-	@Column(nullable= false)
+
+	@Column(nullable = false)
 	private String tipo;
-	
-	@Column(nullable= false)
+
+	@Column(nullable = false)
 	private String descricao;
-	
-	@Column(nullable= false)
+
+	@Column(nullable = false)
 	private BigDecimal valorTotal;
-	
+
 	private BigDecimal valorDesconto;
-	
-	@Column(nullable= false)
+
+	@Column(nullable = false)
 	private BigDecimal valorIcms;
 
 	@Column(columnDefinition = "text", nullable = false)
@@ -61,7 +60,7 @@ public class NotaFiscalVenda extends EntidadeAuditavel implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "empresa_id", nullable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "empresa_fk"))
 	private PessoaJuridica empresa;
-	
+
 	public PessoaJuridica getEmpresa() {
 		return empresa;
 	}

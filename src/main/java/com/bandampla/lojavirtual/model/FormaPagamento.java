@@ -1,7 +1,5 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -23,7 +21,7 @@ import com.bandampla.lojavirtual.enums.TipoFormaPagamento;
 @Entity
 @Table(name = "forma_pagamento")
 @SequenceGenerator(name = "seq_forma_pagamento", sequenceName = "seq_forma_pagamento", allocationSize = 1, initialValue = 1)
-public class FormaPagamento extends EntidadeAuditavel implements Serializable {
+public class FormaPagamento extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 	@Id
@@ -38,7 +36,7 @@ public class FormaPagamento extends EntidadeAuditavel implements Serializable {
 	private TipoFormaPagamento tipoPagamento;
 
 	@Column(nullable = true)
-	private BigDecimal valorMinimoParcela;
+	private Integer valorMinimoParcela;
 
 	@Column(nullable = true)
 	private Integer quantidadeMaximaParcelas;
@@ -71,11 +69,11 @@ public class FormaPagamento extends EntidadeAuditavel implements Serializable {
 		this.descricao = descricao;
 	}
 
-	public BigDecimal getValorMinimoParcela() {
+	public Integer getValorMinimoParcela() {
 		return valorMinimoParcela;
 	}
 
-	public void setValorMinimoParcela(BigDecimal valorMinimoParcela) {
+	public void setValorMinimoParcela(Integer valorMinimoParcela) {
 		this.valorMinimoParcela = valorMinimoParcela;
 	}
 

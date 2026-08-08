@@ -22,11 +22,11 @@ public interface CupomDescontoMapper {
 
 	// 🔥 Mapeamento Limpo: Ignora as coleções complexas no mapeamento automático e deixa o Service tratá-las de forma segura
 	@Mapping(source = "empresaId", target = "empresa.id")
-	@Mapping(source = "codigoDescricao", target = "codigoDescricao", qualifiedByName = "limparTexto")
+	@Mapping(source = "codigo", target = "codigo", qualifiedByName = "limparTexto")
 	CupomDesconto toModel(CupomDescontoDTO dto);
 	
 	@Mapping(source = "empresa.id", target = "empresaId")
-	@Mapping(source = "codigoDescricao", target = "codigoDescricao", qualifiedByName = "limparTexto")
+	@Mapping(source = "codigo", target = "codigo", qualifiedByName = "limparTexto")
 	// 🔥 CORREÇÃO: Alinhado o target para o plural exato das propriedades do DTO
 	@Mapping(source = "categorias", target = "categoriasIds", qualifiedByName = "mapCategoriasToIds")
 	@Mapping(source = "marcas", target = "marcasIds", qualifiedByName = "mapMarcasToIds")
@@ -38,7 +38,7 @@ public interface CupomDescontoMapper {
 	@Mapping(target = "categorias", ignore = true)
 	@Mapping(target = "marcas", ignore = true)
 	@Mapping(target = "produtos", ignore = true)
-	@Mapping(source = "codigoDescricao", target = "codigoDescricao", qualifiedByName = "limparTexto")
+	@Mapping(source = "codigo", target = "codigo", qualifiedByName = "limparTexto")
 	void atualizarCamposDoCupomDesconto(CupomDescontoDTO dto, @MappingTarget CupomDesconto cupom);
 
 	@Named("limparTexto")

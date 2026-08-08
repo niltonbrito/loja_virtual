@@ -1,6 +1,5 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -18,7 +17,7 @@ import javax.persistence.UniqueConstraint;
 @Table(name = "produto_fornecedor", uniqueConstraints = @UniqueConstraint(name = "uk_produto_fornecedor", columnNames = {
 		"produto_id", "fornecedor_id" }))
 @SequenceGenerator(name = "seq_produto_fornecedor", sequenceName = "seq_produto_fornecedor", allocationSize = 1, initialValue = 1)
-public class ProdutoFornecedor implements Serializable {
+public class ProdutoFornecedor extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 

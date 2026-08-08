@@ -117,7 +117,7 @@ public class NotaFiscalCompraService {
 		conta.setPessoaFornecedor(fornecedor);
 		conta.setValorTotal(nf.getValorTotal());
 		conta.setStatus(StatusContaPagar.ABERTA);
-		conta.setDataVencimento(nf.getDataCompra());
+		conta.setDataVencimento(nf.getDataCompra().toLocalDate());
 
 		conta = contaPagarRepository.save(conta);
 
@@ -228,7 +228,7 @@ public class NotaFiscalCompraService {
 			conta.setDescricao("NF Compra nº " + nf.getNumeroNota());
 			conta.setPessoaFornecedor(fornecedor);
 			conta.setValorTotal(nf.getValorTotal());
-			conta.setDataVencimento(nf.getDataCompra());
+			conta.setDataVencimento(nf.getDataCompra().toLocalDate());
 			contaPagarRepository.save(conta);
 		}
 

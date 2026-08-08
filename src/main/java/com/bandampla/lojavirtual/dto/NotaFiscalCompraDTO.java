@@ -1,7 +1,7 @@
 package com.bandampla.lojavirtual.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -36,7 +36,7 @@ public class NotaFiscalCompraDTO {
 	private BigDecimal valorIcms;
 
     @NotNull(message = "Informe a data da compra.")
-    private LocalDate dataCompra;
+    private LocalDateTime dataCompra;
 
     @NotNull(message = "Informe a pessoa (fornecedor) da nota.")
     @Positive(message = "O ID da pessoa deve ser maior que zero.")
@@ -109,11 +109,11 @@ public class NotaFiscalCompraDTO {
 		this.valorIcms = valorIcms;
 	}
 
-	public LocalDate getDataCompra() {
+	public LocalDateTime getDataCompra() {
 		return dataCompra;
 	}
 
-	public void setDataCompra(LocalDate dataCompra) {
+	public void setDataCompra(LocalDateTime dataCompra) {
 		this.dataCompra = dataCompra;
 	}
 

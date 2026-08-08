@@ -18,17 +18,17 @@ public class CupomDescontoSpec {
 		return (root, query, cb) -> empresaId == null ? null : cb.equal(root.get("empresa").get("id"), empresaId);
 	}
 
-	public static Specification<CupomDesconto> codigoDescricaoExata(String codigoDescricao) {
+	public static Specification<CupomDesconto> codigoExata(String codigo) {
 		return (root, query, cb) -> {
-			if (!StringUtils.hasText(codigoDescricao)) return null;
-			return cb.equal(cb.lower(root.get("codigoDescricao")), codigoDescricao.trim().toLowerCase());
+			if (!StringUtils.hasText(codigo)) return null;
+			return cb.equal(cb.lower(root.get("codigo")), codigo.trim().toLowerCase());
 		};
 	}
 
-	public static Specification<CupomDesconto> codigoDescricaoContem(String codigoDescricao) {
+	public static Specification<CupomDesconto> codigoContem(String codigo) {
 		return (root, query, cb) -> {
-			if (!StringUtils.hasText(codigoDescricao)) return null;
-			return cb.like(cb.lower(root.get("codigoDescricao")), "%" + codigoDescricao.trim().toLowerCase() + "%");
+			if (!StringUtils.hasText(codigo)) return null;
+			return cb.like(cb.lower(root.get("codigo")), "%" + codigo.trim().toLowerCase() + "%");
 		};
 	}
 }

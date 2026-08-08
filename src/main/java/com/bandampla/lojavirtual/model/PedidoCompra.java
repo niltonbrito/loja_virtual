@@ -1,10 +1,6 @@
-/**
- * 
- */
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +32,7 @@ import com.bandampla.lojavirtual.enums.StatusPedidoCompra;
 @Entity
 @Table(name = "pedido_compra")
 @SequenceGenerator(name = "seq_pedido_compra", sequenceName = "seq_pedido_compra", allocationSize = 1, initialValue = 1)
-public class PedidoCompra implements Serializable {
+public class PedidoCompra extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 
@@ -48,7 +44,7 @@ public class PedidoCompra implements Serializable {
 	private String numeroPedido;
 
 	@Column(nullable = false)
-	private LocalDate dataPedido;
+	private LocalDateTime dataPedido;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -88,11 +84,11 @@ public class PedidoCompra implements Serializable {
 		this.numeroPedido = numeroPedido;
 	}
 
-	public LocalDate getDataPedido() {
+	public LocalDateTime getDataPedido() {
 		return dataPedido;
 	}
 
-	public void setDataPedido(LocalDate dataPedido) {
+	public void setDataPedido(LocalDateTime dataPedido) {
 		this.dataPedido = dataPedido;
 	}
 

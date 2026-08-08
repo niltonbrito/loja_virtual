@@ -1,6 +1,5 @@
 package com.bandampla.lojavirtual.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +26,7 @@ import com.bandampla.lojavirtual.enums.TipoPessoa;
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @SequenceGenerator(name = "seq_pessoa", sequenceName = "seq_pessoa", allocationSize = 1, initialValue = 1)
-public abstract class Pessoa implements Serializable {
+public abstract class Pessoa extends EntidadeAuditavel {
 
 	private static final long serialVersionUID = 1L;
 

@@ -11,17 +11,17 @@ import com.bandampla.lojavirtual.model.PalavraProibida;
 @Mapper(componentModel = "spring")
 public interface PalavraProibidaMapper {
 
-	@Mapping(source = "termo", target = "termo", qualifiedByName = "limparTexto")
+	@Mapping(source = "descricao", target = "descricao", qualifiedByName = "limparTexto")
 	PalavraProibidaDTO toDTO(PalavraProibida model);
 
 	@Mapping(target = "createdAt", ignore = true)
 	@Mapping(target = "updatedAt", ignore = true)
-	@Mapping(source = "termo", target = "termo", qualifiedByName = "limparTexto")
+	@Mapping(source = "descricao", target = "descricao", qualifiedByName = "limparTexto")
 	PalavraProibida toModel(PalavraProibidaDTO dto);
 
 	@Mapping(target = "createdAt", ignore = true)
 	@Mapping(target = "updatedAt", ignore = true)
-	@Mapping(source = "termo", target = "termo", qualifiedByName = "limparTexto")
+	@Mapping(source = "descricao", target = "descricao", qualifiedByName = "limparTexto")
 	void atualizarTermoPalavraProibida(PalavraProibidaDTO dto, @MappingTarget PalavraProibida existente);
 
 	@Named("limparTexto")
